@@ -7,11 +7,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>Lego Star Wars Explorer</h1>
+    
     <div id="game-container">
-        <h1>Lego Star Wars Explorer</h1>
+        <!-- New UI Dashboard -->
+        <div id="dashboard">
+            <div id="controls"><strong>Controls:</strong> ⬅️ ➡️ Move | SPACE Jump | Hold 'F' Force</div>
+            <div id="quest-status">Lightsaber: <span id="saber-text" style="color: red;">Missing</span></div>
+        </div>
+
+        <!-- The Game -->
         <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <p>Use Arrow Keys to move!</p>
+
+        <!-- New HTML Dialogue Box -->
+        <div id="dialogue-box" style="display: none;">
+            <p id="dialogue-text"></p>
+        </div>
     </div>
+
     <script src="game.js"></script>
 </body>
 </html>
