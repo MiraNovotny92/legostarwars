@@ -4,11 +4,15 @@ const ctx = canvas.getContext("2d");
 // UI Elements
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
-const objectiveText = document.getElementById("objective-text");
+const timerText = document.getElementById("timer-text");
+const tjFill = document.getElementById("tj-fill");
 const scoreText = document.getElementById("score-text");
 const startScreen = document.getElementById("start-screen");
 const winScreen = document.getElementById("win-screen");
 const winMessage = document.getElementById("win-message");
+const finalTime = document.getElementById("final-time");
+const finalStuds = document.getElementById("final-studs");
+const trueJediBadge = document.getElementById("true-jedi-badge");
 
 // Assets
 const jediLeftImg = new Image(); jediLeftImg.src = "assets/jedi_left.png";
@@ -46,6 +50,8 @@ let hasLightsaber = false;
 let deathMessageTimer = 0;
 let score = 0;
 let lastSafeX = 50;
+let startTime = 0, elapsedTime = 0;
+let hasShield = false, shieldTimer = 0;
 
 const player = { 
     x: 50, y: 400, width: 48, height: 48, 
@@ -71,6 +77,14 @@ function toggleFullscreen() {
     }
 }
 
+function buyShield() {
+    if (score >= 50) {
+        score -= 50; scoreText.innerText = score;
+        hasShield = true; shieldTimer = 300; // 5 Seconds Shield
+        playSound('shield'); addParticles(player.x, player.y, "#00bfff", 15);
+    }
+}
+
 function addParticles(x, y, color, count = 5) {
     for (let i = 0; i < count; i++) {
         particles.push({
@@ -85,12 +99,10 @@ function startGame(difficulty) {
     toggleFullscreen();
     startScreen.style.display = "none";
     score = 0; scoreText.innerText = score;
-    hasLightsaber = false;
+    hasLightsaber = false; hasShield = false;
+    tjFill.style.width = "0%";
+    startTime = Date.now();
     
-    if (currentMission === 1) objectiveText.innerText = "Find Obi-Wan's Lightsaber";
-    else if (currentMission === 2) objectiveText.innerText = "Find 3 Kyber Crystals (0/3)";
-    else objectiveText.innerText = "Rescue Baby Yoda (Grogu)";
-
     buildMissionLevel(difficulty);
     gameState = "PLAYING";
 }
@@ -125,14 +137,36 @@ bindTouch("btn-left", "ArrowLeft"); bindTouch("btn-right", "ArrowRight");
 bindTouch("btn-jump", "Space"); bindTouch("btn-force", "F");
 
 function resetPlayer() {
+    if (hasShield) return; // Invincible with shield!
     player.x = lastSafeX; player.y = 300; player.dx = 0; player.dy = 0;
     deathMessageTimer = 90; camera.shake = 12;
     forceContainers.forEach(fc => fc.y = fc.baseY);
 }
 
-// Update Loop
+function triggerWin(message) {
+    gameState = "WON";
+    let formattedTime = timerText.innerText;
+    winMessage.innerText = message;
+    finalTime.innerText = formattedTime;
+    finalStuds.innerText = score;
+    if (score >= 100) trueJediBadge.style.display = "block";
+    else trueJediBadge.style.display = "none";
+    winScreen.style.display = "flex";
+    playSound('win');
+}
+
+// Update Engine
 function update() {
     if (gameState !== "PLAYING") return;
+
+    // Live Timer Engine
+    elapsedTime = Date.now() - startTime;
+    let mins = Math.floor(elapsedTime / 60000);
+    let secs = Math.floor((elapsedTime % 60000) / 1000);
+    let ms = Math.floor((elapsedTime % 1000) / 100);
+    timerText.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms}`;
+
+    if (shieldTimer > 0) shieldTimer--; else hasShield = false;
 
     if (keys.ArrowLeft) { player.dx -= 1.2; player.facing = 'left'; }
     if (keys.ArrowRight) { player.dx += 1.2; player.facing = 'right'; }
@@ -149,7 +183,6 @@ function update() {
         }
     });
 
-    // Solid Collisions
     const solidObjects = platforms.filter(p => p.isGround).concat(crates).concat(forceContainers);
 
     player.x += player.dx;
@@ -168,14 +201,13 @@ function update() {
             if (player.dy > 0) {
                 if (!player.grounded) { player.scaleX = 1.2; player.scaleY = 0.8; }
                 player.grounded = true; player.dy = 0; player.y = s.y - player.height;
-                if (s.y >= 500) lastSafeX = Math.max(50, player.x - 30);
+                if (s.y >= 480) lastSafeX = Math.max(50, player.x - 30);
             } else if (player.dy < 0) {
                 player.y = s.y + s.height; player.dy = 0;
             }
         }
     });
 
-    // One-Way Platforms
     movingPlatforms.forEach(p => {
         let prevPlayerBottom = (player.y - player.dy) + player.height;
         if (player.x < p.x + p.width && player.x + player.width > p.x) {
@@ -186,7 +218,6 @@ function update() {
         }
     });
 
-    // FORCE POWER ON DROIDS & OBJECTS
     droids.forEach(d => {
         let dist = Math.hypot((player.x + 24) - (d.x + 20), (player.y + 24) - d.y);
         if (keys.F && dist < 420) {
@@ -212,6 +243,7 @@ function update() {
             d.bounceY = 12; d.textTimer = 60; playSound(d.type);
             addParticles(d.x + 20, d.y, "#00bfff", 6);
             score += 5; scoreText.innerText = score;
+            tjFill.style.width = Math.min(100, (score / 100) * 100) + "%";
         }
     });
 
@@ -228,27 +260,22 @@ function update() {
         }
     });
 
-    // Stud Collection
     studs.forEach(s => {
         if (!s.collected && Math.hypot((player.x + 24) - s.x, (player.y + 24) - s.y) < 32) {
             s.collected = true; score += 10; scoreText.innerText = score;
+            tjFill.style.width = Math.min(100, (score / 100) * 100) + "%";
             playSound('stud'); addParticles(s.x, s.y, s.color, 8);
         }
     });
 
-    // Kyber Crystal Pickup (Mission 2)
     kyberCrystals.forEach(kc => {
         if (!kc.collected && Math.hypot((player.x + 24) - kc.x, (player.y + 24) - kc.y) < 40) {
             kc.collected = true; kyberCrystalsCollected++;
             playSound('win'); addParticles(kc.x, kc.y, "#00bfff", 15);
-            objectiveText.innerText = `Find Kyber Crystals (${kyberCrystalsCollected}/3)`;
-            if (kyberCrystalsCollected >= 3) {
-                gameState = "WON"; winMessage.innerText = "All Kyber Crystals Recovered!"; winScreen.style.display = "flex";
-            }
+            if (kyberCrystalsCollected >= 3) triggerWin("All 3 Kyber Crystals Recovered!");
         }
     });
 
-    // Jump Pads
     jumpPads.forEach(pad => {
         if (player.x < pad.x + pad.width && player.x + player.width > pad.x && player.y + player.height >= pad.y && player.y < pad.y + pad.height) {
             player.dy = -22; playSound('jump'); camera.shake = 8;
@@ -264,26 +291,17 @@ function update() {
     if (player.y > 800) resetPlayer();
     if (deathMessageTimer > 0) deathMessageTimer--;
 
-    // Mission 1 Win Objective
     if (currentMission === 1 && !hasLightsaber && player.x < lightsaber.x + lightsaber.width && player.x + player.width > lightsaber.x && player.y < lightsaber.y + lightsaber.height && player.y + player.height > lightsaber.y) {
         hasLightsaber = true; playSound('win'); addParticles(lightsaber.x, lightsaber.y, "#00ff00", 25);
     }
 
     let distObi = Math.abs(player.x - obi.x);
     if (currentMission === 1 && distObi < 150 && player.y > 400) {
-        if (hasLightsaber) {
-            gameState = "WON"; winMessage.innerText = "You returned Obi-Wan's Lightsaber!"; winScreen.style.display = "flex"; dialogueBox.style.display = "none"; playSound('win');
-        } else {
-            dialogueBox.style.display = "block"; dialogueText.innerText = "Obi-Wan: Hello there! Bring back my lightsaber from the end of the valley!";
-        }
-    } else {
-        dialogueBox.style.display = "none";
-    }
+        if (hasLightsaber) triggerWin("Returned Obi-Wan's Lightsaber!");
+        else { dialogueBox.style.display = "block"; dialogueText.innerText = "Obi-Wan: Bring back my lightsaber!"; }
+    } else { dialogueBox.style.display = "none"; }
 
-    // Mission 3 Win Objective (Rescue Grogu)
-    if (currentMission === 3 && player.x > worldWidth - 500) {
-        gameState = "WON"; winMessage.innerText = "Grogu Saved! You are a true Jedi Master!"; winScreen.style.display = "flex"; playSound('win');
-    }
+    if (currentMission === 3 && player.x > worldWidth - 500) triggerWin("Grogu Rescued Safely!");
 
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > worldWidth) player.x = worldWidth - player.width;
@@ -295,60 +313,11 @@ function update() {
     if (camera.shake > 0) camera.shake *= 0.88;
 }
 
-function drawLegoPlatform(p) {
-    let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
-    grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
-    grad.addColorStop(1, "#1e272e");
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.roundRect(p.x, p.y, p.width, p.height, 4); ctx.fill();
-
-    ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
-    ctx.fillRect(p.x, p.y, p.width, 3);
-
-    let studSpacing = 22;
-    let studCount = Math.floor(p.width / studSpacing);
-    for (let i = 0; i < studCount; i++) {
-        let sx = p.x + (i * studSpacing) + 11;
-        let sy = p.y - 4;
-        ctx.fillStyle = p.isMoving ? "#d35400" : "#0097e6";
-        ctx.fillRect(sx - 5, sy, 10, 4);
-        ctx.fillStyle = "rgba(255,255,255,0.4)";
-        ctx.fillRect(sx - 5, sy, 10, 1);
-    }
-}
-
-function drawCrate(c) {
-    let grad = ctx.createLinearGradient(c.x, c.y, c.x + c.width, c.y + c.height);
-    grad.addColorStop(0, "#485460"); grad.addColorStop(1, "#1e272e");
-    ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(c.x, c.y, c.width, c.height, 6); ctx.fill();
-    ctx.strokeStyle = "#d2dae2"; ctx.lineWidth = 2; ctx.strokeRect(c.x + 4, c.y + 4, c.width - 8, c.height - 8);
-
-    ctx.fillStyle = "#f1c40f"; ctx.fillRect(c.x + 6, c.y + 6, c.width - 12, 8);
-    ctx.fillStyle = "#000";
-    for(let i = 0; i < 4; i++) { ctx.fillRect(c.x + 8 + (i * 8), c.y + 6, 4, 8); }
-
-    ctx.shadowBlur = 8; ctx.shadowColor = "#00ff00";
-    ctx.fillStyle = "#00ff00"; ctx.beginPath(); ctx.arc(c.x + c.width - 12, c.y + c.height - 12, 3, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-}
-
-function drawVaporator(v) {
-    ctx.fillStyle = "#7f8c8d"; ctx.fillRect(v.x + 10, v.y + 30, 4, v.height - 30);
-    ctx.fillStyle = "#bdc3c7";
-    ctx.fillRect(v.x + 2, v.y + 40, 20, 8);
-    ctx.fillRect(v.x + 4, v.y + 70, 16, 8);
-    ctx.fillRect(v.x + 2, v.y + 100, 20, 8);
-
-    ctx.fillStyle = "#34495e"; ctx.fillRect(v.x + 6, v.y, 12, 30);
-    ctx.shadowBlur = 12; ctx.shadowColor = "#00bfff";
-    ctx.fillStyle = "#00bfff"; ctx.fillRect(v.x + 8, v.y + 10, 8, 10);
-    ctx.shadowBlur = 0;
-}
-
-// Render Loop
+// Render Engine
 function draw() {
+    // High-Contrast Deep Indigo/Magenta Sky Background
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    bgGrad.addColorStop(0, "#0f172a"); bgGrad.addColorStop(1, "#1e293b");
+    bgGrad.addColorStop(0, "#0b0a1a"); bgGrad.addColorStop(0.6, "#1a0e36"); bgGrad.addColorStop(1, "#2d124d");
     ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save(); 
@@ -356,18 +325,27 @@ function draw() {
     let shakeY = (Math.random() - 0.5) * camera.shake;
     ctx.translate(-camera.x + shakeX, shakeY);
 
-    // Endless Stars Background
+    // Stars
     stars.forEach(s => {
         ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
         ctx.fillRect(s.x, s.y, s.size, s.size);
     });
 
+    // Animated Plasma Water Pits
+    waterPits.forEach(wp => {
+        ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
+        ctx.fillRect(wp.x, wp.y, wp.width, 100);
+        ctx.fillStyle = "#54a0ff"; // Plasma surface wave
+        ctx.fillRect(wp.x, wp.y + Math.sin(Date.now()/200)*3, wp.width, 6);
+        ctx.shadowBlur = 0;
+    });
+
     vaporators.forEach(v => drawVaporator(v));
     platforms.concat(movingPlatforms).forEach(p => drawLegoPlatform(p));
 
-    // Force Objects
+    // Force Objects & Crates
     forceContainers.forEach(fc => drawForceObject(ctx, fc));
-    crates.forEach(c => drawCrate(c));
+    crates.forEach(c => drawForceObject(ctx, c));
     
     // Lego Studs
     studs.forEach(s => {
@@ -379,7 +357,7 @@ function draw() {
         }
     });
 
-    // Mission 2 Kyber Crystals
+    // Kyber Crystals
     kyberCrystals.forEach(kc => {
         if (!kc.collected) {
             ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
@@ -390,13 +368,9 @@ function draw() {
         }
     });
 
-    // Droids
     droids.forEach(d => drawDroid(ctx, d));
-
-    // Jump Pads
     jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
 
-    // Mission 1: Obi-Wan & Lightsaber
     if (currentMission === 1) {
         if (obiImg.complete && obiImg.naturalWidth !== 0) ctx.drawImage(obiImg, obi.x, obi.y, obi.width, obi.height);
         if (!hasLightsaber) {
@@ -406,22 +380,24 @@ function draw() {
         }
     }
 
-    // Mission 3: Baby Yoda / Grogu Hover Pod at the End
-    if (currentMission === 3) {
-        let gx = worldWidth - 450;
-        ctx.fillStyle = "#bdc3c7"; ctx.beginPath(); ctx.arc(gx, 490, 25, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#2ecc71"; ctx.beginPath(); ctx.arc(gx, 485, 10, 0, Math.PI*2); ctx.fill(); // Grogu Head
-    }
+    // Render Cute Grogu
+    if (currentMission === 3) drawGrogu(ctx, worldWidth - 400, 480);
 
-    // Particles
     particles.forEach(p => {
         ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
     });
 
-    // Player Rendering
+    // Player & Force Shield
     ctx.save();
     ctx.translate(player.x + player.width/2, player.y + player.height);
     ctx.scale(player.scaleX, player.scaleY);
+
+    if (hasShield) {
+        ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
+        ctx.beginPath(); ctx.arc(0, -player.height/2, player.width/1.2, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
     let pImg = player.facing === 'left' ? jediLeftImg : jediRightImg;
     let currentChar = CHARACTERS[selectedCharKey];
 
