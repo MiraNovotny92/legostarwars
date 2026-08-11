@@ -17,10 +17,10 @@ const obiImg = new Image(); obiImg.src = "assets/obi.png";
 
 // Characters Config
 const CHARACTERS = {
-    luke: { name: "Luke Skywalker", color: "#2ecc71", saberColor: "#2ecc71", cape: false },
-    ahsoka: { name: "Ahsoka Tano", color: "#3498db", saberColor: "#ffffff", cape: false },
-    anakin: { name: "Anakin Skywalker", color: "#00bfff", saberColor: "#00bfff", cape: true },
-    vader: { name: "Darth Vader", color: "#e74c3c", saberColor: "#ff4d4d", cape: true }
+    luke: { name: "Luke Skywalker", color: "#2ecc71", saberColor: "#2ecc71" },
+    ahsoka: { name: "Ahsoka Tano", color: "#3498db", saberColor: "#ffffff" },
+    anakin: { name: "Anakin Skywalker", color: "#00bfff", saberColor: "#00bfff" },
+    vader: { name: "Darth Vader", color: "#e74c3c", saberColor: "#ff4d4d" }
 };
 let selectedCharKey = 'luke';
 
@@ -30,7 +30,7 @@ function selectCharacter(key, el) {
     el.classList.add('selected');
 }
 
-// Game State & Audio
+// Game State
 let gameState = "START";
 const gravity = 0.65;
 const friction = 0.82;
@@ -50,7 +50,7 @@ const player = {
 const obi = { x: 300, y: 500, width: 50, height: 50 };
 const lightsaber = { x: 2000, y: 490, width: 12, height: 60 };
 
-let platforms = [], movingPlatforms = [], jumpPads = [], forceContainers = [], stars = [], trees = [], crates = [], studs = [], droids = [], particles = [];
+let platforms = [], movingPlatforms = [], jumpPads = [], forceContainers = [], stars = [], vaporators = [], crates = [], studs = [], droids = [], particles = [];
 
 // Fullscreen
 function toggleFullscreen() {
@@ -66,7 +66,7 @@ function toggleFullscreen() {
     }
 }
 
-// Audio Synthesizer
+// Sound Synthesizer
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(type) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -93,6 +93,17 @@ function playSound(type) {
         osc.type = 'square'; osc.frequency.setValueAtTime(110, now);
         gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
         osc.start(); osc.stop(now + 0.25);
+    } else if (type === 'bb8') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now); osc.frequency.linearRampToValueAtTime(1800, now + 0.06);
+        osc.frequency.linearRampToValueAtTime(1400, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(); osc.stop(now + 0.15);
+    } else if (type === 'mouse') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(800, now + 0.08);
+        gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        osc.start(); osc.stop(now + 0.12);
     } else if (type === 'win') {
         osc.type = 'triangle'; osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(659, now + 0.3);
@@ -115,10 +126,9 @@ function addParticles(x, y, color, count = 5) {
 // Level Builder
 function buildRandomLevel(difficultyMultiplier) {
     platforms = []; movingPlatforms = []; jumpPads = []; forceContainers = []; 
-    stars = []; trees = []; crates = []; studs = []; droids = []; particles = [];
+    stars = []; vaporators = []; crates = []; studs = []; droids = []; particles = [];
     let cursorX = 0;
 
-    // Background Stars for Night Sky
     for(let i = 0; i < 100; i++) {
         stars.push({ x: Math.random() * 3500, y: Math.random() * 400, size: Math.random() * 2 + 1, alpha: Math.random() });
     }
@@ -129,20 +139,29 @@ function buildRandomLevel(difficultyMultiplier) {
         let itemsCount = Math.floor(width / 350);
         for(let j = 0; j < itemsCount; j++) {
             let rX = cursorX + 120 + Math.random() * (width - 240);
-            if (Math.random() > 0.5) {
-                trees.push({ x: rX, y: 350, width: 30, height: 200 });
+            if (Math.random() > 0.4) {
+                // Sci-Fi Moisture Vaporators
+                vaporators.push({ x: rX, y: 370, width: 24, height: 180 });
             } else {
-                crates.push({ x: rX, y: 500, width: 50, height: 50, color: "#7f8c8d" });
+                // Imperial Supply Crates
+                crates.push({ x: rX, y: 500, width: 50, height: 50, color: "#485460" });
             }
         }
 
-        if (width > 600 && cursorX > 500) {
-            let droidType = Math.random() > 0.5 ? 'r2d2' : 'gonk';
+        // Spawn Multiple Peaceful Droids
+        if (width >= 600 && cursorX > 300) {
+            const types = ['r2d2', 'gonk', 'bb8', 'mouse'];
+            let droidType = types[Math.floor(Math.random() * types.length)];
+            let labels = { r2d2: 'Beep Boop!', gonk: 'GONK!', bb8: 'Beep-Bloop!', mouse: 'Whirrr!' };
+            
             droids.push({
-                x: cursorX + width/2, y: 505, width: 40, height: 45,
-                type: droidType, dx: droidType === 'r2d2' ? 1.2 : 0.6,
-                minX: cursorX + 100, maxX: cursorX + width - 100,
-                bounceY: 0, textTimer: 0, label: droidType === 'r2d2' ? 'Beep Boop!' : 'GONK!'
+                x: cursorX + 200 + Math.random() * (width - 400),
+                y: 505, baseY: 505, width: 40, height: 45,
+                type: droidType,
+                dx: droidType === 'mouse' ? 2.5 : (droidType === 'bb8' ? 1.8 : 1.0),
+                minX: cursorX + 80, maxX: cursorX + width - 80,
+                bounceY: 0, textTimer: 0, label: labels[droidType],
+                rotation: 0, isFloating: false
             });
         }
 
@@ -152,9 +171,7 @@ function buildRandomLevel(difficultyMultiplier) {
     function addPit(width) { cursorX += width; }
     
     function addFloatingPlatform(xOffset, y, width) {
-        movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 20, dx: 0, minX: 0, maxX: 0, isMoving: false });
-        
-        // Arc of studs above platform (Never inside crates)
+        movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 22, dx: 0, minX: 0, maxX: 0, isMoving: false });
         for(let s = 0; s < 3; s++) {
             studs.push({ x: cursorX + xOffset + 30 + (s * 40), y: y - 35, radius: 7, collected: false, color: "#00bfff" });
         }
@@ -167,7 +184,7 @@ function buildRandomLevel(difficultyMultiplier) {
         let choice = Math.random();
         if (choice < 0.33) {
             let pitSize = 240 + (difficultyMultiplier * 60);
-            movingPlatforms.push({ x: cursorX, y: 450, width: 140, height: 20, dx: 1.5, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true });
+            movingPlatforms.push({ x: cursorX, y: 450, width: 140, height: 22, dx: 1.5, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true });
             addPit(pitSize);
             addGround(800);
         } else if (choice < 0.66) {
@@ -230,7 +247,7 @@ function resetPlayer() {
     forceContainers.forEach(fc => fc.y = fc.baseY);
 }
 
-// Update Engine
+// Update Loop
 function update() {
     if (gameState !== "PLAYING") return;
 
@@ -249,7 +266,7 @@ function update() {
         }
     });
 
-    // --- 1. FULL SOLID COLLISION (Ground, Crates, Force Blocks) ---
+    // Solid Collisions (Ground, Crates, Force Blocks)
     const solidObjects = platforms.filter(p => p.isGround).concat(crates).concat(forceContainers);
 
     player.x += player.dx;
@@ -275,11 +292,10 @@ function update() {
         }
     });
 
-    // --- 2. ONE-WAY PLATFORMS (Floating & Moving - Jump Through Below) ---
+    // One-Way Platforms
     movingPlatforms.forEach(p => {
         let prevPlayerBottom = (player.y - player.dy) + player.height;
         if (player.x < p.x + p.width && player.x + player.width > p.x) {
-            // Check if player is falling down AND was previously above the platform
             if (player.dy >= 0 && prevPlayerBottom <= p.y + 12 && player.y + player.height >= p.y) {
                 player.grounded = true; player.dy = 0; player.y = p.y - player.height;
                 if (p.isMoving) player.x += p.dx;
@@ -287,34 +303,39 @@ function update() {
         }
     });
 
-    // Droids
+    // FORCE POWER ON DROIDS & CONTAINERS (HOLDING 'F')
     droids.forEach(d => {
-        d.x += d.dx;
-        if (d.x > d.maxX || d.x < d.minX) d.dx *= -1;
-        if (d.bounceY > 0) d.bounceY -= 1;
+        let dist = Math.hypot((player.x + 24) - (d.x + 20), (player.y + 24) - d.y);
+        
+        // Force Lift Mechanics for Droids!
+        if (keys.F && dist < 420) {
+            d.isFloating = true;
+            d.y -= 3;
+            if (d.y < 300) d.y = 300; // Float height limit
+            d.bounceY = Math.sin(Date.now() / 100) * 8; // Wobble in air
+            addParticles(d.x + 20, d.y + 20, "#e0aaff", 1);
+            if (Math.random() < 0.05) playSound(d.type);
+        } else {
+            d.isFloating = false;
+            if (d.y < d.baseY) {
+                d.y += 5; // Gently float back down
+                if (d.y > d.baseY) d.y = d.baseY;
+            } else {
+                // Normal Patrol Walking
+                d.x += d.dx;
+                if (d.x > d.maxX || d.x < d.minX) d.dx *= -1;
+                d.rotation += d.dx * 0.1;
+            }
+        }
+
+        if (d.bounceY > 0 && !d.isFloating) d.bounceY -= 1;
         if (d.textTimer > 0) d.textTimer--;
 
-        let dist = Math.hypot((player.x + 24) - (d.x + 20), (player.y + 24) - d.y);
-        if (dist < 45 && d.textTimer === 0) {
+        // Touch/Proximity Interaction
+        if (dist < 45 && d.textTimer === 0 && !d.isFloating) {
             d.bounceY = 12; d.textTimer = 60; playSound(d.type);
             addParticles(d.x + 20, d.y, "#00bfff", 6);
             score += 5; scoreText.innerText = score;
-        }
-    });
-
-    // Studs
-    studs.forEach(s => {
-        if (!s.collected && Math.hypot((player.x + 24) - s.x, (player.y + 24) - s.y) < 32) {
-            s.collected = true; score += 10; scoreText.innerText = score;
-            playSound('stud'); addParticles(s.x, s.y, s.color, 8);
-        }
-    });
-
-    // Jump Pads
-    jumpPads.forEach(pad => {
-        if (player.x < pad.x + pad.width && player.x + player.width > pad.x && player.y + player.height >= pad.y && player.y < pad.y + pad.height) {
-            player.dy = -22; playSound('jump'); camera.shake = 8;
-            addParticles(pad.x + 30, pad.y, "#00ffcc", 10);
         }
     });
 
@@ -329,6 +350,22 @@ function update() {
         } else {
             fc.isHovering = false; fc.y += 8;
             if (fc.y > fc.baseY) fc.y = fc.baseY;
+        }
+    });
+
+    // Stud Collection
+    studs.forEach(s => {
+        if (!s.collected && Math.hypot((player.x + 24) - s.x, (player.y + 24) - s.y) < 32) {
+            s.collected = true; score += 10; scoreText.innerText = score;
+            playSound('stud'); addParticles(s.x, s.y, s.color, 8);
+        }
+    });
+
+    // Jump Pads
+    jumpPads.forEach(pad => {
+        if (player.x < pad.x + pad.width && player.x + player.width > pad.x && player.y + player.height >= pad.y && player.y < pad.y + pad.height) {
+            player.dy = -22; playSound('jump'); camera.shake = 8;
+            addParticles(pad.x + 30, pad.y, "#00ffcc", 10);
         }
     });
 
@@ -366,33 +403,75 @@ function update() {
     if (camera.shake > 0) camera.shake *= 0.88;
 }
 
-// 3D Procedural Lego Platform Rendering
+// --- MODERN 2026 GRAPHICS RENDER ENGINE ---
+
+// Sci-Fi Metallic Platforms
 function drawLegoPlatform(p) {
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
-    grad.addColorStop(1, "#1a252f");
+    grad.addColorStop(1, "#1e272e");
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.roundRect(p.x, p.y, p.width, p.height, 4); ctx.fill();
 
-    // Lego Top Studs (3D effect)
-    let studSpacing = 20;
+    // Metallic Rim Accent
+    ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
+    ctx.fillRect(p.x, p.y, p.width, 3);
+
+    // 3D Lego Top Studs
+    let studSpacing = 22;
     let studCount = Math.floor(p.width / studSpacing);
     for (let i = 0; i < studCount; i++) {
-        let sx = p.x + (i * studSpacing) + 10;
-        let sy = p.y - 3;
-        
-        ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
-        ctx.fillRect(sx - 5, sy, 10, 3);
+        let sx = p.x + (i * studSpacing) + 11;
+        let sy = p.y - 4;
+        ctx.fillStyle = p.isMoving ? "#d35400" : "#0097e6";
+        ctx.fillRect(sx - 5, sy, 10, 4);
         ctx.fillStyle = "rgba(255,255,255,0.4)";
-        ctx.fillRect(sx - 5, sy, 10, 1); // Highlight
+        ctx.fillRect(sx - 5, sy, 10, 1);
     }
+}
+
+// Imperial Supply Crates
+function drawCrate(c) {
+    // Metal Crate Base
+    let grad = ctx.createLinearGradient(c.x, c.y, c.x + c.width, c.y + c.height);
+    grad.addColorStop(0, "#485460"); grad.addColorStop(1, "#1e272e");
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(c.x, c.y, c.width, c.height, 6); ctx.fill();
+    ctx.strokeStyle = "#d2dae2"; ctx.lineWidth = 2; ctx.strokeRect(c.x + 4, c.y + 4, c.width - 8, c.height - 8);
+
+    // Yellow/Black Hazard Stripes Header
+    ctx.fillStyle = "#f1c40f"; ctx.fillRect(c.x + 6, c.y + 6, c.width - 12, 8);
+    ctx.fillStyle = "#000";
+    for(let i = 0; i < 4; i++) { ctx.fillRect(c.x + 8 + (i * 8), c.y + 6, 4, 8); }
+
+    // Glowing LED Indicator
+    ctx.shadowBlur = 8; ctx.shadowColor = "#00ff00";
+    ctx.fillStyle = "#00ff00"; ctx.beginPath(); ctx.arc(c.x + c.width - 12, c.y + c.height - 12, 3, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+}
+
+// Star Wars Moisture Vaporators (Replaces Trees)
+function drawVaporator(v) {
+    // Main Steel Pole
+    ctx.fillStyle = "#7f8c8d"; ctx.fillRect(v.x + 10, v.y + 30, 4, v.height - 30);
+    
+    // Condenser Rings
+    ctx.fillStyle = "#bdc3c7";
+    ctx.fillRect(v.x + 2, v.y + 40, 20, 8);
+    ctx.fillRect(v.x + 4, v.y + 70, 16, 8);
+    ctx.fillRect(v.x + 2, v.y + 100, 20, 8);
+
+    // Top Vanes & Blue Power Core
+    ctx.fillStyle = "#34495e"; ctx.fillRect(v.x + 6, v.y, 12, 30);
+    ctx.shadowBlur = 12; ctx.shadowColor = "#00bfff";
+    ctx.fillStyle = "#00bfff"; ctx.fillRect(v.x + 8, v.y + 10, 8, 10);
+    ctx.shadowBlur = 0;
 }
 
 // Render Engine
 function draw() {
-    // Restored Original Dark Blue Galactic Sky
+    // Dark Galactic Sky
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    bgGrad.addColorStop(0, "#1e3c72"); bgGrad.addColorStop(1, "#2a5298");
+    bgGrad.addColorStop(0, "#0f172a"); bgGrad.addColorStop(1, "#1e293b");
     ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save(); 
@@ -406,16 +485,13 @@ function draw() {
         ctx.fillRect(s.x, s.y, s.size, s.size);
     });
 
-    // Trees
-    trees.forEach(t => {
-        ctx.fillStyle = "#3d2817"; ctx.fillRect(t.x, t.y, t.width, t.height);
-        ctx.fillStyle = "#1b4d2e"; ctx.beginPath(); ctx.arc(t.x + 15, t.y, 50, 0, Math.PI*2); ctx.fill();
-    });
+    // Moisture Vaporators
+    vaporators.forEach(v => drawVaporator(v));
 
-    // Platforms (Ground + One-Way Floating)
+    // Platforms
     platforms.concat(movingPlatforms).forEach(p => drawLegoPlatform(p));
 
-    // Force Containers
+    // Kyber Force Containers
     forceContainers.forEach(fc => {
         ctx.fillStyle = "#1e272e"; ctx.beginPath(); ctx.roundRect(fc.x, fc.y, fc.width, fc.height, 10); ctx.fill();
         ctx.fillStyle = "#0984e3"; ctx.fillRect(fc.x + 10, fc.y + 20, fc.width - 20, 15);
@@ -428,8 +504,8 @@ function draw() {
         }
     });
 
-    // Crates & Studs
-    crates.forEach(c => { ctx.fillStyle = c.color; ctx.fillRect(c.x, c.y, c.width, c.height); });
+    // Crates
+    crates.forEach(c => drawCrate(c));
     
     // Glowing Lego Studs
     studs.forEach(s => {
@@ -441,21 +517,40 @@ function draw() {
         }
     });
 
-    // Droids
+    // Render All Droids
     droids.forEach(d => {
         let drawY = d.y - d.bounceY;
+
+        // Force Floating Glow Aura around Droid!
+        if (d.isFloating) {
+            ctx.shadowBlur = 20; ctx.shadowColor = "#e0aaff";
+            ctx.strokeStyle = "#e0aaff"; ctx.lineWidth = 3;
+            ctx.strokeRect(d.x - 5, drawY - 5, d.width + 10, d.height + 10);
+            ctx.shadowBlur = 0;
+        }
+
         if (d.type === 'r2d2') {
             ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.roundRect(d.x, drawY, d.width, d.height, [20,20,5,5]); ctx.fill();
             ctx.fillStyle = "#2980b9"; ctx.fillRect(d.x + 8, drawY + 12, 24, 8);
             ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 16, 3, 0, Math.PI*2); ctx.fill();
-        } else {
+        } else if (d.type === 'gonk') {
             ctx.fillStyle = "#7f8c8d"; ctx.beginPath(); ctx.roundRect(d.x, drawY, d.width, d.height, 4); ctx.fill();
             ctx.fillStyle = "#2c3e50"; ctx.fillRect(d.x + 5, drawY + 20, d.width - 10, 4);
+        } else if (d.type === 'bb8') {
+            // BB-8 Rolling Body & Head
+            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 28, 16, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 10, 10, Math.PI, 0); ctx.fill();
+            ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 8, 3, 0, Math.PI*2); ctx.fill();
+        } else if (d.type === 'mouse') {
+            // Mouse Droid Sleek Hull
+            ctx.fillStyle = "#1e272e"; ctx.beginPath(); ctx.roundRect(d.x, drawY + 20, d.width, d.height - 20, [10,10,2,2]); ctx.fill();
+            ctx.fillStyle = "#7f8c8d"; ctx.fillRect(d.x + 5, drawY + 38, 8, 6); ctx.fillRect(d.x + 27, drawY + 38, 8, 6);
         }
 
-        if (d.textTimer > 0) {
+        if (d.textTimer > 0 || d.isFloating) {
             ctx.fillStyle = "#fff"; ctx.font = "bold 14px 'Comic Sans MS'";
-            ctx.fillText(d.label, d.x - 10, drawY - 10);
+            ctx.fillText(d.isFloating ? "Woah!! 🌀" : d.label, d.x - 10, drawY - 10);
         }
     });
 
@@ -475,7 +570,7 @@ function draw() {
         ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
     });
 
-    // --- DRAW SELECTED CHARACTER (Image asset with fallback to Lego Minifig) ---
+    // Player Rendering
     ctx.save();
     ctx.translate(player.x + player.width/2, player.y + player.height);
     ctx.scale(player.scaleX, player.scaleY);
@@ -485,17 +580,13 @@ function draw() {
     if (pImg.complete && pImg.naturalWidth !== 0) {
         ctx.drawImage(pImg, -player.width/2, -player.height, player.width, player.height);
     } else {
-        // Procedural Custom Lego Character Minifig
-        ctx.fillStyle = currentChar.color; // Torso
+        ctx.fillStyle = currentChar.color;
         ctx.fillRect(-player.width/2 + 8, -player.height + 15, player.width - 16, 20);
-        
-        ctx.fillStyle = "#f1c40f"; // Lego Yellow Head
+        ctx.fillStyle = "#f1c40f";
         ctx.beginPath(); ctx.arc(0, -player.height + 10, 10, 0, Math.PI*2); ctx.fill();
-        
-        ctx.fillStyle = "#2c3e50"; // Legs
+        ctx.fillStyle = "#2c3e50";
         ctx.fillRect(-player.width/2 + 10, -player.height + 35, player.width - 20, 13);
 
-        // Lightsaber Blade Glow
         if (hasLightsaber) {
             ctx.shadowBlur = 15; ctx.shadowColor = currentChar.saberColor;
             ctx.fillStyle = currentChar.saberColor;
