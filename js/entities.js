@@ -13,6 +13,120 @@ loadGameAsset('r2d2', 'assets/r2d2.png');
 loadGameAsset('bb8', 'assets/bb8.png');
 loadGameAsset('gonk', 'assets/gonk.png');
 
+// Tree Renderer preserving natural Aspect Ratio
+function drawVaporator(ctx, v) {
+    let img = ASSETS['tree'];
+    if (img && img.complete && img.naturalWidth !== 0) {
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        let aspect = img.naturalWidth / img.naturalHeight;
+        let drawWidth = v.height * aspect; // Scale width proportionally to height
+        
+        ctx.drawImage(img, v.x - (drawWidth - v.width)/2, v.y, drawWidth, v.height);
+        ctx.restore();
+    } else {
+        // High-Tech Star Wars Moisture Vaporator Fallback
+        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(v.x + 10, v.y + 30, 4, v.height - 30);
+        ctx.fillStyle = "#bdc3c7";
+        ctx.fillRect(v.x + 2, v.y + 40, 20, 8);
+        ctx.fillRect(v.x + 4, v.y + 70, 16, 8);
+        ctx.fillStyle = "#34495e"; ctx.fillRect(v.x + 6, v.y, 12, 30);
+        ctx.shadowBlur = 12; ctx.shadowColor = "#00bfff";
+        ctx.fillStyle = "#00bfff"; ctx.fillRect(v.x + 8, v.y + 10, 8, 10);
+        ctx.shadowBlur = 0;
+    }
+}
+
+// Render Buildings (Imperial Base / Jedi Temple)
+function drawBuilding(ctx, b) {
+    ctx.save();
+    if (b.type === 'imperial') {
+        // Metallic Imperial Outpost
+        ctx.fillStyle = "#1e272e";
+        drawRoundedRect(ctx, b.x, b.y, b.width, b.height, [15,15,0,0]);
+        ctx.strokeStyle = "#485460"; ctx.lineWidth = 4; ctx.strokeRect(b.x + 10, b.y + 10, b.width - 20, b.height - 10);
+
+        // Glowing Red Blast Door
+        ctx.fillStyle = "#2c3e50"; ctx.fillRect(b.x + b.width/2 - 30, b.y + b.height - 70, 60, 70);
+        ctx.shadowBlur = 15; ctx.shadowColor = "#ff0000";
+        ctx.fillStyle = "#ff0000"; ctx.fillRect(b.x + b.width/2 - 25, b.y + b.height - 65, 50, 6);
+        ctx.shadowBlur = 0;
+
+        // Imperial Antenna
+        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(b.x + 30, b.y - 40, 6, 40);
+        ctx.fillStyle = "#ff0000"; ctx.beginPath(); ctx.arc(b.x + 33, b.y - 40, 5, 0, Math.PI*2); ctx.fill();
+    } else {
+        // Ancient Jedi Temple
+        ctx.fillStyle = "#d35400";
+        drawRoundedRect(ctx, b.x, b.y, b.width, b.height, [10,10,0,0]);
+        ctx.fillStyle = "#e67e22";
+        ctx.fillRect(b.x + 15, b.y + 20, 20, b.height - 20); // Pillars
+        ctx.fillRect(b.x + b.width - 35, b.y + 20, 20, b.height - 20);
+
+        // Holocron Emblem Glow
+        ctx.shadowBlur = 20; ctx.shadowColor = "#00bfff";
+        ctx.fillStyle = "#00bfff"; ctx.beginPath();
+        ctx.arc(b.x + b.width/2, b.y + 40, 15, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+    ctx.restore();
+}
+
+// Laser Security Gate (Cut with Lightsaber - D Key)
+function drawLaserGate(ctx, gate) {
+    if (gate.destroyed) return;
+    ctx.save();
+
+    // Side Posts
+    ctx.fillStyle = "#2c3e50";
+    ctx.fillRect(gate.x - 8, gate.y, 12, gate.height);
+    ctx.fillRect(gate.x + gate.width - 4, gate.y, 12, gate.height);
+
+    // Glowing Laser Beams
+    ctx.shadowBlur = 20; ctx.shadowColor = "#ff0055";
+    ctx.fillStyle = "#ff0055";
+    for (let i = 15; i < gate.height - 10; i += 25) {
+        ctx.fillRect(gate.x + 4, gate.y + i, gate.width - 8, 8);
+    }
+    ctx.shadowBlur = 0;
+
+    // "CUT WITH LIGHTSABER [D]" Prompt
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px 'Comic Sans MS'";
+    ctx.fillText("⚔️ CUT [D]", gate.x - 15, gate.y - 12);
+
+    ctx.restore();
+}
+
+// Neutral Minifig NPCs (Jawa, Rebel Trooper, Ewok)
+function drawNPC(ctx, npc) {
+    let drawY = npc.y - npc.bounceY;
+    ctx.save();
+
+    if (npc.type === 'jawa') {
+        // Brown Robes & Glowing Eyes
+        ctx.fillStyle = "#784212"; drawRoundedRect(ctx, npc.x, drawY + 10, npc.width, npc.height - 10, 8);
+        ctx.fillStyle = "#1c2833"; ctx.beginPath(); ctx.arc(npc.x + 18, drawY + 16, 8, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 12; ctx.shadowColor = "#f1c40f";
+        ctx.fillStyle = "#f1c40f";
+        ctx.beginPath(); ctx.arc(npc.x + 15, drawY + 16, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(npc.x + 21, drawY + 16, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+    } else if (npc.type === 'rebel') {
+        // Rebel Helmet & Vest
+        ctx.fillStyle = "#27ae60"; drawRoundedRect(ctx, npc.x + 5, drawY + 15, npc.width - 10, npc.height - 15, 4);
+        ctx.fillStyle = "#ecf0f1"; drawRoundedRect(ctx, npc.x + 4, drawY, npc.width - 8, 14, [8,8,2,2]); // Helmet
+        ctx.fillStyle = "#f1c40f"; ctx.beginPath(); ctx.arc(npc.x + 18, drawY + 18, 6, 0, Math.PI*2); ctx.fill();
+    }
+
+    if (npc.textTimer > 0) {
+        ctx.fillStyle = "#fff"; ctx.font = "bold 14px 'Comic Sans MS'";
+        ctx.fillText(npc.label, npc.x - 10, drawY - 10);
+    }
+    ctx.restore();
+}
+
 function drawForceObject(ctx, obj) {
     ctx.save();
     if (obj.isHovering) {
