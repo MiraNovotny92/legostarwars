@@ -1,0 +1,15 @@
+body {
+    background-color: #1a1a2e;
+    color: #fca311;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+canvas {
+    background-color: #16213e;
+    border: 5px solid #0f3460;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+}
