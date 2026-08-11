@@ -51,7 +51,6 @@ canvas {
     border-bottom: 3px solid #1e293b;
 }
 
-/* True Jedi Bar */
 .true-jedi-container {
     display: flex;
     align-items: center;
@@ -88,13 +87,16 @@ canvas {
     font-size: 13px;
     margin: 0;
     border-radius: 12px;
+    font-weight: bold;
 }
 
 .mini-fs-btn {
     padding: 4px 10px;
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
     border-radius: 8px;
+    background: #34495e;
+    color: white;
 }
 
 #dialogue-box {
