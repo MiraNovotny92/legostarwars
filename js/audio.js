@@ -16,6 +16,11 @@ function playSound(type) {
         osc.frequency.setValueAtTime(900, now); osc.frequency.setValueAtTime(1400, now + 0.06);
         gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
         osc.start(); osc.stop(now + 0.12);
+    } else if (type === 'shield') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+        osc.start(); osc.stop(now + 0.25);
     } else if (type === 'r2d2') {
         osc.type = 'sine'; let freq = 800 + Math.random() * 800;
         osc.frequency.setValueAtTime(freq, now); osc.frequency.linearRampToValueAtTime(freq + 400, now + 0.08);
