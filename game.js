@@ -4,11 +4,11 @@ const ctx = canvas.getContext("2d");
 // UI Elements
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
-const saberText = document.getElementById("saber-text");
-const saberIcon = document.getElementById("saber-icon");
+const objectiveText = document.getElementById("objective-text");
 const scoreText = document.getElementById("score-text");
 const startScreen = document.getElementById("start-screen");
 const winScreen = document.getElementById("win-screen");
+const winMessage = document.getElementById("win-message");
 
 // Assets
 const jediLeftImg = new Image(); jediLeftImg.src = "assets/jedi_left.png";
@@ -30,7 +30,13 @@ function selectCharacter(key, el) {
     el.classList.add('selected');
 }
 
-// Game State
+function selectMission(mId, el) {
+    currentMission = mId;
+    document.querySelectorAll('.mission-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+// Game Physics State
 let gameState = "START";
 const gravity = 0.65;
 const friction = 0.82;
@@ -50,9 +56,8 @@ const player = {
 const obi = { x: 300, y: 500, width: 50, height: 50 };
 const lightsaber = { x: 2000, y: 490, width: 12, height: 60 };
 
-let platforms = [], movingPlatforms = [], jumpPads = [], forceContainers = [], stars = [], vaporators = [], crates = [], studs = [], droids = [], particles = [];
+let platforms = [], movingPlatforms = [], jumpPads = [], forceContainers = [], stars = [], vaporators = [], crates = [], studs = [], droids = [], particles = [], kyberCrystals = [];
 
-// Fullscreen
 function toggleFullscreen() {
     const doc = window.document;
     const docEl = doc.documentElement;
@@ -66,53 +71,6 @@ function toggleFullscreen() {
     }
 }
 
-// Sound Synthesizer
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-
-    if (type === 'jump') {
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.exponentialRampToValueAtTime(450, now + 0.12);
-        gain.gain.setValueAtTime(0.25, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
-        osc.start(); osc.stop(now + 0.12);
-    } else if (type === 'stud') {
-        osc.frequency.setValueAtTime(900, now); osc.frequency.setValueAtTime(1400, now + 0.06);
-        gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
-        osc.start(); osc.stop(now + 0.12);
-    } else if (type === 'r2d2') {
-        osc.type = 'sine'; let freq = 800 + Math.random() * 800;
-        osc.frequency.setValueAtTime(freq, now); osc.frequency.linearRampToValueAtTime(freq + 400, now + 0.08);
-        gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-        osc.start(); osc.stop(now + 0.2);
-    } else if (type === 'gonk') {
-        osc.type = 'square'; osc.frequency.setValueAtTime(110, now);
-        gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-        osc.start(); osc.stop(now + 0.25);
-    } else if (type === 'bb8') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1200, now); osc.frequency.linearRampToValueAtTime(1800, now + 0.06);
-        osc.frequency.linearRampToValueAtTime(1400, now + 0.12);
-        gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-        osc.start(); osc.stop(now + 0.15);
-    } else if (type === 'mouse') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(800, now + 0.08);
-        gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
-        osc.start(); osc.stop(now + 0.12);
-    } else if (type === 'win') {
-        osc.type = 'triangle'; osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(659, now + 0.3);
-        gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
-        osc.start(); osc.stop(now + 0.5);
-    }
-}
-
-// Particle System
 function addParticles(x, y, color, count = 5) {
     for (let i = 0; i < count; i++) {
         particles.push({
@@ -123,92 +81,17 @@ function addParticles(x, y, color, count = 5) {
     }
 }
 
-// Level Builder
-function buildRandomLevel(difficultyMultiplier) {
-    platforms = []; movingPlatforms = []; jumpPads = []; forceContainers = []; 
-    stars = []; vaporators = []; crates = []; studs = []; droids = []; particles = [];
-    let cursorX = 0;
-
-    for(let i = 0; i < 100; i++) {
-        stars.push({ x: Math.random() * 3500, y: Math.random() * 400, size: Math.random() * 2 + 1, alpha: Math.random() });
-    }
-
-    function addGround(width) {
-        platforms.push({ x: cursorX, y: 550, width: width, height: 100, isGround: true });
-        
-        let itemsCount = Math.floor(width / 350);
-        for(let j = 0; j < itemsCount; j++) {
-            let rX = cursorX + 120 + Math.random() * (width - 240);
-            if (Math.random() > 0.4) {
-                // Sci-Fi Moisture Vaporators
-                vaporators.push({ x: rX, y: 370, width: 24, height: 180 });
-            } else {
-                // Imperial Supply Crates
-                crates.push({ x: rX, y: 500, width: 50, height: 50, color: "#485460" });
-            }
-        }
-
-        // Spawn Multiple Peaceful Droids
-        if (width >= 600 && cursorX > 300) {
-            const types = ['r2d2', 'gonk', 'bb8', 'mouse'];
-            let droidType = types[Math.floor(Math.random() * types.length)];
-            let labels = { r2d2: 'Beep Boop!', gonk: 'GONK!', bb8: 'Beep-Bloop!', mouse: 'Whirrr!' };
-            
-            droids.push({
-                x: cursorX + 200 + Math.random() * (width - 400),
-                y: 505, baseY: 505, width: 40, height: 45,
-                type: droidType,
-                dx: droidType === 'mouse' ? 2.5 : (droidType === 'bb8' ? 1.8 : 1.0),
-                minX: cursorX + 80, maxX: cursorX + width - 80,
-                bounceY: 0, textTimer: 0, label: labels[droidType],
-                rotation: 0, isFloating: false
-            });
-        }
-
-        cursorX += width;
-    }
-
-    function addPit(width) { cursorX += width; }
-    
-    function addFloatingPlatform(xOffset, y, width) {
-        movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 22, dx: 0, minX: 0, maxX: 0, isMoving: false });
-        for(let s = 0; s < 3; s++) {
-            studs.push({ x: cursorX + xOffset + 30 + (s * 40), y: y - 35, radius: 7, collected: false, color: "#00bfff" });
-        }
-    }
-
-    addGround(1400);
-    let numberOfObstacles = difficultyMultiplier * 4;
-
-    for (let i = 0; i < numberOfObstacles; i++) {
-        let choice = Math.random();
-        if (choice < 0.33) {
-            let pitSize = 240 + (difficultyMultiplier * 60);
-            movingPlatforms.push({ x: cursorX, y: 450, width: 140, height: 22, dx: 1.5, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true });
-            addPit(pitSize);
-            addGround(800);
-        } else if (choice < 0.66) {
-            jumpPads.push({ x: cursorX + 80, y: 530, width: 60, height: 20, color: "#00ffcc" });
-            addFloatingPlatform(80, 280, 200);
-            addGround(300); addPit(180); addGround(800);
-        } else {
-            forceContainers.push({ x: cursorX + 300, y: 300, width: 110, height: 250, baseY: 300, isHovering: false });
-            addGround(1100);
-        }
-    }
-
-    addGround(1000);
-    worldWidth = cursorX;
-    lightsaber.x = worldWidth - 600;
-}
-
 function startGame(difficulty) {
     toggleFullscreen();
     startScreen.style.display = "none";
     score = 0; scoreText.innerText = score;
     hasLightsaber = false;
-    saberText.style.display = "inline"; saberIcon.style.display = "none";
-    buildRandomLevel(difficulty);
+    
+    if (currentMission === 1) objectiveText.innerText = "Find Obi-Wan's Lightsaber";
+    else if (currentMission === 2) objectiveText.innerText = "Find 3 Kyber Crystals (0/3)";
+    else objectiveText.innerText = "Rescue Baby Yoda (Grogu)";
+
+    buildMissionLevel(difficulty);
     gameState = "PLAYING";
 }
 
@@ -266,7 +149,7 @@ function update() {
         }
     });
 
-    // Solid Collisions (Ground, Crates, Force Blocks)
+    // Solid Collisions
     const solidObjects = platforms.filter(p => p.isGround).concat(crates).concat(forceContainers);
 
     player.x += player.dx;
@@ -303,35 +186,28 @@ function update() {
         }
     });
 
-    // FORCE POWER ON DROIDS & CONTAINERS (HOLDING 'F')
+    // FORCE POWER ON DROIDS & OBJECTS
     droids.forEach(d => {
         let dist = Math.hypot((player.x + 24) - (d.x + 20), (player.y + 24) - d.y);
-        
-        // Force Lift Mechanics for Droids!
         if (keys.F && dist < 420) {
-            d.isFloating = true;
-            d.y -= 3;
-            if (d.y < 300) d.y = 300; // Float height limit
-            d.bounceY = Math.sin(Date.now() / 100) * 8; // Wobble in air
+            d.isFloating = true; d.y -= 3;
+            if (d.y < 300) d.y = 300;
+            d.bounceY = Math.sin(Date.now() / 100) * 8;
             addParticles(d.x + 20, d.y + 20, "#e0aaff", 1);
             if (Math.random() < 0.05) playSound(d.type);
         } else {
             d.isFloating = false;
             if (d.y < d.baseY) {
-                d.y += 5; // Gently float back down
-                if (d.y > d.baseY) d.y = d.baseY;
+                d.y += 5; if (d.y > d.baseY) d.y = d.baseY;
             } else {
-                // Normal Patrol Walking
                 d.x += d.dx;
                 if (d.x > d.maxX || d.x < d.minX) d.dx *= -1;
-                d.rotation += d.dx * 0.1;
             }
         }
 
         if (d.bounceY > 0 && !d.isFloating) d.bounceY -= 1;
         if (d.textTimer > 0) d.textTimer--;
 
-        // Touch/Proximity Interaction
         if (dist < 45 && d.textTimer === 0 && !d.isFloating) {
             d.bounceY = 12; d.textTimer = 60; playSound(d.type);
             addParticles(d.x + 20, d.y, "#00bfff", 6);
@@ -339,7 +215,6 @@ function update() {
         }
     });
 
-    // Force Containers
     forceContainers.forEach(fc => {
         let dist = Math.abs((player.x + player.width/2) - (fc.x + fc.width/2));
         if (keys.F && dist < 420) {
@@ -361,6 +236,18 @@ function update() {
         }
     });
 
+    // Kyber Crystal Pickup (Mission 2)
+    kyberCrystals.forEach(kc => {
+        if (!kc.collected && Math.hypot((player.x + 24) - kc.x, (player.y + 24) - kc.y) < 40) {
+            kc.collected = true; kyberCrystalsCollected++;
+            playSound('win'); addParticles(kc.x, kc.y, "#00bfff", 15);
+            objectiveText.innerText = `Find Kyber Crystals (${kyberCrystalsCollected}/3)`;
+            if (kyberCrystalsCollected >= 3) {
+                gameState = "WON"; winMessage.innerText = "All Kyber Crystals Recovered!"; winScreen.style.display = "flex";
+            }
+        }
+    });
+
     // Jump Pads
     jumpPads.forEach(pad => {
         if (player.x < pad.x + pad.width && player.x + player.width > pad.x && player.y + player.height >= pad.y && player.y < pad.y + pad.height) {
@@ -377,20 +264,25 @@ function update() {
     if (player.y > 800) resetPlayer();
     if (deathMessageTimer > 0) deathMessageTimer--;
 
-    if (!hasLightsaber && player.x < lightsaber.x + lightsaber.width && player.x + player.width > lightsaber.x && player.y < lightsaber.y + lightsaber.height && player.y + player.height > lightsaber.y) {
-        hasLightsaber = true; saberText.style.display = "none"; saberIcon.style.display = "inline-block";
-        playSound('win'); addParticles(lightsaber.x, lightsaber.y, "#00ff00", 25);
+    // Mission 1 Win Objective
+    if (currentMission === 1 && !hasLightsaber && player.x < lightsaber.x + lightsaber.width && player.x + player.width > lightsaber.x && player.y < lightsaber.y + lightsaber.height && player.y + player.height > lightsaber.y) {
+        hasLightsaber = true; playSound('win'); addParticles(lightsaber.x, lightsaber.y, "#00ff00", 25);
     }
 
     let distObi = Math.abs(player.x - obi.x);
-    if (distObi < 150 && player.y > 400) {
+    if (currentMission === 1 && distObi < 150 && player.y > 400) {
         if (hasLightsaber) {
-            gameState = "WON"; winScreen.style.display = "flex"; dialogueBox.style.display = "none"; playSound('win');
+            gameState = "WON"; winMessage.innerText = "You returned Obi-Wan's Lightsaber!"; winScreen.style.display = "flex"; dialogueBox.style.display = "none"; playSound('win');
         } else {
-            dialogueBox.style.display = "block"; dialogueText.innerText = "Obi-Wan: Hello there! Bring back my lightsaber from the valley!";
+            dialogueBox.style.display = "block"; dialogueText.innerText = "Obi-Wan: Hello there! Bring back my lightsaber from the end of the valley!";
         }
     } else {
         dialogueBox.style.display = "none";
+    }
+
+    // Mission 3 Win Objective (Rescue Grogu)
+    if (currentMission === 3 && player.x > worldWidth - 500) {
+        gameState = "WON"; winMessage.innerText = "Grogu Saved! You are a true Jedi Master!"; winScreen.style.display = "flex"; playSound('win');
     }
 
     if (player.x < 0) player.x = 0;
@@ -403,9 +295,6 @@ function update() {
     if (camera.shake > 0) camera.shake *= 0.88;
 }
 
-// --- MODERN 2026 GRAPHICS RENDER ENGINE ---
-
-// Sci-Fi Metallic Platforms
 function drawLegoPlatform(p) {
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
@@ -413,11 +302,9 @@ function drawLegoPlatform(p) {
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.roundRect(p.x, p.y, p.width, p.height, 4); ctx.fill();
 
-    // Metallic Rim Accent
     ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
     ctx.fillRect(p.x, p.y, p.width, 3);
 
-    // 3D Lego Top Studs
     let studSpacing = 22;
     let studCount = Math.floor(p.width / studSpacing);
     for (let i = 0; i < studCount; i++) {
@@ -430,46 +317,36 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Imperial Supply Crates
 function drawCrate(c) {
-    // Metal Crate Base
     let grad = ctx.createLinearGradient(c.x, c.y, c.x + c.width, c.y + c.height);
     grad.addColorStop(0, "#485460"); grad.addColorStop(1, "#1e272e");
     ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(c.x, c.y, c.width, c.height, 6); ctx.fill();
     ctx.strokeStyle = "#d2dae2"; ctx.lineWidth = 2; ctx.strokeRect(c.x + 4, c.y + 4, c.width - 8, c.height - 8);
 
-    // Yellow/Black Hazard Stripes Header
     ctx.fillStyle = "#f1c40f"; ctx.fillRect(c.x + 6, c.y + 6, c.width - 12, 8);
     ctx.fillStyle = "#000";
     for(let i = 0; i < 4; i++) { ctx.fillRect(c.x + 8 + (i * 8), c.y + 6, 4, 8); }
 
-    // Glowing LED Indicator
     ctx.shadowBlur = 8; ctx.shadowColor = "#00ff00";
     ctx.fillStyle = "#00ff00"; ctx.beginPath(); ctx.arc(c.x + c.width - 12, c.y + c.height - 12, 3, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 }
 
-// Star Wars Moisture Vaporators (Replaces Trees)
 function drawVaporator(v) {
-    // Main Steel Pole
     ctx.fillStyle = "#7f8c8d"; ctx.fillRect(v.x + 10, v.y + 30, 4, v.height - 30);
-    
-    // Condenser Rings
     ctx.fillStyle = "#bdc3c7";
     ctx.fillRect(v.x + 2, v.y + 40, 20, 8);
     ctx.fillRect(v.x + 4, v.y + 70, 16, 8);
     ctx.fillRect(v.x + 2, v.y + 100, 20, 8);
 
-    // Top Vanes & Blue Power Core
     ctx.fillStyle = "#34495e"; ctx.fillRect(v.x + 6, v.y, 12, 30);
     ctx.shadowBlur = 12; ctx.shadowColor = "#00bfff";
     ctx.fillStyle = "#00bfff"; ctx.fillRect(v.x + 8, v.y + 10, 8, 10);
     ctx.shadowBlur = 0;
 }
 
-// Render Engine
+// Render Loop
 function draw() {
-    // Dark Galactic Sky
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#0f172a"); bgGrad.addColorStop(1, "#1e293b");
     ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -479,35 +356,20 @@ function draw() {
     let shakeY = (Math.random() - 0.5) * camera.shake;
     ctx.translate(-camera.x + shakeX, shakeY);
 
-    // Stars
+    // Endless Stars Background
     stars.forEach(s => {
         ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
         ctx.fillRect(s.x, s.y, s.size, s.size);
     });
 
-    // Moisture Vaporators
     vaporators.forEach(v => drawVaporator(v));
-
-    // Platforms
     platforms.concat(movingPlatforms).forEach(p => drawLegoPlatform(p));
 
-    // Kyber Force Containers
-    forceContainers.forEach(fc => {
-        ctx.fillStyle = "#1e272e"; ctx.beginPath(); ctx.roundRect(fc.x, fc.y, fc.width, fc.height, 10); ctx.fill();
-        ctx.fillStyle = "#0984e3"; ctx.fillRect(fc.x + 10, fc.y + 20, fc.width - 20, 15);
-        ctx.fillStyle = "#485460"; ctx.fillRect(fc.x + 15, fc.y + 60, fc.width - 30, fc.height - 80);
-
-        if (fc.isHovering) {
-            ctx.strokeStyle = "#a29bfe"; ctx.lineWidth = 6; ctx.shadowBlur = 20; ctx.shadowColor = "#a29bfe";
-            ctx.strokeRect(fc.x - 4, fc.y - 4, fc.width + 8, fc.height + 8);
-            ctx.shadowBlur = 0;
-        }
-    });
-
-    // Crates
+    // Force Objects
+    forceContainers.forEach(fc => drawForceObject(ctx, fc));
     crates.forEach(c => drawCrate(c));
     
-    // Glowing Lego Studs
+    // Lego Studs
     studs.forEach(s => {
         if (!s.collected) {
             ctx.shadowBlur = 10; ctx.shadowColor = s.color;
@@ -517,52 +379,38 @@ function draw() {
         }
     });
 
-    // Render All Droids
-    droids.forEach(d => {
-        let drawY = d.y - d.bounceY;
-
-        // Force Floating Glow Aura around Droid!
-        if (d.isFloating) {
-            ctx.shadowBlur = 20; ctx.shadowColor = "#e0aaff";
-            ctx.strokeStyle = "#e0aaff"; ctx.lineWidth = 3;
-            ctx.strokeRect(d.x - 5, drawY - 5, d.width + 10, d.height + 10);
+    // Mission 2 Kyber Crystals
+    kyberCrystals.forEach(kc => {
+        if (!kc.collected) {
+            ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
+            ctx.fillStyle = "#00bfff"; ctx.beginPath();
+            ctx.moveTo(kc.x, kc.y); ctx.lineTo(kc.x + 10, kc.y - 15);
+            ctx.lineTo(kc.x + 20, kc.y); ctx.lineTo(kc.x + 10, kc.y + 15); ctx.fill();
             ctx.shadowBlur = 0;
         }
-
-        if (d.type === 'r2d2') {
-            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.roundRect(d.x, drawY, d.width, d.height, [20,20,5,5]); ctx.fill();
-            ctx.fillStyle = "#2980b9"; ctx.fillRect(d.x + 8, drawY + 12, 24, 8);
-            ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 16, 3, 0, Math.PI*2); ctx.fill();
-        } else if (d.type === 'gonk') {
-            ctx.fillStyle = "#7f8c8d"; ctx.beginPath(); ctx.roundRect(d.x, drawY, d.width, d.height, 4); ctx.fill();
-            ctx.fillStyle = "#2c3e50"; ctx.fillRect(d.x + 5, drawY + 20, d.width - 10, 4);
-        } else if (d.type === 'bb8') {
-            // BB-8 Rolling Body & Head
-            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 28, 16, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 3; ctx.stroke();
-            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 10, 10, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 8, 3, 0, Math.PI*2); ctx.fill();
-        } else if (d.type === 'mouse') {
-            // Mouse Droid Sleek Hull
-            ctx.fillStyle = "#1e272e"; ctx.beginPath(); ctx.roundRect(d.x, drawY + 20, d.width, d.height - 20, [10,10,2,2]); ctx.fill();
-            ctx.fillStyle = "#7f8c8d"; ctx.fillRect(d.x + 5, drawY + 38, 8, 6); ctx.fillRect(d.x + 27, drawY + 38, 8, 6);
-        }
-
-        if (d.textTimer > 0 || d.isFloating) {
-            ctx.fillStyle = "#fff"; ctx.font = "bold 14px 'Comic Sans MS'";
-            ctx.fillText(d.isFloating ? "Woah!! 🌀" : d.label, d.x - 10, drawY - 10);
-        }
     });
+
+    // Droids
+    droids.forEach(d => drawDroid(ctx, d));
 
     // Jump Pads
     jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
 
-    // Obi-Wan & Lightsaber
-    if (obiImg.complete && obiImg.naturalWidth !== 0) ctx.drawImage(obiImg, obi.x, obi.y, obi.width, obi.height);
-    if (!hasLightsaber) {
-        ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 15; ctx.shadowColor = "#2ecc71";
-        ctx.fillRect(lightsaber.x, lightsaber.y + Math.sin(Date.now() / 150) * 8, lightsaber.width, lightsaber.height);
-        ctx.shadowBlur = 0;
+    // Mission 1: Obi-Wan & Lightsaber
+    if (currentMission === 1) {
+        if (obiImg.complete && obiImg.naturalWidth !== 0) ctx.drawImage(obiImg, obi.x, obi.y, obi.width, obi.height);
+        if (!hasLightsaber) {
+            ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 15; ctx.shadowColor = "#2ecc71";
+            ctx.fillRect(lightsaber.x, lightsaber.y + Math.sin(Date.now() / 150) * 8, lightsaber.width, lightsaber.height);
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    // Mission 3: Baby Yoda / Grogu Hover Pod at the End
+    if (currentMission === 3) {
+        let gx = worldWidth - 450;
+        ctx.fillStyle = "#bdc3c7"; ctx.beginPath(); ctx.arc(gx, 490, 25, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#2ecc71"; ctx.beginPath(); ctx.arc(gx, 485, 10, 0, Math.PI*2); ctx.fill(); // Grogu Head
     }
 
     // Particles
@@ -586,14 +434,6 @@ function draw() {
         ctx.beginPath(); ctx.arc(0, -player.height + 10, 10, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = "#2c3e50";
         ctx.fillRect(-player.width/2 + 10, -player.height + 35, player.width - 20, 13);
-
-        if (hasLightsaber) {
-            ctx.shadowBlur = 15; ctx.shadowColor = currentChar.saberColor;
-            ctx.fillStyle = currentChar.saberColor;
-            let saberX = player.facing === 'right' ? 15 : -20;
-            ctx.fillRect(saberX, -player.height + 5, 5, 30);
-            ctx.shadowBlur = 0;
-        }
     }
     ctx.restore();
 
