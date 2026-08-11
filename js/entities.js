@@ -21,7 +21,6 @@ function drawForceObject(ctx, obj) {
             ctx.fillRect(obj.x + 8 + (s * 22), obj.y - 5, 14, 5);
         }
     } else {
-        // High Contrast Metallic Imperial Crate
         let grad = ctx.createLinearGradient(obj.x, obj.y, obj.x + obj.width, obj.y + obj.height);
         grad.addColorStop(0, "#f39c12"); grad.addColorStop(1, "#d35400");
         ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(obj.x, obj.y, obj.width, obj.height, 8); ctx.fill();
@@ -31,34 +30,35 @@ function drawForceObject(ctx, obj) {
     ctx.restore();
 }
 
-// Render Cute Baby Yoda (Grogu) in Hover Pod
+// Render Cute Grogu with Animated Wiggling Ears
 function drawGrogu(ctx, x, y) {
     ctx.save();
     
-    // Floating Hover Pod Body
+    // Floating Pod Body
     ctx.fillStyle = "#bdc3c7"; ctx.beginPath(); ctx.arc(x, y, 32, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#7f8c8d"; ctx.beginPath(); ctx.arc(x, y - 5, 26, Math.PI, 0); ctx.fill(); // Pod opening
+    ctx.fillStyle = "#7f8c8d"; ctx.beginPath(); ctx.arc(x, y - 5, 26, Math.PI, 0); ctx.fill();
 
     // Thruster Glow
     ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
     ctx.fillStyle = "#00bfff"; ctx.beginPath(); ctx.arc(x, y + 28, 8, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Grogu Ears
+    // Animated Grogu Ears (Wiggling!)
+    let earWiggle = Math.sin(Date.now() / 250) * 0.15;
     ctx.fillStyle = "#2ecc71";
-    ctx.beginPath(); ctx.ellipse(x - 24, y - 12, 16, 6, -0.3, 0, Math.PI * 2); ctx.fill(); // Left Ear
-    ctx.beginPath(); ctx.ellipse(x + 24, y - 12, 16, 6, 0.3, 0, Math.PI * 2); ctx.fill();  // Right Ear
+    ctx.beginPath(); ctx.ellipse(x - 24, y - 12, 16, 6, -0.3 + earWiggle, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 24, y - 12, 16, 6, 0.3 - earWiggle, 0, Math.PI * 2); ctx.fill();
 
-    // Grogu Head & Eyes
+    // Grogu Head & Shiny Eyes
     ctx.beginPath(); ctx.arc(x, y - 12, 12, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#000"; // Big Shiny Black Eyes
+    ctx.fillStyle = "#000";
     ctx.beginPath(); ctx.arc(x - 5, y - 13, 3.5, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(x + 5, y - 13, 3.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#fff"; // Eye Glint
+    ctx.fillStyle = "#fff";
     ctx.beginPath(); ctx.arc(x - 6, y - 14, 1, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(x + 4, y - 14, 1, 0, Math.PI * 2); ctx.fill();
 
-    // Beige Robe Collar
+    // Beige Collar Robe
     ctx.fillStyle = "#f39c12"; ctx.beginPath(); ctx.roundRect(x - 12, y - 2, 24, 10, 4); ctx.fill();
 
     ctx.restore();
