@@ -1,4 +1,4 @@
-// Render Liftable Force Objects (Cargo Containers, Speeder Bikes, Lego Bricks)
+// Render Liftable Force Objects
 function drawForceObject(ctx, obj) {
     ctx.save();
     
@@ -10,30 +10,61 @@ function drawForceObject(ctx, obj) {
     }
 
     if (obj.type === 'speeder') {
-        // Lego Speeder Bike
-        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(obj.x, obj.y + 15, obj.width, 15);
-        ctx.fillStyle = "#e74c3c"; ctx.fillRect(obj.x + 20, obj.y + 5, 25, 10); // Seat
-        ctx.fillStyle = "#34495e"; ctx.fillRect(obj.x + obj.width - 20, obj.y + 18, 25, 4); // Front Vanes
+        ctx.fillStyle = "#e67e22"; ctx.fillRect(obj.x, obj.y + 15, obj.width, 15);
+        ctx.fillStyle = "#e74c3c"; ctx.fillRect(obj.x + 20, obj.y + 5, 25, 10);
+        ctx.fillStyle = "#f1c40f"; ctx.fillRect(obj.x + obj.width - 20, obj.y + 18, 25, 4);
     } else if (obj.type === 'brick') {
-        // Giant 2x4 Lego Brick
         ctx.fillStyle = obj.color || "#e74c3c";
         ctx.beginPath(); ctx.roundRect(obj.x, obj.y, obj.width, obj.height, 6); ctx.fill();
-        
-        // Brick Top Studs
         for (let s = 0; s < 4; s++) {
-            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.fillStyle = "rgba(255,255,255,0.4)";
             ctx.fillRect(obj.x + 8 + (s * 22), obj.y - 5, 14, 5);
         }
     } else {
-        // Kyber Container
-        ctx.fillStyle = "#1e272e"; ctx.beginPath(); ctx.roundRect(obj.x, obj.y, obj.width, obj.height, 8); ctx.fill();
-        ctx.fillStyle = "#0984e3"; ctx.fillRect(obj.x + 10, obj.y + 15, obj.width - 20, 15);
+        // High Contrast Metallic Imperial Crate
+        let grad = ctx.createLinearGradient(obj.x, obj.y, obj.x + obj.width, obj.y + obj.height);
+        grad.addColorStop(0, "#f39c12"); grad.addColorStop(1, "#d35400");
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(obj.x, obj.y, obj.width, obj.height, 8); ctx.fill();
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.strokeRect(obj.x + 4, obj.y + 4, obj.width - 8, obj.height - 8);
     }
 
     ctx.restore();
 }
 
-// Render Droid Types
+// Render Cute Baby Yoda (Grogu) in Hover Pod
+function drawGrogu(ctx, x, y) {
+    ctx.save();
+    
+    // Floating Hover Pod Body
+    ctx.fillStyle = "#bdc3c7"; ctx.beginPath(); ctx.arc(x, y, 32, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#7f8c8d"; ctx.beginPath(); ctx.arc(x, y - 5, 26, Math.PI, 0); ctx.fill(); // Pod opening
+
+    // Thruster Glow
+    ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
+    ctx.fillStyle = "#00bfff"; ctx.beginPath(); ctx.arc(x, y + 28, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Grogu Ears
+    ctx.fillStyle = "#2ecc71";
+    ctx.beginPath(); ctx.ellipse(x - 24, y - 12, 16, 6, -0.3, 0, Math.PI * 2); ctx.fill(); // Left Ear
+    ctx.beginPath(); ctx.ellipse(x + 24, y - 12, 16, 6, 0.3, 0, Math.PI * 2); ctx.fill();  // Right Ear
+
+    // Grogu Head & Eyes
+    ctx.beginPath(); ctx.arc(x, y - 12, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#000"; // Big Shiny Black Eyes
+    ctx.beginPath(); ctx.arc(x - 5, y - 13, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 5, y - 13, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fff"; // Eye Glint
+    ctx.beginPath(); ctx.arc(x - 6, y - 14, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 4, y - 14, 1, 0, Math.PI * 2); ctx.fill();
+
+    // Beige Robe Collar
+    ctx.fillStyle = "#f39c12"; ctx.beginPath(); ctx.roundRect(x - 12, y - 2, 24, 10, 4); ctx.fill();
+
+    ctx.restore();
+}
+
+// Render Droids
 function drawDroid(ctx, d) {
     let drawY = d.y - d.bounceY;
 
@@ -49,7 +80,7 @@ function drawDroid(ctx, d) {
         ctx.fillStyle = "#2980b9"; ctx.fillRect(d.x + 8, drawY + 12, 24, 8);
         ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 16, 3, 0, Math.PI*2); ctx.fill();
     } else if (d.type === 'gonk') {
-        ctx.fillStyle = "#7f8c8d"; ctx.beginPath(); ctx.roundRect(d.x, drawY, d.width, d.height, 4); ctx.fill();
+        ctx.fillStyle = "#f39c12"; ctx.beginPath(); ctx.roundRect(d.x, drawY, d.width, d.height, 4); ctx.fill();
         ctx.fillStyle = "#2c3e50"; ctx.fillRect(d.x + 5, drawY + 20, d.width - 10, 4);
     } else if (d.type === 'bb8') {
         ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 28, 16, 0, Math.PI*2); ctx.fill();
@@ -57,8 +88,8 @@ function drawDroid(ctx, d) {
         ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 10, 10, Math.PI, 0); ctx.fill();
         ctx.fillStyle = "#2c3e50"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 8, 3, 0, Math.PI*2); ctx.fill();
     } else if (d.type === 'mouse') {
-        ctx.fillStyle = "#1e272e"; ctx.beginPath(); ctx.roundRect(d.x, drawY + 20, d.width, d.height - 20, [8,8,2,2]); ctx.fill();
-        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(d.x + 5, drawY + 38, 8, 6); ctx.fillRect(d.x + 27, drawY + 38, 8, 6);
+        ctx.fillStyle = "#34495e"; ctx.beginPath(); ctx.roundRect(d.x, drawY + 20, d.width, d.height - 20, [8,8,2,2]); ctx.fill();
+        ctx.fillStyle = "#f1c40f"; ctx.fillRect(d.x + 5, drawY + 38, 8, 6); ctx.fillRect(d.x + 27, drawY + 38, 8, 6);
     }
 
     if (d.textTimer > 0 || d.isFloating) {
