@@ -127,8 +127,8 @@ canvas {
     padding: 10px;
 }
 
-.overlay h2 { font-size: 32px; margin: 0 0 5px 0; color: #fca311; text-shadow: 0 0 12px #fca311; }
-.overlay p { font-size: 15px; color: white; margin: 5px 0; font-weight: bold; }
+.overlay h2 { font-size: 30px; margin: 0 0 5px 0; color: #fca311; text-shadow: 0 0 12px #fca311; }
+.overlay p { font-size: 14px; color: white; margin: 4px 0; font-weight: bold; }
 
 .stats-box {
     background: rgba(255, 255, 255, 0.1);
@@ -142,7 +142,7 @@ canvas {
 .character-select, .mission-select {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .char-card {
@@ -174,6 +174,7 @@ canvas {
     font-size: 13px;
     border-radius: 12px;
     margin: 0;
+    cursor: pointer;
 }
 
 .menu-buttons { display: flex; flex-wrap: wrap; justify-content: center; }
