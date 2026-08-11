@@ -25,30 +25,69 @@ html, body {
     height: 100vh;
     max-width: 1200px;
     max-height: 700px;
-    background-color: #16213e;
+    background-color: #0f172a;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 0 35px rgba(0, 200, 255, 0.5);
+    box-shadow: 0 0 40px rgba(0, 200, 255, 0.6);
 }
 
 canvas { 
     width: 100%;
     flex-grow: 1;
     object-fit: contain;
-    background: #000;
+    background: #050510;
 }
 
 #dashboard {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(15, 52, 96, 0.95);
+    background-color: rgba(15, 23, 42, 0.95);
     padding: 8px 16px;
-    font-size: 18px;
+    font-size: 16px;
     color: white;
     z-index: 2;
-    border-bottom: 2px solid #1a1a2e;
+    border-bottom: 3px solid #1e293b;
+}
+
+/* True Jedi Bar */
+.true-jedi-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tj-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 5px #ffd700;
+}
+
+.tj-bar {
+    width: 120px;
+    height: 14px;
+    background: #1e293b;
+    border: 2px solid #ffd700;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#tj-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f1c40f, #ff007f);
+    transition: width 0.3s;
+}
+
+.shop-btn {
+    background: #9b59b6;
+    color: white;
+    padding: 6px 12px;
+    font-size: 13px;
+    margin: 0;
+    border-radius: 12px;
 }
 
 .mini-fs-btn {
@@ -63,7 +102,7 @@ canvas {
     top: 60px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 52, 96, 0.95);
+    background: rgba(15, 23, 42, 0.95);
     border: 3px solid #fca311;
     border-radius: 12px;
     padding: 10px 20px;
@@ -77,7 +116,7 @@ canvas {
 .overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(10, 15, 35, 0.95);
+    background: rgba(10, 15, 30, 0.95);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -88,6 +127,15 @@ canvas {
 
 .overlay h2 { font-size: 32px; margin: 0 0 5px 0; color: #fca311; text-shadow: 0 0 12px #fca311; }
 .overlay p { font-size: 15px; color: white; margin: 5px 0; font-weight: bold; }
+
+.stats-box {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #00bfff;
+    border-radius: 12px;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    text-align: center;
+}
 
 .character-select, .mission-select {
     display: flex;
@@ -147,7 +195,7 @@ button {
     display: flex;
     justify-content: space-between;
     padding: 10px 15px;
-    background: #0f3460;
+    background: #0f172a;
     z-index: 2;
 }
 
