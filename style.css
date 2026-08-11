@@ -77,53 +77,54 @@ canvas {
 .overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(10, 15, 35, 0.94);
+    background: rgba(10, 15, 35, 0.95);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 10;
+    padding: 10px;
 }
 
-.overlay h2 { font-size: 36px; margin: 0 0 10px 0; color: #fca311; text-shadow: 0 0 12px #fca311; }
-.overlay p { font-size: 18px; color: white; margin-bottom: 15px; }
+.overlay h2 { font-size: 32px; margin: 0 0 5px 0; color: #fca311; text-shadow: 0 0 12px #fca311; }
+.overlay p { font-size: 15px; color: white; margin: 5px 0; font-weight: bold; }
 
-.character-select {
+.character-select, .mission-select {
     display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .char-card {
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    padding: 10px;
+    border-radius: 10px;
+    padding: 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s;
-    width: 80px;
+    width: 70px;
 }
 
-.char-card:hover { transform: translateY(-4px); }
-
-.char-card.selected {
+.char-card.selected, .mission-btn.selected {
     border-color: #00bfff;
-    box-shadow: 0 0 15px rgba(0, 191, 255, 0.6);
-    background: rgba(0, 191, 255, 0.15);
+    box-shadow: 0 0 12px rgba(0, 191, 255, 0.6);
+    background: rgba(0, 191, 255, 0.2);
 }
 
-.char-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-bottom: 5px;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-}
+.char-avatar { width: 32px; height: 32px; border-radius: 50%; margin-bottom: 4px; }
+.char-card span { font-size: 12px; color: white; }
 
-.char-card span { font-size: 14px; color: white; font-weight: bold; }
+.mission-btn {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.2);
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 12px;
+    margin: 0;
+}
 
 .menu-buttons { display: flex; flex-wrap: wrap; justify-content: center; }
 
@@ -131,9 +132,9 @@ button {
     background-color: #00bfff;
     color: #000;
     border: none;
-    padding: 12px 24px;
-    margin: 8px;
-    font-size: 16px;
+    padding: 10px 20px;
+    margin: 6px;
+    font-size: 15px;
     font-family: inherit;
     font-weight: bold;
     border-radius: 20px;
@@ -141,8 +142,6 @@ button {
     box-shadow: 0 4px 12px rgba(0, 191, 255, 0.4);
     touch-action: manipulation;
 }
-
-button:active { transform: scale(0.95); }
 
 #touch-controls {
     display: flex;
