@@ -31,6 +31,11 @@ canvas {
 }
 
 #dialogue-box {
+    position: absolute; /* Hovers over the canvas */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box; /* Keeps it inside the borders */
     background-color: rgba(0, 50, 100, 0.95);
     border-top: 3px solid #00bfff;
     padding: 15px;
@@ -38,4 +43,6 @@ canvas {
     font-size: 18px;
     text-align: left;
     min-height: 50px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
