@@ -11,9 +11,9 @@
         <!-- Start Screen Overlay -->
         <div id="start-screen" class="overlay">
             <h2>Lego Star Wars Explorer</h2>
-            <p>Choose Your Hero & Difficulty!</p>
             
             <!-- Character Selector -->
+            <p>1. Select Your Hero:</p>
             <div class="character-select">
                 <div class="char-card selected" onclick="selectCharacter('luke', this)">
                     <div class="char-avatar" style="background: #2ecc71;"></div>
@@ -33,19 +33,29 @@
                 </div>
             </div>
 
+            <!-- Mission Selector -->
+            <p>2. Select Mission:</p>
+            <div class="mission-select">
+                <button class="mission-btn selected" onclick="selectMission(1, this)">🗡️ 1. Find Lightsaber</button>
+                <button class="mission-btn" onclick="selectMission(2, this)">💎 2. Kyber Crystals</button>
+                <button class="mission-btn" onclick="selectMission(3, this)">💚 3. Rescue Grogu</button>
+            </div>
+
+            <!-- Difficulty Selector -->
+            <p>3. Select Difficulty:</p>
             <div class="menu-buttons">
                 <button onclick="startGame(1)">Padawan (Easy)</button>
                 <button onclick="startGame(2)">Jedi Knight (Medium)</button>
                 <button onclick="startGame(3)">Jedi Master (Hard)</button>
             </div>
-            <button id="fullscreen-btn" onclick="toggleFullscreen()" style="background-color: #fca311;">📺 Toggle Fullscreen</button>
+            <button id="fullscreen-btn" onclick="toggleFullscreen()" style="background-color: #fca311; margin-top: 10px;">📺 Fullscreen</button>
         </div>
 
         <!-- Win Screen Overlay -->
         <div id="win-screen" class="overlay" style="display: none;">
             <h2 style="color: #00ff00;">Mission Complete!</h2>
-            <p>The Force will be with you, always.</p>
-            <button onclick="location.reload()">Play Again</button>
+            <p id="win-message">The Force will be with you, always.</p>
+            <button onclick="location.reload()">Play Next Mission</button>
         </div>
 
         <!-- Dialogue Box -->
@@ -57,9 +67,7 @@
         <div id="dashboard">
             <div id="score-display">Studs: <span id="score-text" style="color: #fca311;">0</span></div>
             <div id="quest-status">
-                Lightsaber: 
-                <span id="saber-text" style="color: #ff4d4d;">Missing</span>
-                <img id="saber-icon" src="assets/saber.png" style="display: none; height: 24px; vertical-align: middle;">
+                Objective: <span id="objective-text" style="color: #00bfff;">Find Lightsaber</span>
             </div>
             <button onclick="toggleFullscreen()" class="mini-fs-btn">📺</button>
         </div>
@@ -80,6 +88,10 @@
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/levels.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
