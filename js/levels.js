@@ -107,17 +107,15 @@ function buildMissionLevel(difficultyMultiplier) {
         let currentHeight = 520 - (Math.random() * 80);
 
         if (choice < 0.25) {
-            // Horizontal Moving Platform over Water Pit
             let pitSize = 220 + (difficultyMultiplier * 50);
             GAME.movingPlatforms.push({ x: cursorX, y: 440, width: 140, height: 24, dx: 1.5, dy: 0, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true, isVertical: false });
             addWaterPit(pitSize);
             addGround(700, currentHeight);
         } else if (choice < 0.50) {
-            // Vertical Elevator Lift to High Wall Cliff
             let highWallHeight = 320;
             addVerticalElevator(50, 520, 200, 140);
             addWaterPit(250);
-            addGround(800, highWallHeight); // High cliff
+            addGround(800, highWallHeight);
         } else if (choice < 0.75) {
             jumpPads.push({ x: cursorX + 80, y: 520, width: 60, height: 20, color: "#00ffcc" });
             addFloatingPlatform(80, 260, 200);
@@ -143,11 +141,11 @@ function buildMissionLevel(difficultyMultiplier) {
     GAME.worldWidth = cursorX;
     GAME.lightsaber.x = GAME.worldWidth - 600;
 
-    // Guaranteed Mission 2 Kyber Crystals Floating High Above Ground
+    // Guaranteed Mission 2 Kyber Crystals Floating High Above Ground Floor
     while(GAME.currentMission === 2 && GAME.kyberCrystals.length < 3) {
         let spawnX = 800 + (GAME.kyberCrystals.length * 800);
         let targetGround = GAME.platforms.find(p => p.isGround && spawnX >= p.x && spawnX <= p.x + p.width);
         let groundY = targetGround ? targetGround.y : 540;
-        GAME.kyberCrystals.push({ x: spawnX, y: groundY - 50, width: 20, height: 30, collected: false });
+        GAME.kyberCrystals.push({ x: spawnX, y: groundY - 60, width: 20, height: 30, collected: false });
     }
 }
