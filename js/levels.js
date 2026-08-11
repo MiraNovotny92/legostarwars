@@ -13,7 +13,7 @@ function buildMissionLevel(difficultyMultiplier) {
         stars.push({ x: Math.random() * totalWidthNeeded, y: Math.random() * 450, size: Math.random() * 2 + 1, alpha: Math.random() });
     }
 
-    function addGround(width, heightY = 550) {
+    function addGround(width, heightY = 540) {
         platforms.push({ x: cursorX, y: heightY, width: width, height: 600 - heightY + 100, isGround: true });
         
         let itemsCount = Math.floor(width / 300);
@@ -45,12 +45,12 @@ function buildMissionLevel(difficultyMultiplier) {
     }
 
     function addWaterPit(width) {
-        waterPits.push({ x: cursorX, width: width, y: 560 });
+        waterPits.push({ x: cursorX, width: width, y: 550 });
         cursorX += width;
     }
     
     function addFloatingPlatform(xOffset, y, width) {
-        movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 22, dx: 0, minX: 0, maxX: 0, isMoving: false });
+        movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 24, dx: 0, minX: 0, maxX: 0, isMoving: false });
         for(let s = 0; s < 3; s++) {
             studs.push({ x: cursorX + xOffset + 30 + (s * 40), y: y - 35, radius: 7, collected: false, color: "#00bfff" });
         }
@@ -60,7 +60,7 @@ function buildMissionLevel(difficultyMultiplier) {
         }
     }
 
-    addGround(1000, 550);
+    addGround(1000, 540);
     let numberOfObstacles = Math.max(3, difficultyMultiplier * 3);
 
     for (let i = 0; i < numberOfObstacles; i++) {
@@ -69,13 +69,13 @@ function buildMissionLevel(difficultyMultiplier) {
 
         if (choice < 0.33) {
             let pitSize = 220 + (difficultyMultiplier * 50);
-            movingPlatforms.push({ x: cursorX, y: 440, width: 140, height: 22, dx: 1.5, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true });
+            movingPlatforms.push({ x: cursorX, y: 440, width: 140, height: 24, dx: 1.5, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true });
             addWaterPit(pitSize);
             addGround(700, currentHeight);
         } else if (choice < 0.66) {
-            jumpPads.push({ x: cursorX + 80, y: 530, width: 60, height: 20, color: "#00ffcc" });
+            jumpPads.push({ x: cursorX + 80, y: 520, width: 60, height: 20, color: "#00ffcc" });
             addFloatingPlatform(80, 260, 200);
-            addGround(300, 550); 
+            addGround(300, 540); 
             addWaterPit(180); 
             addGround(700, currentHeight);
         } else {
@@ -93,7 +93,7 @@ function buildMissionLevel(difficultyMultiplier) {
         }
     }
 
-    addGround(1000, 550);
+    addGround(1000, 540);
     worldWidth = cursorX;
     lightsaber.x = worldWidth - 600;
 
