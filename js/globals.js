@@ -44,7 +44,7 @@ window.GAME = {
     npcs: []
 };
 
-// Pure Native Canvas arcTo Rounded Rectangle (Guarantees zero browser crashes)
+// Fail-Safe Drawing Helper (Guarantees zero browser crashes)
 function drawRoundedRect(ctx, x, y, w, h, r = 6) {
     if (w <= 0 || h <= 0) return;
     let radius = typeof r === 'number' ? r : 6;
