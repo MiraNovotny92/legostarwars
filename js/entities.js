@@ -16,11 +16,12 @@ loadGameAsset('gonk', 'assets/gonk.png');
 // Tree Renderer with preserved Aspect Ratio
 function drawVaporator(ctx, v) {
     let img = ASSETS['tree'];
-    if (img && img.complete && img.naturalWidth !== 0) {
+    if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
         ctx.save();
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         let aspect = img.naturalWidth / img.naturalHeight;
+        if (!isFinite(aspect) || aspect <= 0) aspect = 0.5;
         let drawWidth = v.height * aspect;
         ctx.drawImage(img, v.x - (drawWidth - v.width)/2, v.y, drawWidth, v.height);
         ctx.restore();
@@ -86,7 +87,7 @@ function drawLaserGate(ctx, gate) {
 }
 
 function drawNPC(ctx, npc) {
-    let drawY = npc.y - npc.bounceY;
+    let drawY = npc.y - (npc.bounceY || 0);
     ctx.save();
     if (npc.type === 'jawa') {
         ctx.fillStyle = "#784212"; drawRoundedRect(ctx, npc.x, drawY + 10, npc.width, npc.height - 10, 8);
@@ -121,7 +122,7 @@ function drawForceObject(ctx, obj) {
     let spriteKey = obj.type === 'speeder' ? 'speeder' : 'crate';
     let img = ASSETS[spriteKey];
 
-    if (img && img.complete && img.naturalWidth !== 0) {
+    if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
         ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
     } else {
         if (obj.type === 'speeder') {
@@ -144,7 +145,7 @@ function drawGrogu(ctx, x, y) {
     let img = ASSETS['grogu'];
     let floatY = y + Math.sin(Date.now() / 200) * 6;
 
-    if (img && img.complete && img.naturalWidth !== 0) {
+    if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
         ctx.drawImage(img, x - 40, floatY - 40, 80, 80);
     } else {
         ctx.fillStyle = "#bdc3c7"; ctx.beginPath(); ctx.arc(x, floatY, 32, 0, Math.PI * 2); ctx.fill();
@@ -174,7 +175,7 @@ function drawGrogu(ctx, x, y) {
 }
 
 function drawDroid(ctx, d) {
-    let drawY = d.y - d.bounceY;
+    let drawY = d.y - (d.bounceY || 0);
 
     if (d.isFloating) {
         ctx.shadowBlur = 20; ctx.shadowColor = "#e0aaff";
@@ -184,7 +185,7 @@ function drawDroid(ctx, d) {
     }
 
     let img = ASSETS[d.type];
-    if (img && img.complete && img.naturalWidth !== 0) {
+    if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
         ctx.drawImage(img, d.x, drawY, d.width, d.height);
     } else {
         if (d.type === 'r2d2') {
