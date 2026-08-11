@@ -8,13 +8,11 @@ function buildMissionLevel(difficultyMultiplier) {
     kyberCrystalsCollected = 0;
     let cursorX = 0;
 
-    // Endless Sky Stars & Nebula
     let totalWidthNeeded = 8000;
     for(let i = 0; i < 250; i++) {
         stars.push({ x: Math.random() * totalWidthNeeded, y: Math.random() * 450, size: Math.random() * 2 + 1, alpha: Math.random() });
     }
 
-    // Varied Height Ground Function (Hills & Cliffs)
     function addGround(width, heightY = 550) {
         platforms.push({ x: cursorX, y: heightY, width: width, height: 600 - heightY + 100, isGround: true });
         
@@ -62,15 +60,12 @@ function buildMissionLevel(difficultyMultiplier) {
         }
     }
 
-    // Start Spawn Area
     addGround(1000, 550);
-    
-    // Varied Terrain Segment Generation
     let numberOfObstacles = Math.max(3, difficultyMultiplier * 3);
 
     for (let i = 0; i < numberOfObstacles; i++) {
         let choice = Math.random();
-        let currentHeight = 520 - (Math.random() * 80); // Hill height variation
+        let currentHeight = 520 - (Math.random() * 80);
 
         if (choice < 0.33) {
             let pitSize = 220 + (difficultyMultiplier * 50);
