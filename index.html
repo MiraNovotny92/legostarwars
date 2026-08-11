@@ -10,19 +10,32 @@
     <h1>Lego Star Wars Explorer</h1>
     
     <div id="game-container">
-        <!-- New UI Dashboard -->
+        <!-- Start Screen Overlay -->
+        <div id="start-screen" class="overlay">
+            <h2>Select Difficulty</h2>
+            <button onclick="startGame(1)">Padawan (Easy)</button>
+            <button onclick="startGame(2)">Jedi Knight (Medium)</button>
+            <button onclick="startGame(3)">Jedi Master (Hard)</button>
+        </div>
+
+        <!-- Win Screen Overlay -->
+        <div id="win-screen" class="overlay" style="display: none;">
+            <h2 style="color: #00ff00;">Mission Complete!</h2>
+            <p>The Force will be with you, always.</p>
+            <button onclick="location.reload()">Play Again</button>
+        </div>
+
         <div id="dashboard">
             <div id="controls"><strong>Controls:</strong> ⬅️ ➡️ Move | SPACE Jump | Hold 'F' Force</div>
-<div id="quest-status">
-            Lightsaber: 
-            <span id="saber-text" style="color: red;">Missing</span>
-            <img id="saber-icon" src="assets/saber.png" style="display: none; height: 24px; vertical-align: middle;">
-        </div>        </div>
+            <div id="quest-status">
+                Lightsaber: 
+                <span id="saber-text" style="color: #ff4d4d;">Missing</span>
+                <img id="saber-icon" src="assets/saber.png" style="display: none; height: 24px; vertical-align: middle;">
+            </div>
+        </div>
 
-        <!-- The Game -->
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-        <!-- New HTML Dialogue Box -->
         <div id="dialogue-box" style="display: none;">
             <p id="dialogue-text"></p>
         </div>
