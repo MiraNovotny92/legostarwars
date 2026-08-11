@@ -5,6 +5,7 @@ const ctx = canvas.getContext("2d");
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
 const saberText = document.getElementById("saber-text");
+const saberIcon = document.getElementById("saber-icon");
 
 // --- ASSETS ---
 const jediLeftImg = new Image(); jediLeftImg.src = "assets/jedi_left.png";
@@ -26,22 +27,19 @@ const player = {
 
 const obi = { x: 400, y: 500, width: 50, height: 50 };
 const lightsaber = { x: 4800, y: 490, width: 10, height: 60 }; 
-const forceBlock = { x: 800, y: 450, width: 100, height: 100, isHovering: false };
 
 // --- IMPROVED LEVEL BUILDER ---
 const platforms = [];
 const movingPlatforms = [];
 const jumpPads = [];
-let cursorX = 0; // The builder's current position
+const forceBlocks = []; // Now an array for multiple blocks!
+let cursorX = 0; 
 
-// Functions to build the world easily!
 function addGround(width) {
     platforms.push({ x: cursorX, y: 550, width: width, height: 100, isMoving: false });
     cursorX += width;
 }
-function addPit(width) {
-    cursorX += width;
-}
+function addPit(width) { cursorX += width; }
 function addPlatform(xOffset, y, width) {
     platforms.push({ x: cursorX + xOffset, y: y, width: width, height: 20, isMoving: false });
 }
@@ -52,25 +50,31 @@ function addMovingPlatform(xOffset, y, width, moveDist) {
 function addJumpPad(xOffset, y) {
     jumpPads.push({ x: cursorX + xOffset, y: y, width: 60, height: 20, color: "#00ffcc" });
 }
+function addForceBlock(xOffset, y) {
+    forceBlocks.push({ x: cursorX + xOffset, y: y, width: 100, height: 100, color: "#9d4edd", isHovering: false });
+}
 
 // ⬇️ DESIGN YOUR LEVEL HERE ⬇️
 
 // 1. Safe start area
 addGround(1500); 
 
-// 2. A pit with a moving platform to get across!
-addMovingPlatform(50, 450, 150, 300); // 50px into the pit, moves 300px right
+// 2. An obstacle you have to lift!
+addForceBlock(-700, 450); // Placed 700px BEFORE the end of the first ground
+
+// 3. A pit with a moving platform
+addMovingPlatform(50, 450, 150, 300); 
 addPit(500); 
 
-// 3. More safe ground
+// 4. More safe ground
 addGround(1000);
 
-// 4. A high wall that requires a jump pad!
-addJumpPad(-200, 530);     // Placed on the previous ground, 200px before the pit
-addPlatform(-200, 200, 200); // A high platform directly above the jump pad
+// 5. A high wall that requires a jump pad!
+addJumpPad(-200, 530);     
+addPlatform(-200, 200, 200); 
 addPit(200);
 
-// 5. Final stretch
+// 6. Final stretch
 addGround(3000);
 
 
@@ -98,9 +102,10 @@ window.addEventListener("keyup", (e) => {
 // --- GAME LOGIC ---
 function resetGame() {
     player.x = 50; player.y = 400; player.dx = 0; player.dy = 0;
-    hasLightsaber = false; forceBlock.y = 450; deathMessageTimer = 180; 
-    saberText.innerText = "Missing";
-    saberText.style.color = "red";
+    hasLightsaber = false; deathMessageTimer = 180; 
+    saberText.style.display = "inline";
+    saberIcon.style.display = "none";
+    forceBlocks.forEach(fb => fb.y = 450); // Reset blocks
 }
 
 function update() {
@@ -135,34 +140,37 @@ function update() {
     if (player.y > 1000) resetGame();
     if (deathMessageTimer > 0) deathMessageTimer--;
 
-    let distanceToBlock = Math.abs((player.x + player.width/2) - (forceBlock.x + forceBlock.width/2));
-    if (keys.F && distanceToBlock < 350) {
-        forceBlock.y -= 3; forceBlock.isHovering = true;
-        if (forceBlock.y < 150) forceBlock.y = 150; 
-    } else {
-        forceBlock.isHovering = false; forceBlock.y += 6; 
-        if (forceBlock.y > 450) forceBlock.y = 450; 
-    }
-    if (player.x < forceBlock.x + forceBlock.width && player.x + player.width > forceBlock.x && player.y < forceBlock.y + forceBlock.height && player.y + player.height > forceBlock.y) {
-        if (player.dx > 0 && player.x < forceBlock.x) { player.x = forceBlock.x - player.width; player.dx = 0; } 
-        else if (player.dx < 0 && player.x > forceBlock.x) { player.x = forceBlock.x + forceBlock.width; player.dx = 0; }
-    }
+    // Update ALL force blocks
+    forceBlocks.forEach(block => {
+        let distanceToBlock = Math.abs((player.x + player.width/2) - (block.x + block.width/2));
+        if (keys.F && distanceToBlock < 350) {
+            block.y -= 3; block.isHovering = true;
+            if (block.y < 150) block.y = 150; 
+        } else {
+            block.isHovering = false; block.y += 6; 
+            if (block.y > 450) block.y = 450; 
+        }
+        if (player.x < block.x + block.width && player.x + player.width > block.x && player.y < block.y + block.height && player.y + player.height > block.y) {
+            if (player.dx > 0 && player.x < block.x) { player.x = block.x - player.width; player.dx = 0; } 
+            else if (player.dx < 0 && player.x > block.x) { player.x = block.x + block.width; player.dx = 0; }
+        }
+    });
 
     if (!hasLightsaber && player.x < lightsaber.x + lightsaber.width && player.x + player.width > lightsaber.x && player.y < lightsaber.y + lightsaber.height && player.y + player.height > lightsaber.y) {
         hasLightsaber = true;
-        saberText.innerText = "FOUND!";
-        saberText.style.color = "#00ff00";
+        saberText.style.display = "none";
+        saberIcon.style.display = "inline-block";
     }
 
     // --- HTML UI UPDATE LOGIC ---
     let distToObi = Math.abs(player.x - obi.x);
     if (distToObi < 150 && player.y > 400) { 
-        dialogueBox.style.display = "block"; // Show HTML Box
+        dialogueBox.style.display = "block"; 
         dialogueText.innerText = hasLightsaber 
             ? "Obi-Wan: Hello there... Excellent! You found my lightsaber! The Force is strong with you!" 
             : "Obi-Wan: Hello there... I dropped my lightsaber at the end of the valley. Navigate the moving platforms to find it!";
     } else {
-        dialogueBox.style.display = "none"; // Hide HTML Box
+        dialogueBox.style.display = "none"; 
     }
 
     if (player.x < 0) player.x = 0;
@@ -210,12 +218,15 @@ function draw() {
     if (obiImg.complete && obiImg.naturalWidth !== 0) ctx.drawImage(obiImg, obi.x, obi.y, obi.width, obi.height);
     if (!hasLightsaber) drawLightsaber(lightsaber.x, lightsaber.y + Math.sin(Date.now() / 200) * 10);
 
-    ctx.fillStyle = forceBlock.color; ctx.fillRect(forceBlock.x, forceBlock.y, forceBlock.width, forceBlock.height);
-    if (forceBlock.isHovering) {
-        ctx.strokeStyle = "#9d4edd"; ctx.shadowBlur = 20; ctx.shadowColor = "#9d4edd"; ctx.lineWidth = 4;
-        ctx.strokeRect(forceBlock.x - 5, forceBlock.y - 5, forceBlock.width + 10, forceBlock.height + 10);
-        ctx.shadowBlur = 0;
-    }
+    // Draw ALL force blocks
+    forceBlocks.forEach(block => {
+        ctx.fillStyle = block.color; ctx.fillRect(block.x, block.y, block.width, block.height);
+        if (block.isHovering) {
+            ctx.strokeStyle = "#9d4edd"; ctx.shadowBlur = 20; ctx.shadowColor = "#9d4edd"; ctx.lineWidth = 4;
+            ctx.strokeRect(block.x - 5, block.y - 5, block.width + 10, block.height + 10);
+            ctx.shadowBlur = 0;
+        }
+    });
 
     let currentImg = player.facing === 'left' ? jediLeftImg : jediRightImg;
     if (currentImg.complete && currentImg.naturalWidth !== 0) ctx.drawImage(currentImg, player.x, player.y, player.width, player.height);
