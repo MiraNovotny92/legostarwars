@@ -12,7 +12,6 @@
         <div id="start-screen" class="overlay">
             <h2>Lego Star Wars Explorer</h2>
             
-            <!-- Character Selector -->
             <p>1. Select Your Hero:</p>
             <div class="character-select">
                 <div class="char-card selected" onclick="selectCharacter('luke', this)">
@@ -33,7 +32,6 @@
                 </div>
             </div>
 
-            <!-- Mission Selector -->
             <p>2. Select Mission:</p>
             <div class="mission-select">
                 <button class="mission-btn selected" onclick="selectMission(1, this)">🗡️ 1. Find Lightsaber</button>
@@ -41,7 +39,6 @@
                 <button class="mission-btn" onclick="selectMission(3, this)">💚 3. Rescue Grogu</button>
             </div>
 
-            <!-- Difficulty Selector -->
             <p>3. Select Difficulty:</p>
             <div class="menu-buttons">
                 <button onclick="startGame(1)">Padawan (Easy)</button>
@@ -55,6 +52,11 @@
         <div id="win-screen" class="overlay" style="display: none;">
             <h2 style="color: #00ff00;">Mission Complete!</h2>
             <p id="win-message">The Force will be with you, always.</p>
+            <div id="win-stats" class="stats-box">
+                <p>⏱️ Time: <span id="final-time" style="color: #00bfff;">00:00.0</span></p>
+                <p>🟡 Studs: <span id="final-studs" style="color: #fca311;">0</span></p>
+                <p id="true-jedi-badge" style="color: #ffd700; display: none;">🌟 TRUE JEDI STATUS ACHIEVED! 🌟</p>
+            </div>
             <button onclick="location.reload()">Play Next Mission</button>
         </div>
 
@@ -65,10 +67,16 @@
 
         <!-- Dashboard -->
         <div id="dashboard">
-            <div id="score-display">Studs: <span id="score-text" style="color: #fca311;">0</span></div>
-            <div id="quest-status">
-                Objective: <span id="objective-text" style="color: #00bfff;">Find Lightsaber</span>
+            <div id="timer-display">⏱️ <span id="timer-text" style="color: #00bfff;">00:00.0</span></div>
+            
+            <!-- True Jedi Meter Bar -->
+            <div class="true-jedi-container">
+                <span class="tj-label">TRUE JEDI</span>
+                <div class="tj-bar"><div id="tj-fill"></div></div>
             </div>
+
+            <div id="score-display">Studs: <span id="score-text" style="color: #fca311;">0</span></div>
+            <button id="shield-buy-btn" onclick="buyShield()" class="shop-btn">🛡️ Shield (50🟡)</button>
             <button onclick="toggleFullscreen()" class="mini-fs-btn">📺</button>
         </div>
 
