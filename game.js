@@ -159,7 +159,6 @@ function update() {
     GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;
     GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;
 
-    // Moving Platform Update (Horizontal + Vertical Elevators)
     GAME.movingPlatforms.forEach(mp => {
         if (mp.isMoving) {
             if (mp.isVertical) {
@@ -200,7 +199,6 @@ function update() {
         }
     });
 
-    // Extended Saber Attack Slash Collision Hitbox (Matching 55px saber blade length)
     if (GAME.player.saberSwingTimer > 0) {
         let attackBoxX = GAME.player.facing === 'right' ? GAME.player.x + GAME.player.width : GAME.player.x - 65;
         let attackBox = { x: attackBoxX, y: GAME.player.y - 15, width: 65, height: GAME.player.height + 30 };
@@ -217,7 +215,6 @@ function update() {
         });
     }
 
-    // Elevator / Platform Player Carry Ride
     GAME.movingPlatforms.forEach(p => {
         let prevPlayerBottom = (GAME.player.y - GAME.player.dy) + GAME.player.height;
         if (GAME.player.x < p.x + p.width && GAME.player.x + GAME.player.width > p.x) {
@@ -338,6 +335,7 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
+// Guaranteed Fail-Safe Vector & Textured Platform Renderer
 function drawLegoPlatform(p) {
     if (p.isGround) {
         let img = ASSETS['ground'];
@@ -353,6 +351,7 @@ function drawLegoPlatform(p) {
             } catch (e) {}
         }
 
+        // Cartoon Ground Vector
         ctx.fillStyle = "#6e3f19";
         drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
         ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
@@ -363,6 +362,7 @@ function drawLegoPlatform(p) {
         return;
     }
 
+    // High-Tech Metallic Floating Lego Platform
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
     grad.addColorStop(1, "#1a252f");
@@ -386,7 +386,7 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Master Render Loop
+// Unbreakable Master Render Loop
 function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
@@ -460,7 +460,7 @@ function draw() {
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
         });
 
-        // Player Render & Longer Lightsaber Blade
+        // Player Render & Extended 55px Lightsaber Blade
         ctx.save();
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);
         ctx.scale(GAME.player.scaleX, GAME.player.scaleY);
@@ -481,7 +481,6 @@ function draw() {
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
         ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
 
-        // Extended Saber Swing Blade Animation (55px Blade)
         if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {
             ctx.save();
             let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;
@@ -492,7 +491,7 @@ function draw() {
 
             ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;
             ctx.fillStyle = currentChar.saberColor;
-            ctx.fillRect(0, -55, 7, 55); // Longer 55px Blade
+            ctx.fillRect(0, -55, 7, 55);
             ctx.shadowBlur = 0;
             ctx.restore();
         }
