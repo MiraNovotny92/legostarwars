@@ -15,10 +15,10 @@ const jediRightImg = new Image(); jediRightImg.src = "assets/jedi_right.png";
 const obiImg = new Image(); obiImg.src = "assets/obi.png";
 
 // Game State
-let gameState = "START"; // "START", "PLAYING", "WON"
+let gameState = "START"; 
 const gravity = 0.6;
 const friction = 0.8;
-let worldWidth = 3000; // Will be overwritten by generator
+let worldWidth = 3000; 
 const camera = { x: 0, y: 0 };
 let hasLightsaber = false;
 let deathMessageTimer = 0; 
@@ -33,29 +33,41 @@ let movingPlatforms = [];
 let jumpPads = [];
 let forceBlocks = [];
 let clouds = [];
+let trees = [];
+let crates = [];
 
 // --- PROCEDURAL LEVEL GENERATOR ---
 function buildRandomLevel(difficultyMultiplier) {
-    platforms = []; movingPlatforms = []; jumpPads = []; forceBlocks = []; clouds = [];
+    platforms = []; movingPlatforms = []; jumpPads = []; forceBlocks = []; clouds = []; trees = []; crates = [];
     let cursorX = 0;
 
-    // Helper functions for building
-    function addGround(width) { platforms.push({ x: cursorX, y: 550, width: width, height: 100, isMoving: false }); cursorX += width; }
+    // Generates ground and randomly adds trees and crates on it
+    function addGround(width) { 
+        platforms.push({ x: cursorX, y: 550, width: width, height: 100, isMoving: false }); 
+        
+        let itemsCount = Math.floor(width / 400); 
+        for(let j = 0; j < itemsCount; j++) {
+            let rX = cursorX + 100 + Math.random() * (width - 200);
+            if (Math.random() > 0.5) {
+                trees.push({ x: rX, y: 350, width: 30, height: 200 }); // Scenery trees
+            } else if (Math.random() > 0.3) {
+                crates.push({ x: rX, y: 500, width: 50, height: 50, color: "#95a5a6" }); // Solid crates
+            }
+        }
+        cursorX += width; 
+    }
+    
     function addPit(width) { cursorX += width; }
     function addPlatform(xOffset, y, width) { platforms.push({ x: cursorX + xOffset, y: y, width: width, height: 20, isMoving: false }); }
     
-    // 1. Safe start area for Obi-Wan
-    addGround(1500); 
+    addGround(1500); // Start area
 
-    // 2. Generate random chunks based on difficulty
-    // Easy = 5 obstacles, Medium = 10, Hard = 15
     let numberOfObstacles = difficultyMultiplier * 5; 
 
     for (let i = 0; i < numberOfObstacles; i++) {
         let randomChoice = Math.random();
         
         if (randomChoice < 0.33) {
-            // Chunk A: Moving Platform over a pit
             let pitSize = 300 + (difficultyMultiplier * 100);
             let platformSpeed = 1.5 + (difficultyMultiplier * 0.5);
             movingPlatforms.push({ x: cursorX, y: 450, width: 150, height: 20, dx: platformSpeed, minX: cursorX, maxX: cursorX + pitSize - 150, isMoving: true });
@@ -63,7 +75,6 @@ function buildRandomLevel(difficultyMultiplier) {
             addGround(800);
         } 
         else if (randomChoice < 0.66) {
-            // Chunk B: High Wall with Jump Pad
             jumpPads.push({ x: cursorX + 100, y: 530, width: 60, height: 20, color: "#00ffcc" });
             addPlatform(100, 200, 200); 
             addGround(300);
@@ -71,33 +82,28 @@ function buildRandomLevel(difficultyMultiplier) {
             addGround(800);
         } 
         else {
-            // Chunk C: Solid Force Block Obstacle
-            forceBlocks.push({ x: cursorX + 400, y: 450, width: 100, height: 100, color: "#9d4edd", isHovering: false });
+            // Massive Force Block (Taller so you can't jump over it!)
+            forceBlocks.push({ x: cursorX + 400, y: 300, width: 100, height: 250, baseY: 300, color: "#9d4edd", isHovering: false });
             addGround(1200);
         }
     }
 
-    // 3. Final stretch for the Lightsaber
-    addGround(1000); 
+    addGround(1000); // End area
     
-    // Set the world size and lightsaber position based on how long the generator ran
     worldWidth = cursorX;
     lightsaber.x = worldWidth - 600;
 
-    // Generate Clouds
     for(let i = 0; i < (worldWidth / 150); i++) { 
         clouds.push({ x: Math.random() * worldWidth, y: Math.random() * 250 + 20, width: Math.random() * 80 + 60, height: Math.random() * 40 + 30, parallax: Math.random() * 0.4 + 0.1 });
     }
 }
 
-// Function called by the HTML buttons
 function startGame(difficulty) {
     startScreen.style.display = "none";
     buildRandomLevel(difficulty);
     gameState = "PLAYING";
 }
 
-// Controls
 const keys = { ArrowLeft: false, ArrowRight: false, Space: false, F: false };
 window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft") keys.ArrowLeft = true;
@@ -115,11 +121,11 @@ window.addEventListener("keyup", (e) => {
 function resetPlayer() {
     player.x = 50; player.y = 400; player.dx = 0; player.dy = 0;
     deathMessageTimer = 180; 
-    forceBlocks.forEach(fb => fb.y = 450); 
+    forceBlocks.forEach(fb => fb.y = fb.baseY); 
 }
 
 function update() {
-    if (gameState !== "PLAYING") return; // Stop math if not playing
+    if (gameState !== "PLAYING") return; 
 
     if (keys.ArrowLeft) { player.dx -= 1.2; player.facing = 'left'; }
     if (keys.ArrowRight) { player.dx += 1.2; player.facing = 'right'; }
@@ -133,11 +139,11 @@ function update() {
         if (mp.x > mp.maxX || mp.x < mp.minX) mp.dx *= -1; 
     });
 
-    // Vertical Collision (Allows standing on Force Blocks too!)
-    const allSolids = platforms.concat(movingPlatforms).concat(forceBlocks);
+    // Vertical Collision includes ground, platforms, force blocks, AND crates
+    const allSolids = platforms.concat(movingPlatforms).concat(forceBlocks).concat(crates);
     allSolids.forEach(p => {
         if (player.x < p.x + p.width && player.x + player.width > p.x && player.y < p.y + p.height && player.y + player.height > p.y) {
-            if (player.dy > 0 && player.y + player.height - player.dy <= p.y + 15) { // +15 gives leniency
+            if (player.dy > 0 && player.y + player.height - player.dy <= p.y + 15) { 
                 player.grounded = true; player.dy = 0; player.y = p.y - player.height; 
                 if (p.isMoving) player.x += p.dx;
             }
@@ -153,18 +159,25 @@ function update() {
     if (player.y > 1200) resetPlayer();
     if (deathMessageTimer > 0) deathMessageTimer--;
 
-    // Force Block Logic (Horizontal blocking and lifting)
+    // Horizontal collision for solid crates
+    crates.forEach(crate => {
+        if (player.x < crate.x + crate.width && player.x + player.width > crate.x && player.y < crate.y + crate.height && player.y + player.height > crate.y + 10) {
+            if (player.dx > 0 && player.x < crate.x) { player.x = crate.x - player.width; player.dx = 0; } 
+            else if (player.dx < 0 && player.x > crate.x) { player.x = crate.x + crate.width; player.dx = 0; }
+        }
+    });
+
+    // Force Block Logic 
     forceBlocks.forEach(block => {
         let distanceToBlock = Math.abs((player.x + player.width/2) - (block.x + block.width/2));
-        if (keys.F && distanceToBlock < 350) {
+        if (keys.F && distanceToBlock < 400) { // Wider Force range
             block.y -= 4; block.isHovering = true;
-            if (block.y < 150) block.y = 150; 
+            if (block.y < 50) block.y = 50; // Lift high enough to walk under
         } else {
-            block.isHovering = false; block.y += 6; 
-            if (block.y > 450) block.y = 450; 
+            block.isHovering = false; block.y += 8; 
+            if (block.y > block.baseY) block.y = block.baseY; 
         }
 
-        // Horizontal push if walking into the side of the block
         if (player.x < block.x + block.width && player.x + player.width > block.x && player.y < block.y + block.height && player.y + player.height > block.y + 10) {
             if (player.dx > 0 && player.x < block.x) { player.x = block.x - player.width; player.dx = 0; } 
             else if (player.dx < 0 && player.x > block.x) { player.x = block.x + block.width; player.dx = 0; }
@@ -180,7 +193,7 @@ function update() {
     let distToObi = Math.abs(player.x - obi.x);
     if (distToObi < 150 && player.y > 400) { 
         if (hasLightsaber) {
-            gameState = "WON"; // WIN CONDITION TRIGGERED!
+            gameState = "WON"; 
             winScreen.style.display = "flex";
             dialogueBox.style.display = "none";
         } else {
@@ -199,7 +212,7 @@ function update() {
     if (camera.x > worldWidth - canvas.width) camera.x = worldWidth - canvas.width;
 }
 
-// --- MODERN RENDERING ---
+// --- RENDERING ---
 function drawLightsaber(x, y) {
     ctx.fillStyle = "#aaaaaa"; ctx.beginPath(); ctx.roundRect(x, y + 40, 10, 20, 3); ctx.fill();
     ctx.fillStyle = "#333333"; ctx.beginPath(); ctx.roundRect(x - 2, y + 45, 14, 4, 2); ctx.fill();
@@ -209,7 +222,6 @@ function drawLightsaber(x, y) {
 }
 
 function draw() {
-    // Beautiful Sky Gradient
     let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     skyGrad.addColorStop(0, "#1e3c72"); 
     skyGrad.addColorStop(1, "#2a5298");
@@ -218,7 +230,6 @@ function draw() {
     
     ctx.save(); ctx.translate(-camera.x, 0); 
 
-    // Round Fluffy Clouds
     ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
     clouds.forEach(cloud => {
         let px = cloud.x + (camera.x * cloud.parallax);
@@ -229,7 +240,18 @@ function draw() {
         ctx.fill();
     });
 
-    // Rounded Platforms
+    // Draw Trees
+    trees.forEach(tree => {
+        ctx.fillStyle = "#5c4033"; // Trunk
+        ctx.fillRect(tree.x, tree.y, tree.width, tree.height);
+        ctx.fillStyle = "#1e5631"; // Canopy
+        ctx.beginPath();
+        ctx.arc(tree.x + tree.width/2, tree.y, 60, 0, Math.PI*2);
+        ctx.arc(tree.x + tree.width/2 - 30, tree.y + 40, 50, 0, Math.PI*2);
+        ctx.arc(tree.x + tree.width/2 + 30, tree.y + 40, 50, 0, Math.PI*2);
+        ctx.fill();
+    });
+
     const allPlatforms = platforms.concat(movingPlatforms);
     allPlatforms.forEach(p => {
         let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
@@ -237,7 +259,7 @@ function draw() {
         
         ctx.fillStyle = grad; 
         ctx.beginPath(); 
-        ctx.roundRect(p.x, p.y, p.width, p.height, p.isMoving ? 10 : [10, 10, 0, 0]); // Rounded top corners
+        ctx.roundRect(p.x, p.y, p.width, p.height, p.isMoving ? 10 : [10, 10, 0, 0]); 
         ctx.fill();
         
         ctx.fillStyle = p.isMoving ? "#ff9900" : "#00bfff"; 
@@ -246,7 +268,16 @@ function draw() {
         ctx.fill();
     });
 
-    // Rounded Jump Pads
+    // Draw Crates
+    crates.forEach(crate => {
+        ctx.fillStyle = crate.color; 
+        ctx.beginPath(); 
+        ctx.roundRect(crate.x, crate.y, crate.width, crate.height, 5); 
+        ctx.fill();
+        ctx.strokeStyle = "#7f8c8d"; ctx.lineWidth = 2;
+        ctx.strokeRect(crate.x + 5, crate.y + 5, crate.width - 10, crate.height - 10);
+    });
+
     jumpPads.forEach(pad => {
         ctx.fillStyle = pad.color; 
         ctx.beginPath(); 
@@ -257,7 +288,6 @@ function draw() {
     if (obiImg.complete && obiImg.naturalWidth !== 0) ctx.drawImage(obiImg, obi.x, obi.y, obi.width, obi.height);
     if (!hasLightsaber) drawLightsaber(lightsaber.x, lightsaber.y + Math.sin(Date.now() / 150) * 10);
 
-    // Rounded Force Blocks with better glow
     forceBlocks.forEach(block => {
         ctx.fillStyle = block.color; 
         ctx.beginPath(); 
