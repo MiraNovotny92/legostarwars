@@ -50,12 +50,12 @@
 
         <!-- Win Screen Overlay -->
         <div id="win-screen" class="overlay" style="display: none;">
-            <h2 style="color: #00ff00;">Mission Complete!</h2>
+            <h2 style="color: #00ff00; text-shadow: 0 0 20px #00ff00;">🎉 MISSION COMPLETE! 🎉</h2>
             <p id="win-message">The Force will be with you, always.</p>
             <div id="win-stats" class="stats-box">
                 <p>⏱️ Time: <span id="final-time" style="color: #00bfff;">00:00.0</span></p>
                 <p>🟡 Studs: <span id="final-studs" style="color: #fca311;">0</span></p>
-                <p id="true-jedi-badge" style="color: #ffd700; display: none;">🌟 TRUE JEDI STATUS ACHIEVED! 🌟</p>
+                <p id="true-jedi-badge" style="color: #ffd700; display: none; font-size: 18px;">🌟 TRUE JEDI STATUS ACHIEVED! 🌟</p>
             </div>
             <button onclick="location.reload()">Play Next Mission</button>
         </div>
@@ -69,7 +69,6 @@
         <div id="dashboard">
             <div id="timer-display">⏱️ <span id="timer-text" style="color: #00bfff;">00:00.0</span></div>
             
-            <!-- True Jedi Meter Bar -->
             <div class="true-jedi-container">
                 <span class="tj-label">TRUE JEDI</span>
                 <div class="tj-bar"><div id="tj-fill"></div></div>
@@ -77,6 +76,7 @@
 
             <div id="score-display">Studs: <span id="score-text" style="color: #fca311;">0</span></div>
             <button id="shield-buy-btn" onclick="buyShield()" class="shop-btn">🛡️ Shield (50🟡)</button>
+            <button id="mute-btn" onclick="toggleMute()" class="mini-fs-btn">🔊 Sound On</button>
             <button onclick="toggleFullscreen()" class="mini-fs-btn">📺</button>
         </div>
 
@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Modular Game Scripts -->
     <script src="js/audio.js"></script>
     <script src="js/entities.js"></script>
     <script src="js/levels.js"></script>
