@@ -42,7 +42,7 @@ function playSound(type) {
         gain.gain.setValueAtTime(0.12, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
         osc.start(); osc.stop(now + 0.12);
     } else if (type === 'slash') {
-        // Authentic Dual-Oscillator Star Wars Lightsaber Whoosh & Hum
+        // Dual-Oscillator Lightsaber Whoosh & Hum
         const osc1 = audioCtx.createOscillator(); const gain1 = audioCtx.createGain();
         osc1.type = 'sawtooth';
         osc1.frequency.setValueAtTime(480, now);
