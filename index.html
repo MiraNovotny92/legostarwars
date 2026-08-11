@@ -2,20 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lego Star Wars Explorer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Lego Star Wars Explorer</h1>
-    
     <div id="game-container">
         <!-- Start Screen Overlay -->
         <div id="start-screen" class="overlay">
-            <h2>Select Difficulty</h2>
-            <button onclick="startGame(1)">Padawan (Easy)</button>
-            <button onclick="startGame(2)">Jedi Knight (Medium)</button>
-            <button onclick="startGame(3)">Jedi Master (Hard)</button>
+            <h2>Lego Star Wars Explorer</h2>
+            <p>Help Jedi find Obi-Wan's Lost Lightsaber!</p>
+            <div class="menu-buttons">
+                <button onclick="startGame(1)">Padawan (Easy)</button>
+                <button onclick="startGame(2)">Jedi Knight (Medium)</button>
+                <button onclick="startGame(3)">Jedi Master (Hard)</button>
+            </div>
+            <button id="fullscreen-btn" onclick="toggleFullscreen()" style="background-color: #fca311;">📺 Toggle Fullscreen</button>
         </div>
 
         <!-- Win Screen Overlay -->
@@ -30,21 +32,21 @@
             <span id="dialogue-text"></span>
         </div>
 
-        <!-- Dashboard with Score -->
+        <!-- Dashboard -->
         <div id="dashboard">
-            <div id="controls"><strong>Controls:</strong> ⬅️ ➡️ Move | SPACE Jump | Hold 'F' Force</div>
             <div id="score-display">Studs: <span id="score-text" style="color: #fca311;">0</span></div>
             <div id="quest-status">
                 Lightsaber: 
                 <span id="saber-text" style="color: #ff4d4d;">Missing</span>
                 <img id="saber-icon" src="assets/saber.png" style="display: none; height: 24px; vertical-align: middle;">
             </div>
+            <button onclick="toggleFullscreen()" class="mini-fs-btn">📺</button>
         </div>
 
-        <!-- Widescreen Canvas -->
+        <!-- Main Canvas -->
         <canvas id="gameCanvas" width="1200" height="600"></canvas>
 
-        <!-- Touch Controls for Mobile/Tablets -->
+        <!-- Touch Controls HUD -->
         <div id="touch-controls">
             <div class="touch-group">
                 <button id="btn-left" class="touch-btn">⬅️</button>
