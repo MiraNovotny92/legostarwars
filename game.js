@@ -8,7 +8,6 @@ const CHARACTERS = {
     vader: { name: "Darth Vader", color: "#e74c3c", saberColor: "#ff4d4d" }
 };
 
-// Global Handlers
 window.selectCharacter = function(key, el) {
     GAME.selectedCharKey = key;
     document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
@@ -94,7 +93,6 @@ function triggerWin(message) {
     playSound('win');
 }
 
-// Input Controllers
 const keys = { ArrowLeft: false, ArrowRight: false, Space: false, F: false, D: false };
 window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft") keys.ArrowLeft = true;
@@ -106,7 +104,7 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "KeyF") keys.F = true;
     if (e.code === "KeyD") {
         if (!keys.D && GAME.player.saberSwingTimer <= 0) {
-            GAME.player.saberSwingTimer = 15; // 15 frames swing animation
+            GAME.player.saberSwingTimer = 15;
             playSound('slash');
         }
         keys.D = true;
@@ -140,7 +138,6 @@ function resetPlayer() {
     GAME.forceContainers.forEach(fc => fc.y = fc.baseY);
 }
 
-// Update Loop
 function update() {
     if (GAME.state !== "PLAYING") return;
 
@@ -169,7 +166,6 @@ function update() {
         }
     });
 
-    // Solid Collisions (Includes Laser Gates)
     const solidObjects = GAME.platforms.filter(p => p.isGround)
         .concat(GAME.crates)
         .concat(GAME.forceContainers)
@@ -198,7 +194,6 @@ function update() {
         }
     });
 
-    // Lightsaber Slash Breaking Laser Gates
     if (GAME.player.saberSwingTimer > 0) {
         let attackBoxX = GAME.player.facing === 'right' ? GAME.player.x + GAME.player.width : GAME.player.x - 40;
         let attackBox = { x: attackBoxX, y: GAME.player.y, width: 40, height: GAME.player.height };
@@ -332,21 +327,24 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
-// Sci-Fi Metallic Floating Platforms Renderer
 function drawLegoPlatform(p) {
     if (p.isGround) {
-        // Ground uses PNG texture or organic gradient
         let img = ASSETS['ground'];
         if (img && img.complete && img.naturalWidth !== 0) {
-            let pattern = ctx.createPattern(img, 'repeat');
-            ctx.fillStyle = pattern;
-            drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-            return;
+            try {
+                let pattern = ctx.createPattern(img, 'repeat');
+                if (pattern) {
+                    ctx.fillStyle = pattern;
+                    drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
+                    ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+                    return;
+                }
+            } catch (e) {
+                // Fail-safe catch for pattern errors
+            }
         }
     }
 
-    // High-Tech Metallic Sci-Fi Platform
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
     grad.addColorStop(1, "#1a252f");
@@ -355,11 +353,9 @@ function drawLegoPlatform(p) {
     drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
 
-    // LED Strip Accent
     ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
     ctx.fillRect(p.x, p.y, p.width, 3);
 
-    // 3D Lego Stud Highlights
     let studSpacing = 22;
     let studCount = Math.floor(p.width / studSpacing);
     for (let i = 0; i < studCount; i++) {
@@ -372,7 +368,7 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Main Render Loop
+// Render Loop
 function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
@@ -383,107 +379,111 @@ function draw() {
     let shakeY = (Math.random() - 0.5) * GAME.camera.shake;
     ctx.translate(-GAME.camera.x + shakeX, shakeY);
 
-    GAME.stars.forEach(s => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
-        ctx.fillRect(s.x, s.y, s.size, s.size);
-    });
+    // Render Scenery
+    try {
+        GAME.stars.forEach(s => {
+            ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+            ctx.fillRect(s.x, s.y, s.size, s.size);
+        });
 
-    // Buildings & Scenery
-    GAME.buildings.forEach(b => drawBuilding(ctx, b));
-    GAME.vaporators.forEach(v => drawVaporator(v));
+        GAME.buildings.forEach(b => drawBuilding(ctx, b));
+        GAME.vaporators.forEach(v => drawVaporator(v));
 
-    GAME.waterPits.forEach(wp => {
-        ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
-        ctx.fillRect(wp.x, wp.y, wp.width, 100);
-        ctx.fillStyle = "#54a0ff";
-        ctx.fillRect(wp.x, wp.y + Math.sin(Date.now()/200)*3, wp.width, 6);
-        ctx.shadowBlur = 0;
-    });
-
-    GAME.platforms.concat(GAME.movingPlatforms).forEach(p => drawLegoPlatform(p));
-
-    GAME.forceContainers.forEach(fc => drawForceObject(ctx, fc));
-    GAME.crates.forEach(c => drawForceObject(ctx, c));
-    GAME.laserGates.forEach(g => drawLaserGate(ctx, g));
-    
-    GAME.studs.forEach(s => {
-        if (!s.collected) {
-            ctx.shadowBlur = 10; ctx.shadowColor = s.color;
-            ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s.x - 2, s.y - 2, 2.5, 0, Math.PI*2); ctx.fill();
+        GAME.waterPits.forEach(wp => {
+            ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
+            ctx.fillRect(wp.x, wp.y, wp.width, 100);
+            ctx.fillStyle = "#54a0ff";
+            ctx.fillRect(wp.x, wp.y + Math.sin(Date.now()/200)*3, wp.width, 6);
             ctx.shadowBlur = 0;
-        }
-    });
+        });
 
-    GAME.kyberCrystals.forEach(kc => {
-        if (!kc.collected) {
-            ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
-            ctx.fillStyle = "#00bfff"; ctx.beginPath();
-            ctx.moveTo(kc.x, kc.y); ctx.lineTo(kc.x + 10, kc.y - 15);
-            ctx.lineTo(kc.x + 20, kc.y); ctx.lineTo(kc.x + 10, kc.y + 15); ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-    });
+        GAME.platforms.concat(GAME.movingPlatforms).forEach(p => drawLegoPlatform(p));
 
-    GAME.droids.forEach(d => drawDroid(ctx, d));
-    GAME.npcs.forEach(n => drawNPC(ctx, n));
-    GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
-
-    if (GAME.currentMission === 1) {
-        if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth !== 0) {
-            ctx.drawImage(ASSETS['obi'], GAME.obi.x, GAME.obi.y, GAME.obi.width, GAME.obi.height);
-        }
-        if (!GAME.hasLightsaber) {
-            ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 15; ctx.shadowColor = "#2ecc71";
-            ctx.fillRect(GAME.lightsaber.x, GAME.lightsaber.y + Math.sin(Date.now() / 150) * 8, GAME.lightsaber.width, GAME.lightsaber.height);
-            ctx.shadowBlur = 0;
-        }
-    }
-
-    if (GAME.currentMission === 3) drawGrogu(ctx, GAME.worldWidth - 400, 480);
-
-    GAME.particles.forEach(p => {
-        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-    });
-
-    // Player & Animated Lightsaber Slash Swing
-    ctx.save();
-    ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);
-    ctx.scale(GAME.player.scaleX, GAME.player.scaleY);
-
-    if (GAME.hasShield) {
-        ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
-        ctx.beginPath(); ctx.arc(0, -GAME.player.height/2, GAME.player.width/1.2, 0, Math.PI*2); ctx.stroke();
-        ctx.shadowBlur = 0;
-    }
-
-    let currentChar = CHARACTERS[GAME.selectedCharKey];
-    ctx.fillStyle = currentChar.color;
-    ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
-    ctx.fillStyle = "#f1c40f";
-    ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#2c3e50";
-    ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);
-    ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
-    ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
-
-    // Animated Lightsaber Slash Arc Animation
-    if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {
-        ctx.save();
-        let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;
-        let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));
+        GAME.forceContainers.forEach(fc => drawForceObject(ctx, fc));
+        GAME.crates.forEach(c => drawForceObject(ctx, c));
+        GAME.laserGates.forEach(g => drawLaserGate(ctx, g));
         
-        ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);
-        ctx.rotate(swingAngle);
+        GAME.studs.forEach(s => {
+            if (!s.collected) {
+                ctx.shadowBlur = 10; ctx.shadowColor = s.color;
+                ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s.x - 2, s.y - 2, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        });
 
-        ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;
-        ctx.fillStyle = currentChar.saberColor;
-        ctx.fillRect(0, -35, 6, 35); // Lightsaber Blade
-        ctx.shadowBlur = 0;
+        GAME.kyberCrystals.forEach(kc => {
+            if (!kc.collected) {
+                ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
+                ctx.fillStyle = "#00bfff"; ctx.beginPath();
+                ctx.moveTo(kc.x, kc.y); ctx.lineTo(kc.x + 10, kc.y - 15);
+                ctx.lineTo(kc.x + 20, kc.y); ctx.lineTo(kc.x + 10, kc.y + 15); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        });
+
+        GAME.droids.forEach(d => drawDroid(ctx, d));
+        GAME.npcs.forEach(n => drawNPC(ctx, n));
+        GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
+
+        if (GAME.currentMission === 1) {
+            if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth !== 0) {
+                ctx.drawImage(ASSETS['obi'], GAME.obi.x, GAME.obi.y, GAME.obi.width, GAME.obi.height);
+            }
+            if (!GAME.hasLightsaber) {
+                ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 15; ctx.shadowColor = "#2ecc71";
+                ctx.fillRect(GAME.lightsaber.x, GAME.lightsaber.y + Math.sin(Date.now() / 150) * 8, GAME.lightsaber.width, GAME.lightsaber.height);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        if (GAME.currentMission === 3) drawGrogu(ctx, GAME.worldWidth - 400, 480);
+
+        GAME.particles.forEach(p => {
+            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Player & Lightsaber Slash Render
+        ctx.save();
+        ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);
+        ctx.scale(GAME.player.scaleX, GAME.player.scaleY);
+
+        if (GAME.hasShield) {
+            ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
+            ctx.beginPath(); ctx.arc(0, -GAME.player.height/2, GAME.player.width/1.2, 0, Math.PI*2); ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        let currentChar = CHARACTERS[GAME.selectedCharKey];
+        ctx.fillStyle = currentChar.color;
+        ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
+        ctx.fillStyle = "#f1c40f";
+        ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#2c3e50";
+        ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
+        ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
+
+        if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {
+            ctx.save();
+            let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;
+            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));
+            
+            ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);
+            ctx.rotate(swingAngle);
+
+            ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;
+            ctx.fillStyle = currentChar.saberColor;
+            ctx.fillRect(0, -35, 6, 35);
+            ctx.shadowBlur = 0;
+            ctx.restore();
+        }
+
         ctx.restore();
+    } catch (e) {
+        // Guard against any single entity render error
     }
 
-    ctx.restore();
     ctx.restore();
 
     if (GAME.deathMessageTimer > 0) {
