@@ -95,7 +95,7 @@ function triggerWin(message) {
 }
 
 // Input Controllers
-const keys = { ArrowLeft: false, ArrowRight: false, Space: false, F: false };
+const keys = { ArrowLeft: false, ArrowRight: false, Space: false, F: false, D: false };
 window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft") keys.ArrowLeft = true;
     if (e.code === "ArrowRight") keys.ArrowRight = true;
@@ -104,12 +104,20 @@ window.addEventListener("keydown", (e) => {
         keys.Space = true;
     }
     if (e.code === "KeyF") keys.F = true;
+    if (e.code === "KeyD") {
+        if (!keys.D && GAME.player.saberSwingTimer <= 0) {
+            GAME.player.saberSwingTimer = 15; // 15 frames swing animation
+            playSound('slash');
+        }
+        keys.D = true;
+    }
 });
 window.addEventListener("keyup", (e) => {
     if (e.code === "ArrowLeft") keys.ArrowLeft = false;
     if (e.code === "ArrowRight") keys.ArrowRight = false;
     if (e.code === "Space") keys.Space = false;
     if (e.code === "KeyF") keys.F = false;
+    if (e.code === "KeyD") keys.D = false;
 });
 
 function bindTouch(id, keyName) {
@@ -117,12 +125,13 @@ function bindTouch(id, keyName) {
     if (!btn) return;
     btn.addEventListener("touchstart", (e) => {
         e.preventDefault(); keys[keyName] = true;
-        if(keyName==='Space' && GAME.player.grounded) { playSound('jump'); GAME.player.scaleX = 0.7; GAME.player.scaleY = 1.3; }
+        if (keyName === 'Space' && GAME.player.grounded) { playSound('jump'); GAME.player.scaleX = 0.7; GAME.player.scaleY = 1.3; }
+        if (keyName === 'D' && GAME.player.saberSwingTimer <= 0) { GAME.player.saberSwingTimer = 15; playSound('slash'); }
     });
     btn.addEventListener("touchend", (e) => { e.preventDefault(); keys[keyName] = false; });
 }
 bindTouch("btn-left", "ArrowLeft"); bindTouch("btn-right", "ArrowRight");
-bindTouch("btn-jump", "Space"); bindTouch("btn-force", "F");
+bindTouch("btn-jump", "Space"); bindTouch("btn-force", "F"); bindTouch("btn-attack", "D");
 
 function resetPlayer() {
     if (GAME.hasShield) return;
@@ -131,7 +140,7 @@ function resetPlayer() {
     GAME.forceContainers.forEach(fc => fc.y = fc.baseY);
 }
 
-// Physics & State Loop
+// Update Loop
 function update() {
     if (GAME.state !== "PLAYING") return;
 
@@ -143,6 +152,7 @@ function update() {
     if (timerText) timerText.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms}`;
 
     if (GAME.shieldTimer > 0) GAME.shieldTimer--; else GAME.hasShield = false;
+    if (GAME.player.saberSwingTimer > 0) GAME.player.saberSwingTimer--;
 
     if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }
     if (keys.ArrowRight) { GAME.player.dx += 1.2; GAME.player.facing = 'right'; }
@@ -159,7 +169,11 @@ function update() {
         }
     });
 
-    const solidObjects = GAME.platforms.filter(p => p.isGround).concat(GAME.crates).concat(GAME.forceContainers);
+    // Solid Collisions (Includes Laser Gates)
+    const solidObjects = GAME.platforms.filter(p => p.isGround)
+        .concat(GAME.crates)
+        .concat(GAME.forceContainers)
+        .concat(GAME.laserGates.filter(g => !g.destroyed));
 
     GAME.player.x += GAME.player.dx;
     solidObjects.forEach(s => {
@@ -183,6 +197,23 @@ function update() {
             }
         }
     });
+
+    // Lightsaber Slash Breaking Laser Gates
+    if (GAME.player.saberSwingTimer > 0) {
+        let attackBoxX = GAME.player.facing === 'right' ? GAME.player.x + GAME.player.width : GAME.player.x - 40;
+        let attackBox = { x: attackBoxX, y: GAME.player.y, width: 40, height: GAME.player.height };
+
+        GAME.laserGates.forEach(gate => {
+            if (!gate.destroyed && attackBox.x < gate.x + gate.width && attackBox.x + attackBox.width > gate.x && attackBox.y < gate.y + gate.height && attackBox.y + attackBox.height > gate.y) {
+                gate.destroyed = true;
+                playSound('gateBreak');
+                addParticles(gate.x + 10, gate.y + gate.height/2, "#ff0055", 25);
+                GAME.score += 20;
+                const scoreText = document.getElementById("score-text");
+                if (scoreText) scoreText.innerText = GAME.score;
+            }
+        });
+    }
 
     GAME.movingPlatforms.forEach(p => {
         let prevPlayerBottom = (GAME.player.y - GAME.player.dy) + GAME.player.height;
@@ -301,54 +332,47 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
+// Sci-Fi Metallic Floating Platforms Renderer
 function drawLegoPlatform(p) {
-    let img = ASSETS['ground'];
-
-    if (img && img.complete && img.naturalWidth !== 0) {
-        let pattern = ctx.createPattern(img, 'repeat');
-        ctx.fillStyle = pattern;
-        drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-    } else {
-        let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
-        grad.addColorStop(0, p.isMoving ? "#e67e22" : "#2ecc71");
-        grad.addColorStop(0.25, "#2c3e50");
-        grad.addColorStop(1, "#1a252f");
-        
-        ctx.fillStyle = grad;
-        drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3.5; ctx.stroke();
-
-        let studSpacing = 22;
-        let studCount = Math.floor(p.width / studSpacing);
-        for (let i = 0; i < studCount; i++) {
-            let sx = p.x + (i * studSpacing) + 11;
-            let sy = p.y - 4;
-            ctx.fillStyle = p.isMoving ? "#f39c12" : "#27ae60";
-            ctx.fillRect(sx - 5, sy, 10, 4);
-            ctx.fillStyle = "rgba(255,255,255,0.5)";
-            ctx.fillRect(sx - 5, sy, 10, 1);
+    if (p.isGround) {
+        // Ground uses PNG texture or organic gradient
+        let img = ASSETS['ground'];
+        if (img && img.complete && img.naturalWidth !== 0) {
+            let pattern = ctx.createPattern(img, 'repeat');
+            ctx.fillStyle = pattern;
+            drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+            return;
         }
     }
-}
 
-function drawVaporator(v) {
-    let img = ASSETS['tree'];
-    if (img && img.complete && img.naturalWidth !== 0) {
-        ctx.drawImage(img, v.x - 20, v.y, v.width + 40, v.height);
-    } else {
-        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(v.x + 10, v.y + 30, 4, v.height - 30);
-        ctx.fillStyle = "#bdc3c7";
-        ctx.fillRect(v.x + 2, v.y + 40, 20, 8);
-        ctx.fillRect(v.x + 4, v.y + 70, 16, 8);
-        ctx.fillStyle = "#34495e"; ctx.fillRect(v.x + 6, v.y, 12, 30);
-        ctx.shadowBlur = 12; ctx.shadowColor = "#00bfff";
-        ctx.fillStyle = "#00bfff"; ctx.fillRect(v.x + 8, v.y + 10, 8, 10);
-        ctx.shadowBlur = 0;
+    // High-Tech Metallic Sci-Fi Platform
+    let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+    grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
+    grad.addColorStop(1, "#1a252f");
+    
+    ctx.fillStyle = grad;
+    drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+
+    // LED Strip Accent
+    ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
+    ctx.fillRect(p.x, p.y, p.width, 3);
+
+    // 3D Lego Stud Highlights
+    let studSpacing = 22;
+    let studCount = Math.floor(p.width / studSpacing);
+    for (let i = 0; i < studCount; i++) {
+        let sx = p.x + (i * studSpacing) + 11;
+        let sy = p.y - 4;
+        ctx.fillStyle = p.isMoving ? "#d35400" : "#0097e6";
+        ctx.fillRect(sx - 5, sy, 10, 4);
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.fillRect(sx - 5, sy, 10, 1);
     }
 }
 
-// Render Pipeline
+// Main Render Loop
 function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
@@ -364,6 +388,10 @@ function draw() {
         ctx.fillRect(s.x, s.y, s.size, s.size);
     });
 
+    // Buildings & Scenery
+    GAME.buildings.forEach(b => drawBuilding(ctx, b));
+    GAME.vaporators.forEach(v => drawVaporator(v));
+
     GAME.waterPits.forEach(wp => {
         ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
         ctx.fillRect(wp.x, wp.y, wp.width, 100);
@@ -372,11 +400,11 @@ function draw() {
         ctx.shadowBlur = 0;
     });
 
-    GAME.vaporators.forEach(v => drawVaporator(v));
     GAME.platforms.concat(GAME.movingPlatforms).forEach(p => drawLegoPlatform(p));
 
     GAME.forceContainers.forEach(fc => drawForceObject(ctx, fc));
     GAME.crates.forEach(c => drawForceObject(ctx, c));
+    GAME.laserGates.forEach(g => drawLaserGate(ctx, g));
     
     GAME.studs.forEach(s => {
         if (!s.collected) {
@@ -398,6 +426,7 @@ function draw() {
     });
 
     GAME.droids.forEach(d => drawDroid(ctx, d));
+    GAME.npcs.forEach(n => drawNPC(ctx, n));
     GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
 
     if (GAME.currentMission === 1) {
@@ -417,6 +446,7 @@ function draw() {
         ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
     });
 
+    // Player & Animated Lightsaber Slash Swing
     ctx.save();
     ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);
     ctx.scale(GAME.player.scaleX, GAME.player.scaleY);
@@ -436,6 +466,22 @@ function draw() {
     ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);
     ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
     ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
+
+    // Animated Lightsaber Slash Arc Animation
+    if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {
+        ctx.save();
+        let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;
+        let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));
+        
+        ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);
+        ctx.rotate(swingAngle);
+
+        ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;
+        ctx.fillStyle = currentChar.saberColor;
+        ctx.fillRect(0, -35, 6, 35); // Lightsaber Blade
+        ctx.shadowBlur = 0;
+        ctx.restore();
+    }
 
     ctx.restore();
     ctx.restore();
