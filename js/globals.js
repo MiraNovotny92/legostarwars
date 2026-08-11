@@ -22,7 +22,7 @@ window.GAME = {
         dx: 0, dy: 0, speed: 5, jumpPower: -13.5, 
         grounded: false, facing: 'right',
         scaleX: 1, scaleY: 1,
-        saberSwingTimer: 0, isAttacking: false
+        saberSwingTimer: 0
     },
     obi: { x: 300, y: 490, width: 50, height: 50 },
     lightsaber: { x: 2000, y: 480, width: 12, height: 60 },
@@ -44,12 +44,17 @@ window.GAME = {
     npcs: []
 };
 
-// Fail-Safe Drawing Helper
+// Fail-Safe Drawing Helper (Guarantees zero API exceptions on any browser)
 function drawRoundedRect(ctx, x, y, width, height, radius = 6) {
+    let r = typeof radius === 'number' ? radius : 6;
     ctx.beginPath();
-    if (ctx.roundRect) {
-        ctx.roundRect(x, y, width, height, radius);
-    } else {
+    try {
+        if (ctx.roundRect) {
+            ctx.roundRect(x, y, width, height, r);
+        } else {
+            ctx.rect(x, y, width, height);
+        }
+    } catch (e) {
         ctx.rect(x, y, width, height);
     }
     ctx.fill();
