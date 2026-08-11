@@ -335,34 +335,42 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
-// Guaranteed Fail-Safe Vector & Textured Platform Renderer
+// Guaranteed Fail-Safe Platform Renderer
 function drawLegoPlatform(p) {
     if (p.isGround) {
+        let drawn = false;
         let img = ASSETS['ground'];
         if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
             try {
+                ctx.save();
                 let pattern = ctx.createPattern(img, 'repeat');
                 if (pattern) {
                     ctx.fillStyle = pattern;
                     drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
                     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-                    return;
+                    ctx.restore();
+                    drawn = true;
+                } else {
+                    ctx.restore();
                 }
-            } catch (e) {}
+            } catch (e) {
+                ctx.restore();
+                drawn = false;
+            }
         }
 
-        // Cartoon Ground Vector
-        ctx.fillStyle = "#6e3f19";
-        drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-        
-        ctx.fillStyle = "#2ecc71";
-        ctx.fillRect(p.x, p.y, p.width, 10);
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);
+        if (!drawn) {
+            ctx.fillStyle = "#6e3f19";
+            drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+            
+            ctx.fillStyle = "#2ecc71";
+            ctx.fillRect(p.x, p.y, p.width, 10);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);
+        }
         return;
     }
 
-    // High-Tech Metallic Floating Lego Platform
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
     grad.addColorStop(1, "#1a252f");
@@ -386,7 +394,7 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Unbreakable Master Render Loop
+// Master Render Pipeline
 function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
@@ -508,6 +516,10 @@ function draw() {
 }
 
 function gameLoop() {
-    update(); draw(); requestAnimationFrame(gameLoop);
+    try {
+        update();
+        draw();
+    } catch(e) {}
+    requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
