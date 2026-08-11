@@ -7,9 +7,35 @@ body {
     padding: 20px;
 }
 
-canvas {
+#game-container {
+    display: inline-block;
+    position: relative;
     background-color: #16213e;
     border: 5px solid #0f3460;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+}
+
+canvas {
+    display: block; /* Removes weird gaps below canvas */
+}
+
+#dashboard {
+    display: flex;
+    justify-content: space-between;
+    background-color: #0f3460;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border-bottom: 2px solid #1a1a2e;
+}
+
+#dialogue-box {
+    background-color: rgba(0, 50, 100, 0.95);
+    border-top: 3px solid #00bfff;
+    padding: 15px;
+    color: white;
+    font-size: 18px;
+    text-align: left;
+    min-height: 50px;
 }
