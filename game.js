@@ -40,7 +40,7 @@ function selectMission(mId, el) {
     el.classList.add('selected');
 }
 
-// Game Physics State
+// Physics & Game Engine State
 let gameState = "START";
 const gravity = 0.65;
 const friction = 0.82;
@@ -80,7 +80,7 @@ function toggleFullscreen() {
 function buyShield() {
     if (score >= 50) {
         score -= 50; scoreText.innerText = score;
-        hasShield = true; shieldTimer = 300; // 5 Seconds Shield
+        hasShield = true; shieldTimer = 300;
         playSound('shield'); addParticles(player.x, player.y, "#00bfff", 15);
     }
 }
@@ -89,10 +89,28 @@ function addParticles(x, y, color, count = 5) {
     for (let i = 0; i < count; i++) {
         particles.push({
             x: x, y: y,
-            dx: (Math.random() - 0.5) * 6, dy: (Math.random() - 0.5) * 6 - 2,
-            size: Math.random() * 5 + 3, color: color, life: 25
+            dx: (Math.random() - 0.5) * 8, dy: (Math.random() - 0.5) * 8 - 2,
+            size: Math.random() * 6 + 3, color: color, life: 30
         });
     }
+}
+
+function triggerWin(message) {
+    gameState = "WON";
+    let formattedTime = timerText.innerText;
+    winMessage.innerText = message;
+    finalTime.innerText = formattedTime;
+    finalStuds.innerText = score;
+    if (score >= 100) trueJediBadge.style.display = "block";
+    else trueJediBadge.style.display = "none";
+
+    // Victory Firework Confetti Burst!
+    for(let i = 0; i < 150; i++) {
+        addParticles(camera.x + 600, 200, ["#ffd700", "#00bfff", "#ff007f", "#2ecc71"][Math.floor(Math.random()*4)], 1);
+    }
+
+    winScreen.style.display = "flex";
+    playSound('win');
 }
 
 function startGame(difficulty) {
@@ -104,6 +122,7 @@ function startGame(difficulty) {
     startTime = Date.now();
     
     buildMissionLevel(difficulty);
+    startBackgroundMusic();
     gameState = "PLAYING";
 }
 
@@ -137,29 +156,16 @@ bindTouch("btn-left", "ArrowLeft"); bindTouch("btn-right", "ArrowRight");
 bindTouch("btn-jump", "Space"); bindTouch("btn-force", "F");
 
 function resetPlayer() {
-    if (hasShield) return; // Invincible with shield!
+    if (hasShield) return;
     player.x = lastSafeX; player.y = 300; player.dx = 0; player.dy = 0;
     deathMessageTimer = 90; camera.shake = 12;
     forceContainers.forEach(fc => fc.y = fc.baseY);
 }
 
-function triggerWin(message) {
-    gameState = "WON";
-    let formattedTime = timerText.innerText;
-    winMessage.innerText = message;
-    finalTime.innerText = formattedTime;
-    finalStuds.innerText = score;
-    if (score >= 100) trueJediBadge.style.display = "block";
-    else trueJediBadge.style.display = "none";
-    winScreen.style.display = "flex";
-    playSound('win');
-}
-
-// Update Engine
+// Update Loop
 function update() {
     if (gameState !== "PLAYING") return;
 
-    // Live Timer Engine
     elapsedTime = Date.now() - startTime;
     let mins = Math.floor(elapsedTime / 60000);
     let secs = Math.floor((elapsedTime % 60000) / 1000);
@@ -313,9 +319,43 @@ function update() {
     if (camera.shake > 0) camera.shake *= 0.88;
 }
 
+function drawLegoPlatform(p) {
+    let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
+    grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
+    grad.addColorStop(1, "#1e272e");
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.roundRect(p.x, p.y, p.width, p.height, 4); ctx.fill();
+
+    ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";
+    ctx.fillRect(p.x, p.y, p.width, 3);
+
+    let studSpacing = 22;
+    let studCount = Math.floor(p.width / studSpacing);
+    for (let i = 0; i < studCount; i++) {
+        let sx = p.x + (i * studSpacing) + 11;
+        let sy = p.y - 4;
+        ctx.fillStyle = p.isMoving ? "#d35400" : "#0097e6";
+        ctx.fillRect(sx - 5, sy, 10, 4);
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.fillRect(sx - 5, sy, 10, 1);
+    }
+}
+
+function drawVaporator(v) {
+    ctx.fillStyle = "#7f8c8d"; ctx.fillRect(v.x + 10, v.y + 30, 4, v.height - 30);
+    ctx.fillStyle = "#bdc3c7";
+    ctx.fillRect(v.x + 2, v.y + 40, 20, 8);
+    ctx.fillRect(v.x + 4, v.y + 70, 16, 8);
+    ctx.fillRect(v.x + 2, v.y + 100, 20, 8);
+
+    ctx.fillStyle = "#34495e"; ctx.fillRect(v.x + 6, v.y, 12, 30);
+    ctx.shadowBlur = 12; ctx.shadowColor = "#00bfff";
+    ctx.fillStyle = "#00bfff"; ctx.fillRect(v.x + 8, v.y + 10, 8, 10);
+    ctx.shadowBlur = 0;
+}
+
 // Render Engine
 function draw() {
-    // High-Contrast Deep Indigo/Magenta Sky Background
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#0b0a1a"); bgGrad.addColorStop(0.6, "#1a0e36"); bgGrad.addColorStop(1, "#2d124d");
     ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -325,17 +365,16 @@ function draw() {
     let shakeY = (Math.random() - 0.5) * camera.shake;
     ctx.translate(-camera.x + shakeX, shakeY);
 
-    // Stars
     stars.forEach(s => {
         ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
         ctx.fillRect(s.x, s.y, s.size, s.size);
     });
 
-    // Animated Plasma Water Pits
+    // Plasma Water Pits
     waterPits.forEach(wp => {
         ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
         ctx.fillRect(wp.x, wp.y, wp.width, 100);
-        ctx.fillStyle = "#54a0ff"; // Plasma surface wave
+        ctx.fillStyle = "#54a0ff";
         ctx.fillRect(wp.x, wp.y + Math.sin(Date.now()/200)*3, wp.width, 6);
         ctx.shadowBlur = 0;
     });
@@ -343,11 +382,9 @@ function draw() {
     vaporators.forEach(v => drawVaporator(v));
     platforms.concat(movingPlatforms).forEach(p => drawLegoPlatform(p));
 
-    // Force Objects & Crates
     forceContainers.forEach(fc => drawForceObject(ctx, fc));
     crates.forEach(c => drawForceObject(ctx, c));
     
-    // Lego Studs
     studs.forEach(s => {
         if (!s.collected) {
             ctx.shadowBlur = 10; ctx.shadowColor = s.color;
@@ -357,7 +394,6 @@ function draw() {
         }
     });
 
-    // Kyber Crystals
     kyberCrystals.forEach(kc => {
         if (!kc.collected) {
             ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
@@ -380,7 +416,6 @@ function draw() {
         }
     }
 
-    // Render Cute Grogu
     if (currentMission === 3) drawGrogu(ctx, worldWidth - 400, 480);
 
     particles.forEach(p => {
