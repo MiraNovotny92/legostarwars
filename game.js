@@ -327,10 +327,11 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
+// Crisp Vector & Textured Platform Renderer
 function drawLegoPlatform(p) {
     if (p.isGround) {
         let img = ASSETS['ground'];
-        if (img && img.complete && img.naturalWidth !== 0) {
+        if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
             try {
                 let pattern = ctx.createPattern(img, 'repeat');
                 if (pattern) {
@@ -339,12 +340,21 @@ function drawLegoPlatform(p) {
                     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
                     return;
                 }
-            } catch (e) {
-                // Fail-safe catch for pattern errors
-            }
+            } catch (e) {}
         }
+
+        // Cartoon Ground (Brown Dirt Block with Bright Grass Top Layer)
+        ctx.fillStyle = "#6e3f19";
+        drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+        
+        ctx.fillStyle = "#2ecc71"; // Bright Green Grass Top
+        ctx.fillRect(p.x, p.y, p.width, 10);
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);
+        return;
     }
 
+    // High-Tech Metallic Floating Lego Platform
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");
     grad.addColorStop(1, "#1a252f");
@@ -368,8 +378,9 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Render Loop
+// Master Unbreakable Render Loop
 function draw() {
+    // Galactic Sky Gradient
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
     ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -379,16 +390,22 @@ function draw() {
     let shakeY = (Math.random() - 0.5) * GAME.camera.shake;
     ctx.translate(-GAME.camera.x + shakeX, shakeY);
 
-    // Render Scenery
+    // 1. Parallax Stars
     try {
         GAME.stars.forEach(s => {
             ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
             ctx.fillRect(s.x, s.y, s.size, s.size);
         });
+    } catch(e) {}
 
-        GAME.buildings.forEach(b => drawBuilding(ctx, b));
-        GAME.vaporators.forEach(v => drawVaporator(v));
+    // 2. Background Buildings
+    try { GAME.buildings.forEach(b => drawBuilding(ctx, b)); } catch(e) {}
 
+    // 3. Trees / Vaporators
+    try { GAME.vaporators.forEach(v => drawVaporator(v)); } catch(e) {}
+
+    // 4. Plasma Water Pits
+    try {
         GAME.waterPits.forEach(wp => {
             ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
             ctx.fillRect(wp.x, wp.y, wp.width, 100);
@@ -396,13 +413,22 @@ function draw() {
             ctx.fillRect(wp.x, wp.y + Math.sin(Date.now()/200)*3, wp.width, 6);
             ctx.shadowBlur = 0;
         });
+    } catch(e) {}
 
-        GAME.platforms.concat(GAME.movingPlatforms).forEach(p => drawLegoPlatform(p));
+    // 5. Ground & Floating Platforms (Guaranteed Render)
+    try { GAME.platforms.concat(GAME.movingPlatforms).forEach(p => drawLegoPlatform(p)); } catch(e) {}
 
+    // 6. Force Objects & Crates
+    try {
         GAME.forceContainers.forEach(fc => drawForceObject(ctx, fc));
         GAME.crates.forEach(c => drawForceObject(ctx, c));
-        GAME.laserGates.forEach(g => drawLaserGate(ctx, g));
-        
+    } catch(e) {}
+
+    // 7. Laser Gates
+    try { GAME.laserGates.forEach(g => drawLaserGate(ctx, g)); } catch(e) {}
+
+    // 8. Studs & Kyber Crystals
+    try {
         GAME.studs.forEach(s => {
             if (!s.collected) {
                 ctx.shadowBlur = 10; ctx.shadowColor = s.color;
@@ -421,13 +447,19 @@ function draw() {
                 ctx.shadowBlur = 0;
             }
         });
+    } catch(e) {}
 
+    // 9. Droids & Minifig NPCs
+    try {
         GAME.droids.forEach(d => drawDroid(ctx, d));
         GAME.npcs.forEach(n => drawNPC(ctx, n));
         GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
+    } catch(e) {}
 
+    // 10. Mission NPC / Targets
+    try {
         if (GAME.currentMission === 1) {
-            if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth !== 0) {
+            if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth > 0) {
                 ctx.drawImage(ASSETS['obi'], GAME.obi.x, GAME.obi.y, GAME.obi.width, GAME.obi.height);
             }
             if (!GAME.hasLightsaber) {
@@ -436,14 +468,18 @@ function draw() {
                 ctx.shadowBlur = 0;
             }
         }
-
         if (GAME.currentMission === 3) drawGrogu(ctx, GAME.worldWidth - 400, 480);
+    } catch(e) {}
 
+    // 11. Particles
+    try {
         GAME.particles.forEach(p => {
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
         });
+    } catch(e) {}
 
-        // Player & Lightsaber Slash Render
+    // 12. Player Character & Lightsaber Slash
+    try {
         ctx.save();
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);
         ctx.scale(GAME.player.scaleX, GAME.player.scaleY);
@@ -480,9 +516,7 @@ function draw() {
         }
 
         ctx.restore();
-    } catch (e) {
-        // Guard against any single entity render error
-    }
+    } catch(e) {}
 
     ctx.restore();
 
