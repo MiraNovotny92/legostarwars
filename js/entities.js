@@ -13,6 +13,7 @@ loadGameAsset('r2d2', 'assets/r2d2.png');
 loadGameAsset('bb8', 'assets/bb8.png');
 loadGameAsset('gonk', 'assets/gonk.png');
 
+// Tree Renderer with preserved Aspect Ratio
 function drawVaporator(ctx, v) {
     let img = ASSETS['tree'];
     if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
@@ -36,6 +37,7 @@ function drawVaporator(ctx, v) {
     }
 }
 
+// Buildings Renderer
 function drawBuilding(ctx, b) {
     ctx.save();
     if (b.type === 'imperial') {
@@ -65,12 +67,12 @@ function drawBuilding(ctx, b) {
     ctx.restore();
 }
 
-// Taller Laser Barrier (No Text Prompt)
+// Taller Laser Barrier (220px high - impossible to jump over)
 function drawLaserGate(ctx, gate) {
     if (gate.destroyed) return;
     ctx.save();
     
-    // High-Contrast Silver Metallic Posts with Black Outlines
+    // High-Contrast Silver Metallic Posts
     ctx.fillStyle = "#bdc3c7";
     ctx.fillRect(gate.x - 8, gate.y, 12, gate.height);
     ctx.fillRect(gate.x + gate.width - 4, gate.y, 12, gate.height);
@@ -78,7 +80,7 @@ function drawLaserGate(ctx, gate) {
     ctx.strokeRect(gate.x - 8, gate.y, 12, gate.height);
     ctx.strokeRect(gate.x + gate.width - 4, gate.y, 12, gate.height);
 
-    // Bright Pulsing Laser Beams
+    // Pulsing Laser Beams
     ctx.shadowBlur = 20; ctx.shadowColor = "#ff0055";
     ctx.fillStyle = "#ff0055";
     for (let i = 15; i < gate.height - 10; i += 22) {
@@ -112,7 +114,6 @@ function drawNPC(ctx, npc) {
     ctx.restore();
 }
 
-// High-Contrast Force Objects
 function drawForceObject(ctx, obj) {
     ctx.save();
     if (obj.isHovering) {
