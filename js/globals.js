@@ -1,4 +1,4 @@
-// Central Game State Container
+// Centralized Global Engine State
 window.GAME = {
     state: "START",
     currentMission: 1,
@@ -21,7 +21,8 @@ window.GAME = {
         x: 50, y: 400, width: 48, height: 48, 
         dx: 0, dy: 0, speed: 5, jumpPower: -13.5, 
         grounded: false, facing: 'right',
-        scaleX: 1, scaleY: 1
+        scaleX: 1, scaleY: 1,
+        saberSwingTimer: 0, isAttacking: false
     },
     obi: { x: 300, y: 490, width: 50, height: 50 },
     lightsaber: { x: 2000, y: 480, width: 12, height: 60 },
@@ -37,16 +38,19 @@ window.GAME = {
     droids: [],
     particles: [],
     kyberCrystals: [],
-    waterPits: []
+    waterPits: [],
+    buildings: [],
+    laserGates: [],
+    npcs: []
 };
 
-// Fail-Safe Drawing Helper (Prevents Canvas Crashes on any browser)
+// Fail-Safe Drawing Helper
 function drawRoundedRect(ctx, x, y, width, height, radius = 6) {
     ctx.beginPath();
     if (ctx.roundRect) {
         ctx.roundRect(x, y, width, height, radius);
     } else {
-        ctx.rect(x, y, width, height); // Fallback
+        ctx.rect(x, y, width, height);
     }
     ctx.fill();
 }
