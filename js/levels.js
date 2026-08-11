@@ -15,7 +15,6 @@ function buildMissionLevel(difficultyMultiplier) {
     function addGround(width, heightY = 540) {
         GAME.platforms.push({ x: cursorX, y: heightY, width: width, height: 600 - heightY + 100, isGround: true });
         
-        // Spawn Buildings
         if (width >= 800 && Math.random() > 0.3) {
             let bType = Math.random() > 0.5 ? 'imperial' : 'jedi';
             GAME.buildings.push({
@@ -24,7 +23,6 @@ function buildMissionLevel(difficultyMultiplier) {
             });
         }
 
-        // Spawn Laser Security Gate Obstacles
         if (width >= 600 && cursorX > 600 && Math.random() > 0.4) {
             GAME.laserGates.push({
                 x: cursorX + width/2, y: heightY - 120,
@@ -42,7 +40,6 @@ function buildMissionLevel(difficultyMultiplier) {
             }
         }
 
-        // Spawn Droids & Neutral NPCs
         if (width >= 350 && cursorX > 200) {
             const types = ['r2d2', 'gonk', 'bb8', 'mouse'];
             let droidType = types[Math.floor(Math.random() * types.length)];
@@ -57,7 +54,6 @@ function buildMissionLevel(difficultyMultiplier) {
                 bounceY: 0, textTimer: 0, label: labels[droidType], isFloating: false
             });
 
-            // Neutral Minifig NPCs (Jawas / Rebel Troopers)
             if (Math.random() > 0.5) {
                 let npcType = Math.random() > 0.5 ? 'jawa' : 'rebel';
                 GAME.npcs.push({
