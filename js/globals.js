@@ -1,4 +1,4 @@
-// Centralized Global Engine State
+// Centralized Engine State
 window.GAME = {
     state: "START",
     currentMission: 1,
@@ -44,18 +44,19 @@ window.GAME = {
     npcs: []
 };
 
-// Fail-Safe Drawing Helper (Guarantees zero API exceptions on any browser)
-function drawRoundedRect(ctx, x, y, width, height, radius = 6) {
-    let r = typeof radius === 'number' ? radius : 6;
+// Pure Native Canvas arcTo Rounded Rectangle (Guarantees zero browser crashes)
+function drawRoundedRect(ctx, x, y, w, h, r = 6) {
+    if (w <= 0 || h <= 0) return;
+    let radius = typeof r === 'number' ? r : 6;
+    if (radius * 2 > w) radius = w / 2;
+    if (radius * 2 > h) radius = h / 2;
+    
     ctx.beginPath();
-    try {
-        if (ctx.roundRect) {
-            ctx.roundRect(x, y, width, height, r);
-        } else {
-            ctx.rect(x, y, width, height);
-        }
-    } catch (e) {
-        ctx.rect(x, y, width, height);
-    }
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + w, y, x + w, y + h, radius);
+    ctx.arcTo(x + w, y + h, x, y + h, radius);
+    ctx.arcTo(x, y + h, x, y, radius);
+    ctx.arcTo(x, y, x + w, y, radius);
+    ctx.closePath();
     ctx.fill();
 }
