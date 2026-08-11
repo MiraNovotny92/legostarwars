@@ -13,7 +13,6 @@ loadGameAsset('r2d2', 'assets/r2d2.png');
 loadGameAsset('bb8', 'assets/bb8.png');
 loadGameAsset('gonk', 'assets/gonk.png');
 
-// Tree Renderer with preserved Aspect Ratio
 function drawVaporator(ctx, v) {
     let img = ASSETS['tree'];
     if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
@@ -37,25 +36,24 @@ function drawVaporator(ctx, v) {
     }
 }
 
-// Buildings Renderer
 function drawBuilding(ctx, b) {
     ctx.save();
     if (b.type === 'imperial') {
-        ctx.fillStyle = "#1e272e";
+        ctx.fillStyle = "#2c3e50";
         drawRoundedRect(ctx, b.x, b.y, b.width, b.height, 12);
-        ctx.strokeStyle = "#485460"; ctx.lineWidth = 4; ctx.strokeRect(b.x + 10, b.y + 10, b.width - 20, b.height - 10);
+        ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.strokeRect(b.x + 10, b.y + 10, b.width - 20, b.height - 10);
 
-        ctx.fillStyle = "#2c3e50"; ctx.fillRect(b.x + b.width/2 - 30, b.y + b.height - 70, 60, 70);
+        ctx.fillStyle = "#1e272e"; ctx.fillRect(b.x + b.width/2 - 30, b.y + b.height - 70, 60, 70);
         ctx.shadowBlur = 15; ctx.shadowColor = "#ff0000";
         ctx.fillStyle = "#ff0000"; ctx.fillRect(b.x + b.width/2 - 25, b.y + b.height - 65, 50, 6);
         ctx.shadowBlur = 0;
 
-        ctx.fillStyle = "#7f8c8d"; ctx.fillRect(b.x + 30, b.y - 40, 6, 40);
-        ctx.fillStyle = "#ff0000"; ctx.beginPath(); ctx.arc(b.x + 33, b.y - 40, 5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#bdc3c7"; ctx.fillRect(b.x + 30, b.y - 40, 6, 40);
+        ctx.fillStyle = "#ff0000"; ctx.beginPath(); ctx.arc(b.x + 33, b.y - 40, 6, 0, Math.PI*2); ctx.fill();
     } else {
         ctx.fillStyle = "#d35400";
         drawRoundedRect(ctx, b.x, b.y, b.width, b.height, 10);
-        ctx.fillStyle = "#e67e22";
+        ctx.fillStyle = "#f39c12";
         ctx.fillRect(b.x + 15, b.y + 20, 20, b.height - 20);
         ctx.fillRect(b.x + b.width - 35, b.y + 20, 20, b.height - 20);
 
@@ -67,22 +65,26 @@ function drawBuilding(ctx, b) {
     ctx.restore();
 }
 
+// Taller Laser Barrier (No Text Prompt)
 function drawLaserGate(ctx, gate) {
     if (gate.destroyed) return;
     ctx.save();
-    ctx.fillStyle = "#2c3e50";
+    
+    // High-Contrast Silver Metallic Posts with Black Outlines
+    ctx.fillStyle = "#bdc3c7";
     ctx.fillRect(gate.x - 8, gate.y, 12, gate.height);
     ctx.fillRect(gate.x + gate.width - 4, gate.y, 12, gate.height);
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
+    ctx.strokeRect(gate.x - 8, gate.y, 12, gate.height);
+    ctx.strokeRect(gate.x + gate.width - 4, gate.y, 12, gate.height);
 
+    // Bright Pulsing Laser Beams
     ctx.shadowBlur = 20; ctx.shadowColor = "#ff0055";
     ctx.fillStyle = "#ff0055";
-    for (let i = 15; i < gate.height - 10; i += 25) {
+    for (let i = 15; i < gate.height - 10; i += 22) {
         ctx.fillRect(gate.x + 4, gate.y + i, gate.width - 8, 8);
     }
     ctx.shadowBlur = 0;
-
-    ctx.fillStyle = "#fff"; ctx.font = "bold 13px 'Comic Sans MS'";
-    ctx.fillText("⚔️ CUT [D]", gate.x - 15, gate.y - 12);
     ctx.restore();
 }
 
@@ -110,6 +112,7 @@ function drawNPC(ctx, npc) {
     ctx.restore();
 }
 
+// High-Contrast Force Objects
 function drawForceObject(ctx, obj) {
     ctx.save();
     if (obj.isHovering) {
