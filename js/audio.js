@@ -1,23 +1,38 @@
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let isMuted = false;
-let musicInterval = null;
+
+// Custom MP3 Audio File
+const bgMusic = new Audio('assets/theme.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.3; // 30% volume so sound effects remain clear
 
 function toggleMute() {
     isMuted = !isMuted;
     const btn = document.getElementById("mute-btn");
     btn.innerText = isMuted ? "🔇 Sound Off" : "🔊 Sound On";
-    if (isMuted && musicInterval) {
-        clearInterval(musicInterval);
-        musicInterval = null;
-    } else if (!isMuted && gameState === "PLAYING") {
-        startBackgroundMusic();
+    
+    if (isMuted) {
+        bgMusic.pause();
+    } else if (gameState === "PLAYING") {
+        bgMusic.play().catch(e => console.log("Audio autoplay prevented by browser:", e));
     }
 }
 
-// Play Sound Effects
+function startBackgroundMusic() {
+    if (isMuted) return;
+    bgMusic.play().catch(e => console.log("Click screen to enable audio context"));
+}
+
+function stopBackgroundMusic() {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+}
+
+// Sound Effects Engine
 function playSound(type) {
     if (isMuted) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
@@ -46,48 +61,10 @@ function playSound(type) {
         osc.type = 'square'; osc.frequency.setValueAtTime(110, now);
         gain.gain.setValueAtTime(0.25, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
         osc.start(); osc.stop(now + 0.25);
-    } else if (type === 'bb8') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1200, now); osc.frequency.linearRampToValueAtTime(1800, now + 0.06);
-        gain.gain.setValueAtTime(0.18, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-        osc.start(); osc.stop(now + 0.15);
-    } else if (type === 'mouse') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(800, now + 0.08);
-        gain.gain.setValueAtTime(0.12, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
-        osc.start(); osc.stop(now + 0.12);
     } else if (type === 'win') {
         osc.type = 'triangle'; osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(659, now + 0.3);
         gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
         osc.start(); osc.stop(now + 0.5);
     }
-}
-
-// Procedural Chiptune Star Wars Main Fanfare Loop
-function startBackgroundMusic() {
-    if (musicInterval || isMuted) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const notes = [261.63, 392.00, 349.23, 329.63, 293.66, 523.25, 392.00, 349.23, 329.63, 293.66, 523.25, 392.00];
-    let noteIdx = 0;
-
-    musicInterval = setInterval(() => {
-        if (gameState !== "PLAYING" || isMuted) {
-            clearInterval(musicInterval);
-            musicInterval = null;
-            return;
-        }
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.25);
-
-        noteIdx = (noteIdx + 1) % notes.length;
-    }, 400);
 }
