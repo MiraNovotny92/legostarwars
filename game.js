@@ -335,7 +335,6 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
-// Guaranteed Fail-Safe Platform Renderer
 function drawLegoPlatform(p) {
     if (p.isGround) {
         let drawn = false;
@@ -394,7 +393,6 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Master Render Pipeline
 function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
