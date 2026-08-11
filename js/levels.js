@@ -1,6 +1,9 @@
 function buildMissionLevel(difficultyMultiplier) {
     GAME.platforms = []; GAME.movingPlatforms = []; GAME.jumpPads = []; GAME.forceContainers = []; 
-    GAME.stars = []; GAME.vaporators = []; GAME.crates = []; GAME.studs = []; GAME.droids = []; GAME.particles = []; GAME.kyberCrystals = []; GAME.waterPits = [];
+    GAME.stars = []; GAME.vaporators = []; GAME.crates = []; GAME.studs = []; GAME.droids = []; 
+    GAME.particles = []; GAME.kyberCrystals = []; GAME.waterPits = []; GAME.buildings = [];
+    GAME.laserGates = []; GAME.npcs = [];
+    
     GAME.kyberCrystalsCollected = 0;
     let cursorX = 0;
 
@@ -12,16 +15,34 @@ function buildMissionLevel(difficultyMultiplier) {
     function addGround(width, heightY = 540) {
         GAME.platforms.push({ x: cursorX, y: heightY, width: width, height: 600 - heightY + 100, isGround: true });
         
-        let itemsCount = Math.floor(width / 300);
+        // Spawn Buildings
+        if (width >= 800 && Math.random() > 0.3) {
+            let bType = Math.random() > 0.5 ? 'imperial' : 'jedi';
+            GAME.buildings.push({
+                x: cursorX + 200, y: heightY - 160,
+                width: 180, height: 160, type: bType
+            });
+        }
+
+        // Spawn Laser Security Gate Obstacles
+        if (width >= 600 && cursorX > 600 && Math.random() > 0.4) {
+            GAME.laserGates.push({
+                x: cursorX + width/2, y: heightY - 120,
+                width: 20, height: 120, destroyed: false
+            });
+        }
+
+        let itemsCount = Math.floor(width / 320);
         for(let j = 0; j < itemsCount; j++) {
             let rX = cursorX + 80 + Math.random() * (width - 160);
             if (Math.random() > 0.5) {
-                GAME.vaporators.push({ x: rX, y: heightY - 180, width: 24, height: 180 });
+                GAME.vaporators.push({ x: rX, y: heightY - 180, width: 30, height: 180 });
             } else {
                 GAME.crates.push({ x: rX, y: heightY - 50, width: 50, height: 50, color: "#f39c12" });
             }
         }
 
+        // Spawn Droids & Neutral NPCs
         if (width >= 350 && cursorX > 200) {
             const types = ['r2d2', 'gonk', 'bb8', 'mouse'];
             let droidType = types[Math.floor(Math.random() * types.length)];
@@ -35,6 +56,16 @@ function buildMissionLevel(difficultyMultiplier) {
                 minX: cursorX + 40, maxX: cursorX + width - 40,
                 bounceY: 0, textTimer: 0, label: labels[droidType], isFloating: false
             });
+
+            // Neutral Minifig NPCs (Jawas / Rebel Troopers)
+            if (Math.random() > 0.5) {
+                let npcType = Math.random() > 0.5 ? 'jawa' : 'rebel';
+                GAME.npcs.push({
+                    x: cursorX + 150, y: heightY - 40, width: 36, height: 40,
+                    type: npcType, textTimer: 0, bounceY: 0,
+                    label: npcType === 'jawa' ? 'Utinni!' : 'For the Republic!'
+                });
+            }
         }
 
         cursorX += width;
