@@ -58,5 +58,10 @@ function drawRoundedRect(ctx, x, y, w, h, r = 6) {
     ctx.arcTo(x, y + h, x, y, radius);
     ctx.arcTo(x, y, x + w, y, radius);
     ctx.closePath();
-    ctx.fill();
+    try {
+        ctx.fill();
+    } catch(e) {
+        ctx.fillStyle = "#6e3f19";
+        ctx.fill();
+    }
 }
