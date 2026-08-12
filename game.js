@@ -388,6 +388,26 @@ function draw() {
     } catch(e) {}     
     
     // Player Character & Saber Swing
+    try {
+        if (GAME.currentMission === 1) {
+            if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth > 0) {
+                ctx.drawImage(ASSETS['obi'], GAME.obi.x, GAME.obi.y, 50, 50);
+            } else if (typeof drawObiWan === 'function') {
+                drawObiWan(ctx, GAME.obi.x, GAME.obi.y);
+            }
+            if (!GAME.hasLightsaber) {
+                let floatY = GAME.lightsaber.y + Math.sin(Date.now() / 150) * 8;
+                ctx.fillStyle = "#bdc3c7";
+                ctx.fillRect(GAME.lightsaber.x - 2, floatY + 30, 16, 18);
+                ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 20; ctx.shadowColor = "#2ecc71";
+                ctx.fillRect(GAME.lightsaber.x, floatY, 12, 30);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "#2ecc71"; ctx.font = "bold 13px 'Comic Sans MS'"; ctx.textAlign = "center";
+                ctx.fillText("Obi-Wan's Lightsaber", GAME.lightsaber.x + 6, floatY - 12);
+            }
+        }
+    } catch(e) {}
+    
     try {         
         ctx.save();         
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
