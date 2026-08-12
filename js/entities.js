@@ -170,3 +170,27 @@ function drawForceObject(ctx, obj) {
     }
     ctx.restore();
 }
+function drawObiWan(ctx, x, y) {
+    ctx.save();
+    if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth > 0) {
+        ctx.drawImage(ASSETS['obi'], x, y, 50, 50);
+    } else {
+        // Outer Brown Hooded Cloak
+        ctx.fillStyle = "#5c3317";
+        drawRoundedRect(ctx, x + 4, y + 10, 42, 40, 8);
+        // Inner Tan Robe
+        ctx.fillStyle = "#d2b48c";
+        ctx.fillRect(x + 18, y + 18, 18, 32);
+        // Head
+        ctx.fillStyle = "#f5cba7";
+        ctx.beginPath(); ctx.arc(x + 25, y + 12, 10, 0, Math.PI * 2); ctx.fill();
+        // Orange Beard
+        ctx.fillStyle = "#d35400";
+        ctx.fillRect(x + 18, y + 14, 14, 7);
+    }
+    // Name Tag
+    ctx.fillStyle = "#ffd700"; ctx.font = "bold 14px 'Comic Sans MS'";
+    ctx.textAlign = "center";
+    ctx.fillText("Obi-Wan Kenobi", x + 25, y - 10);
+    ctx.restore();
+}
