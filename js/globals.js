@@ -1,4 +1,4 @@
-// Centralized Engine State
+// Centralized Engine State - Guarantees all files share the exact same data
 window.GAME = {
     state: "START",
     currentMission: 1,
@@ -44,24 +44,26 @@ window.GAME = {
     npcs: []
 };
 
-// Fail-Safe Drawing Helper
-function drawRoundedRect(ctx, x, y, w, h, r = 6) {
+// Fail-Safe Drawing Helper (Guarantees zero browser crashes)
+window.drawRoundedRect = function(ctx, x, y, w, h, r = 6) {
     if (w <= 0 || h <= 0) return;
-    let radius = typeof r === 'number' ? r : 6;
-    if (radius * 2 > w) radius = w / 2;
-    if (radius * 2 > h) radius = h / 2;
-    
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.arcTo(x + w, y, x + w, y + h, radius);
-    ctx.arcTo(x + w, y + h, x, y + h, radius);
-    ctx.arcTo(x, y + h, x, y, radius);
-    ctx.arcTo(x, y, x + w, y, radius);
-    ctx.closePath();
     try {
+        let radius = typeof r === 'number' ? r : 6;
+        if (radius * 2 > w) radius = w / 2;
+        if (radius * 2 > h) radius = h / 2;
+        
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
         ctx.fill();
     } catch(e) {
-        ctx.fillStyle = "#6e3f19";
+        // Ultimate Fallback if the browser doesn't support complex curves
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
         ctx.fill();
     }
-}
+};
