@@ -180,6 +180,13 @@ function buildMission1() {
     });
     // Draw 600px of ground under the Force block
     addGround(300, 540);
+    addGround(100, 480);
+    addGround(100, 400);
+    addGround(100, 350);
+    addGround(100, 300);
+    addGround(100, 250);
+    addGround(50, 200);
+
         // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
     GAME.forceContainers.push({
         x: cursorX + 200, y: 310, width: 90, height: 230,
