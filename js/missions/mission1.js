@@ -111,7 +111,7 @@ function buildMission1() {
     addGround(300, 540);
 
 
-    // --- SECTION 8: JUMP PAD OVER A WALL ---
+// --- SECTION 8: JUMP PAD OVER A WALL ---
     // Left side: A green jump pad that shoots the player into the air
     GAME.jumpPads.push({ 
         x: cursorX + 100, y: 520, width: 60, height: 20, color: "#00ffcc" 
@@ -122,13 +122,12 @@ function buildMission1() {
         x: cursorX + 200, y: 200, width: 100, height: 340, isGround: true
     });
 
-    // Right side: A vertical platform so they can get back over the wall on the return trip
-    GAME.movingPlatforms.push({
-        x: cursorX + 330, y: 490, width: 120, height: 24,
-        dx: 0, dy: -2.5, minX: cursorX + 330, maxX: cursorX + 330,
-        minY: 180, maxY: 490, isMoving: true
+    // Right side: Another green jump pad so they can get back over on the return trip
+    GAME.jumpPads.push({ 
+        x: cursorX + 350, y: 520, width: 60, height: 20, color: "#00ffcc" 
     });
-    // Draw 600px of ground
+    
+    // Draw 600px of ground under the pads and wall
     addGround(600, 540);
 
 
