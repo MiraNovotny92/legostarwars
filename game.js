@@ -1,6 +1,11 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// RESTORED MISSING IMAGES!
+const jediLeftImg = new Image(); jediLeftImg.src = "assets/jedi_left.png";
+const jediRightImg = new Image(); jediRightImg.src = "assets/jedi_right.png";
+const obiImg = new Image(); obiImg.src = "assets/obi.png";
+
 const CHARACTERS = {
     luke: { name: "Luke Skywalker", color: "#2ecc71", saberColor: "#2ecc71" },
     ahsoka: { name: "Ahsoka Tano", color: "#3498db", saberColor: "#ffffff" },
@@ -335,39 +340,29 @@ function update() {
     if (GAME.camera.shake > 0) GAME.camera.shake *= 0.88;
 }
 
-// Guaranteed Fail-Safe Platform Renderer
+// Platform Renderer
 function drawLegoPlatform(p) {
     if (p.isGround) {
-        let drawn = false;
-        let img = ASSETS['ground'];
+        let img = (typeof ASSETS !== 'undefined') ? ASSETS['ground'] : null;
         if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
             try {
-                ctx.save();
                 let pattern = ctx.createPattern(img, 'repeat');
                 if (pattern) {
                     ctx.fillStyle = pattern;
                     drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
                     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-                    ctx.restore();
-                    drawn = true;
-                } else {
-                    ctx.restore();
+                    return;
                 }
-            } catch (e) {
-                ctx.restore();
-                drawn = false;
-            }
+            } catch (e) {}
         }
 
-        if (!drawn) {
-            ctx.fillStyle = "#6e3f19";
-            drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
-            
-            ctx.fillStyle = "#2ecc71";
-            ctx.fillRect(p.x, p.y, p.width, 10);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);
-        }
+        ctx.fillStyle = "#6e3f19";
+        drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+        
+        ctx.fillStyle = "#2ecc71";
+        ctx.fillRect(p.x, p.y, p.width, 10);
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);
         return;
     }
 
@@ -394,7 +389,7 @@ function drawLegoPlatform(p) {
     }
 }
 
-// Master Render Loop
+// Safe Render Loop
 function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");
@@ -411,8 +406,8 @@ function draw() {
             ctx.fillRect(s.x, s.y, s.size, s.size);
         });
 
-        GAME.buildings.forEach(b => drawBuilding(ctx, b));
-        GAME.vaporators.forEach(v => drawVaporator(v));
+        if (typeof drawBuilding === "function") GAME.buildings.forEach(b => drawBuilding(ctx, b));
+        if (typeof drawVaporator === "function") GAME.vaporators.forEach(v => drawVaporator(ctx, v));
 
         GAME.waterPits.forEach(wp => {
             ctx.fillStyle = "#00d2d3"; ctx.shadowBlur = 15; ctx.shadowColor = "#00d2d3";
@@ -424,9 +419,14 @@ function draw() {
 
         GAME.platforms.concat(GAME.movingPlatforms).forEach(p => drawLegoPlatform(p));
 
-        GAME.forceContainers.forEach(fc => drawForceObject(ctx, fc));
-        GAME.crates.forEach(c => drawForceObject(ctx, c));
-        GAME.laserGates.forEach(g => drawLaserGate(ctx, g));
+        if (typeof drawForceObject === "function") {
+            GAME.forceContainers.forEach(fc => drawForceObject(ctx, fc));
+            GAME.crates.forEach(c => drawForceObject(ctx, c));
+        }
+        
+        if (typeof drawLaserGate === "function") {
+            GAME.laserGates.forEach(g => drawLaserGate(ctx, g));
+        }
         
         GAME.studs.forEach(s => {
             if (!s.collected) {
@@ -447,12 +447,13 @@ function draw() {
             }
         });
 
-        GAME.droids.forEach(d => drawDroid(ctx, d));
-        GAME.npcs.forEach(n => drawNPC(ctx, n));
+        if (typeof drawDroid === "function") GAME.droids.forEach(d => drawDroid(ctx, d));
+        if (typeof drawNPC === "function") GAME.npcs.forEach(n => drawNPC(ctx, n));
+        
         GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });
 
         if (GAME.currentMission === 1) {
-            if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth > 0) {
+            if (typeof ASSETS !== 'undefined' && ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth > 0) {
                 ctx.drawImage(ASSETS['obi'], GAME.obi.x, GAME.obi.y, GAME.obi.width, GAME.obi.height);
             }
             if (!GAME.hasLightsaber) {
@@ -462,13 +463,19 @@ function draw() {
             }
         }
 
-        if (GAME.currentMission === 3) drawGrogu(ctx, GAME.worldWidth - 400, 480);
+        if (GAME.currentMission === 3 && typeof drawGrogu === "function") {
+            drawGrogu(ctx, GAME.worldWidth - 400, 480);
+        }
 
         GAME.particles.forEach(p => {
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
         });
+    } catch (e) {
+        console.warn("Minor rendering error skipped:", e);
+    }
 
-        // Player Render & Extended 55px Lightsaber Blade
+    // Player Render & Extended 55px Lightsaber Blade
+    try {
         ctx.save();
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);
         ctx.scale(GAME.player.scaleX, GAME.player.scaleY);
@@ -479,15 +486,21 @@ function draw() {
             ctx.shadowBlur = 0;
         }
 
+        let pImg = GAME.player.facing === 'left' ? jediLeftImg : jediRightImg;
         let currentChar = CHARACTERS[GAME.selectedCharKey];
-        ctx.fillStyle = currentChar.color;
-        ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
-        ctx.fillStyle = "#f1c40f";
-        ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#2c3e50";
-        ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
-        ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
+
+        if (pImg.complete && pImg.naturalWidth > 0) {
+            ctx.drawImage(pImg, -GAME.player.width/2, -GAME.player.height, GAME.player.width, GAME.player.height);
+        } else {
+            ctx.fillStyle = currentChar.color;
+            ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#2c3e50";
+            ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;
+            ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);
+        }
 
         if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {
             ctx.save();
@@ -505,9 +518,12 @@ function draw() {
         }
 
         ctx.restore();
-    } catch (e) {}
+    } catch (e) {
+        ctx.restore();
+        console.warn("Player rendering error recovered:", e);
+    }
 
-    ctx.restore();
+    ctx.restore(); // Restore Camera
 
     if (GAME.deathMessageTimer > 0) {
         ctx.fillStyle = "#e74c3c"; ctx.font = "bold 28px 'Comic Sans MS'";
@@ -515,11 +531,14 @@ function draw() {
     }
 }
 
+// Single Protected Game Loop
 function gameLoop() {
     try {
         update();
         draw();
-    } catch(e) {}
+    } catch(e) {
+        console.error("Critical loop error:", e);
+    }
     requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
