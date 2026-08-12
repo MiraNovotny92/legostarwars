@@ -474,18 +474,29 @@ function draw() {
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
         ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
         
-        if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
+if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
             ctx.save();             
             let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
-            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                          
+            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                      
             ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
             ctx.rotate(swingAngle);             
+            
+            // Vader gets a longer saber (55px), others get standard (35px)
+            let saberLength = GAME.selectedCharKey === 'vader' ? 55 : 35;
+            
             ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;             
             ctx.fillStyle = currentChar.saberColor;             
-            ctx.fillRect(0, -35, 6, 35);             
+            ctx.fillRect(0, -saberLength, 6, saberLength); // Main Saber
+            
+            // Ahsoka gets a second smaller saber in her other hand!
+            if (GAME.selectedCharKey === 'ahsoka') {
+                let dualOffset = GAME.player.facing === 'right' ? -25 : 25;
+                ctx.fillRect(dualOffset, -25, 5, 25); // Second Shoto blade
+            }
+            
             ctx.shadowBlur = 0;             
             ctx.restore();         
-        }         
+        }       
         ctx.restore();     
     } catch(e) {}     
     ctx.restore();     
