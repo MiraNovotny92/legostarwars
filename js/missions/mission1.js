@@ -144,6 +144,10 @@ function buildMission1() {
     // Draw 900px of ground
     addGround(700, 540);
 
+    addGround(200, 480);
+    addGround(400, 400);
+    addGround(400, 400);
+
     // 1. The moving platform
     // dx: 1.5 means it moves left and right. 
     // minX and maxX define how far it travels.
