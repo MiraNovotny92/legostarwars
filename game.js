@@ -162,7 +162,7 @@ function update() {
         }     
     });     
 
-    const solidObjects = GAME.platforms.filter(p => p.isGround)         
+    const solidObjects = GAME.platforms    
         .concat(GAME.crates)         
         .concat(GAME.forceContainers)         
         .concat(GAME.laserGates.filter(g => !g.destroyed));     
