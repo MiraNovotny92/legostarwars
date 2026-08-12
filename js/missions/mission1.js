@@ -142,7 +142,19 @@ function buildMission1() {
         dx: 2.5, minX: cursorX + 450, maxX: cursorX + 750, bounceY: 0, textTimer: 0, label: 'Whirrr!', isFloating: false
     });
     // Draw 900px of ground
-    addGround(900, 540);
+    addGround(700, 540);
+
+    // 1. The moving platform
+    // dx: 1.5 means it moves left and right. 
+    // minX and maxX define how far it travels.
+    GAME.movingPlatforms.push({ 
+        x: cursorX, y: 440, width: 140, height: 24, 
+        dx: 1.5, dy: 0, minX: cursorX, maxX: cursorX + 200, 
+        minY: 440, maxY: 440, isMoving: true 
+    });
+    
+    // 2. The water pit underneath it (140 platform width + 200 travel distance = 340 gap)
+    addWaterPit(340);
 
 
     // --- SECTION 10: GOAL AREA ---
