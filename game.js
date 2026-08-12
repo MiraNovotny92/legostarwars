@@ -181,17 +181,11 @@ function update() {
     GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;     
     GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;     
     
-    // UPDATE MOVING PLATFORMS (Horizontal & Vertical)
+    // Moving Platforms
     GAME.movingPlatforms.forEach(mp => {         
         if (mp.isMoving) {             
-            if (mp.dx) {
-                mp.x += mp.dx;             
-                if (mp.x > mp.maxX || mp.x < mp.minX) mp.dx *= -1;         
-            }
-            if (mp.dy) {
-                mp.y += mp.dy;
-                if (mp.y > mp.maxY || mp.y < mp.minY) mp.dy *= -1;
-            }
+            if (mp.dx) { mp.x += mp.dx; if (mp.x > mp.maxX || mp.x < mp.minX) mp.dx *= -1; }
+            if (mp.dy) { mp.y += mp.dy; if (mp.y > mp.maxY || mp.y < mp.minY) mp.dy *= -1; }
         }     
     });     
 
@@ -219,28 +213,22 @@ function update() {
             GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
             if (GAME.player.dy > 0) {                 
                 if (!GAME.player.grounded) { GAME.player.scaleX = 1.2; GAME.player.scaleY = 0.8; }                 
-                GAME.player.grounded = true; 
-                GAME.player.dy = 0; 
-                GAME.player.y = s.y - GAME.player.height;                 
+                GAME.player.grounded = true; GAME.player.dy = 0; GAME.player.y = s.y - GAME.player.height;                 
                 if (s.y >= 480) GAME.lastSafeX = Math.max(50, GAME.player.x - 30);             
             } else if (GAME.player.dy < 0) {                 
-                GAME.player.y = s.y + s.height; 
-                GAME.player.dy = 0;             
+                GAME.player.y = s.y + s.height; GAME.player.dy = 0;             
             }         
         }     
     });     
 
-    // LIGHTSABER SLASH ATTACK CHECK AGAINST TALL BARRIERS
+    // LIGHTSABER SLASH (Key D)
     if (GAME.player.saberSwingTimer > 0) {         
         let attackBoxX = GAME.player.facing === 'right' ? GAME.player.x + GAME.player.width : GAME.player.x - 50;         
         let attackBox = { x: attackBoxX, y: GAME.player.y - 40, width: 60, height: GAME.player.height + 80 };         
         GAME.laserGates.forEach(gate => {             
             if (!gate.destroyed && 
-                attackBox.x < gate.x + gate.width && 
-                attackBox.x + attackBox.width > gate.x && 
-                attackBox.y < gate.y + gate.height && 
-                attackBox.y + attackBox.height > gate.y) {                 
-                
+                attackBox.x < gate.x + gate.width && attackBox.x + attackBox.width > gate.x && 
+                attackBox.y < gate.y + gate.height && attackBox.y + attackBox.height > gate.y) {                 
                 gate.destroyed = true;                 
                 playSound('gateBreak');                 
                 addParticles(gate.x + gate.width / 2, gate.y + gate.height / 2, "#ff0055", 35);                 
@@ -252,27 +240,36 @@ function update() {
         });     
     }     
 
-    // MOVING PLATFORM RIDING (Horizontal & Vertical)
+    // MOVING PLATFORMS RIDING
     GAME.movingPlatforms.forEach(p => {         
         let prevPlayerBottom = (GAME.player.y - GAME.player.dy) + GAME.player.height;         
         if (GAME.player.x < p.x + p.width && GAME.player.x + GAME.player.width > p.x) {             
             if (GAME.player.dy >= 0 && prevPlayerBottom <= p.y + 12 && GAME.player.y + GAME.player.height >= p.y) {                 
-                GAME.player.grounded = true; 
-                GAME.player.dy = 0; 
-                GAME.player.y = p.y - GAME.player.height;                 
-                if (p.isMoving) {
-                    if (p.dx) GAME.player.x += p.dx;
-                }             
+                GAME.player.grounded = true; GAME.player.dy = 0; GAME.player.y = p.y - GAME.player.height;                 
+                if (p.isMoving) { if (p.dx) GAME.player.x += p.dx; }             
             }         
         }     
     });     
 
-    // Droids, Force Containers, Studs, Kyber Crystals, Jump Pads & Particles
+    // FORCE LEVITATION (Key F) - Lift Objects & Droids
+    GAME.forceContainers.forEach(fc => {         
+        let dist = Math.abs((GAME.player.x + GAME.player.width/2) - (fc.x + fc.width/2));         
+        if (keys.F && dist < 420) {             
+            fc.y -= 4.5; fc.isHovering = true;             
+            if (fc.y < 60) fc.y = 60;             
+            GAME.camera.shake = Math.random() * 2;             
+            addParticles(fc.x + Math.random() * fc.width, fc.y + fc.height, "#e0aaff", 2);         
+        } else {             
+            fc.isHovering = false; fc.y += 8;             
+            if (fc.y > fc.baseY) fc.y = fc.baseY;         
+        }     
+    });     
+
     GAME.droids.forEach(d => {         
         let dist = Math.hypot((GAME.player.x + 24) - (d.x + 20), (GAME.player.y + 24) - d.y);         
         if (keys.F && dist < 420) {             
             d.isFloating = true; d.y -= 3;             
-            if (d.y < 300) d.y = 300;             
+            if (d.y < 280) d.y = 280;             
             d.bounceY = Math.sin(Date.now() / 100) * 8;             
             addParticles(d.x + 20, d.y + 20, "#e0aaff", 1);             
         } else {             
@@ -296,55 +293,58 @@ function update() {
         }     
     });     
 
-    GAME.forceContainers.forEach(fc => {         
-        let dist = Math.abs((GAME.player.x + GAME.player.width/2) - (fc.x + fc.width/2));         
-        if (keys.F && dist < 420) {             
-            fc.y -= 4.5; fc.isHovering = true;             
-            if (fc.y < 60) fc.y = 60;             
-            GAME.camera.shake = Math.random() * 2;             
-            addParticles(fc.x + Math.random() * fc.width, fc.y + fc.height, "#e0aaff", 2);         
-        } else {             
-            fc.isHovering = false; fc.y += 8;             
-            if (fc.y > fc.baseY) fc.y = fc.baseY;         
-        }     
-    });     
-
+    // STUD / COIN COLLECTION & MISSION 2 WIN (100 STUDS)
     GAME.studs.forEach(s => {         
-        if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {             
-            s.collected = true; GAME.score += 10;             
+        if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 36) {             
+            s.collected = true; 
+            GAME.score += 10;             
             const scoreText = document.getElementById("score-text");             
             const tjFill = document.getElementById("tj-fill");             
             if (scoreText) scoreText.innerText = GAME.score;             
             if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";             
-            playSound('stud'); addParticles(s.x, s.y, s.color, 8);         
+            playSound('stud'); 
+            addParticles(s.x, s.y, s.color, 8);         
+            
+            // MISSION 2 WIN CONDITION: Collect 100 Studs!
+            if (GAME.currentMission === 2 && GAME.score >= 100) {
+                triggerWin("True Jedi Achieved! 100 Studs Collected!");
+            }
         }     
     });     
 
-    GAME.kyberCrystals.forEach(kc => {         
-        if (!kc.collected && Math.hypot((GAME.player.x + 24) - kc.x, (GAME.player.y + 24) - kc.y) < 40) {             
-            kc.collected = true; GAME.kyberCrystalsCollected++;             
-            playSound('win'); addParticles(kc.x, kc.y, "#00bfff", 15);             
-            if (GAME.kyberCrystalsCollected >= 3) triggerWin("All 3 Kyber Crystals Recovered!");         
-        }     
-    });     
+    // MISSION 1: OBI-WAN LIGHTSABER QUEST
+    if (GAME.currentMission === 1 && !GAME.hasLightsaber && 
+        GAME.player.x < GAME.lightsaber.x + GAME.lightsaber.width && 
+        GAME.player.x + GAME.player.width > GAME.lightsaber.x && 
+        GAME.player.y < GAME.lightsaber.y + GAME.lightsaber.height && 
+        GAME.player.y + GAME.player.height > GAME.lightsaber.y) {         
+        
+        GAME.hasLightsaber = true; 
+        playSound('win'); 
+        addParticles(GAME.lightsaber.x, GAME.lightsaber.y, "#00ff00", 25);     
+    }     
 
-    GAME.jumpPads.forEach(pad => {         
-        if (GAME.player.x < pad.x + pad.width && GAME.player.x + GAME.player.width > pad.x && 
-            GAME.player.y + GAME.player.height >= pad.y && GAME.player.y < pad.y + pad.height) {             
-            GAME.player.dy = -22; playSound('jump'); GAME.camera.shake = 8;             
-            addParticles(pad.x + 30, pad.y, "#00ffcc", 10);         
+    let distObi = Math.abs(GAME.player.x - GAME.obi.x);     
+    const dialogueBox = document.getElementById("dialogue-box");     
+    const dialogueText = document.getElementById("dialogue-text");     
+    if (GAME.currentMission === 1 && distObi < 150 && GAME.player.y > 400) {         
+        if (GAME.hasLightsaber) {
+            triggerWin("Returned Obi-Wan's Lightsaber!");         
+        } else {              
+            if (dialogueBox) dialogueBox.style.display = "block";              
+            if (dialogueText) dialogueText.innerText = "Obi-Wan: Bring back my lightsaber!";          
         }     
-    });     
+    } else { 
+        if (dialogueBox) dialogueBox.style.display = "none"; 
+    }     
 
-    GAME.particles.forEach((p, index) => {         
-        p.x += p.dx; p.y += p.dy; p.life--;         
-        if (p.life <= 0) GAME.particles.splice(index, 1);     
-    });     
+    // MISSION 3: GROGU RESCUE
+    if (GAME.currentMission === 3 && GAME.player.x > GAME.worldWidth - 500) {
+        triggerWin("Grogu Rescued Safely!");     
+    }
 
     if (GAME.player.y > 800) resetPlayer();     
     if (GAME.deathMessageTimer > 0) GAME.deathMessageTimer--;     
-    
-    if (GAME.currentMission === 3 && GAME.player.x > GAME.worldWidth - 500) triggerWin("Grogu Rescued Safely!");     
     if (GAME.player.x < 0) GAME.player.x = 0;     
     if (GAME.player.x + GAME.player.width > GAME.worldWidth) GAME.player.x = GAME.worldWidth - GAME.player.width;     
     
@@ -369,11 +369,9 @@ function drawLegoPlatform(p) {
                 }             
             } catch (e) {}         
         }         
-        ctx.fillStyle = "#6e3f19";         
-        drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);         
+        ctx.fillStyle = "#6e3f19"; drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 6);         
         ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();                  
-        ctx.fillStyle = "#2ecc71";         
-        ctx.fillRect(p.x, p.y, p.width, 10);         
+        ctx.fillStyle = "#2ecc71"; ctx.fillRect(p.x, p.y, p.width, 10);         
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);         
         return;     
     }     
@@ -382,8 +380,7 @@ function drawLegoPlatform(p) {
     let headerColor = p.dy ? "#e74c3c" : (p.dx ? "#e67e22" : "#34495e");
     grad.addColorStop(0, headerColor);     
     grad.addColorStop(1, "#1a252f");          
-    ctx.fillStyle = grad;     
-    drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);     
+    ctx.fillStyle = grad; drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);     
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();     
     ctx.fillStyle = p.dy ? "#ff4757" : (p.dx ? "#e67e22" : "#00bfff");     
     ctx.fillRect(p.x, p.y, p.width, 3);     
@@ -395,14 +392,11 @@ function drawLegoPlatform(p) {
         let sy = p.y - 4;         
         ctx.fillStyle = p.dy ? "#ff6b81" : (p.dx ? "#d35400" : "#0097e6");         
         ctx.fillRect(sx - 5, sy, 10, 4);         
-        ctx.fillStyle = "rgba(255,255,255,0.5)";         
-        ctx.fillRect(sx - 5, sy, 10, 1);     
+        ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.fillRect(sx - 5, sy, 10, 1);     
     } 
 
     if (p.dy) {
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 11px Arial";
-        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px Arial"; ctx.textAlign = "center";
         ctx.fillText("↕ UP / DOWN", p.x + p.width / 2, p.y + 16);
     }
 }
@@ -443,15 +437,6 @@ function draw() {
                 ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(s.x - 2, s.y - 2, 2.5, 0, Math.PI*2); ctx.fill();                 
                 ctx.shadowBlur = 0;             
             }         
-        });         
-        GAME.kyberCrystals.forEach(kc => {             
-            if (!kc.collected) {                 
-                ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";                 
-                ctx.fillStyle = "#00bfff"; ctx.beginPath();                 
-                ctx.moveTo(kc.x, kc.y); ctx.lineTo(kc.x + 10, kc.y - 15);                 
-                ctx.lineTo(kc.x + 20, kc.y); ctx.lineTo(kc.x + 10, kc.y + 15); ctx.fill();                 
-                ctx.shadowBlur = 0;             
-            }         
         });     
     } catch(e) {}     
     try {         
@@ -459,16 +444,27 @@ function draw() {
         GAME.npcs.forEach(n => drawNPC(ctx, n));         
         GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });     
     } catch(e) {}     
+    
+    // MISSION 1: OBI-WAN & LIGHTSABER
     try {         
+        if (GAME.currentMission === 1) {             
+            drawObiWan(ctx, GAME.obi.x, GAME.obi.y);
+            if (!GAME.hasLightsaber) {                 
+                ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 15; ctx.shadowColor = "#2ecc71";                 
+                ctx.fillRect(GAME.lightsaber.x, GAME.lightsaber.y + Math.sin(Date.now() / 150) * 8, GAME.lightsaber.width, GAME.lightsaber.height);                 
+                ctx.shadowBlur = 0;             
+            }         
+        }         
         if (GAME.currentMission === 3) drawGrogu(ctx, GAME.worldWidth - 400, 480);     
     } catch(e) {}     
+
     try {         
         GAME.particles.forEach(p => {             
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();         
         });     
     } catch(e) {}     
     
-    // PLAYER & LIGHTSABER SLASH RENDER
+    // PLAYER & LIGHTSABER RENDER
     try {         
         ctx.save();         
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
@@ -490,7 +486,7 @@ function draw() {
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
         ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
 
-        // Lightsaber Blade & Arc Swing Animation
+        // Lightsaber & Swing Arc Animation
         ctx.save();             
         let isSwinging = GAME.player.saberSwingTimer > 0;
         let swingProgress = isSwinging ? (15 - GAME.player.saberSwingTimer) / 15 : 0;             
@@ -500,20 +496,16 @@ function draw() {
         
         ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
         ctx.rotate(swingAngle);             
-        ctx.shadowBlur = 25; 
-        ctx.shadowColor = currentChar.saberColor;             
+        ctx.shadowBlur = 25; ctx.shadowColor = currentChar.saberColor;             
         ctx.fillStyle = currentChar.saberColor;             
         ctx.fillRect(0, -45, 8, 45);             
         ctx.shadowBlur = 0;             
         ctx.restore();         
 
-        // Glowing Slash Arc Wave
         if (isSwinging) {
             ctx.save();
-            ctx.strokeStyle = currentChar.saberColor;
-            ctx.lineWidth = 6;
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = currentChar.saberColor;
+            ctx.strokeStyle = currentChar.saberColor; ctx.lineWidth = 6;
+            ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;
             ctx.beginPath();
             let arcDir = GAME.player.facing === 'right' ? 1 : -1;
             ctx.arc(0, -GAME.player.height/2, 45, -Math.PI/3 * arcDir, Math.PI/3 * arcDir, GAME.player.facing !== 'right');
