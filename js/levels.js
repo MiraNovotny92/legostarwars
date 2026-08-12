@@ -1,149 +1,98 @@
-function buildMissionLevel(difficultyMultiplier) {
-    GAME.platforms = []; GAME.movingPlatforms = []; GAME.jumpPads = []; GAME.forceContainers = []; 
-    GAME.stars = []; GAME.vaporators = []; GAME.crates = []; GAME.studs = []; GAME.droids = []; 
-    GAME.particles = []; GAME.kyberCrystals = []; GAME.waterPits = []; GAME.buildings = [];
-    GAME.laserGates = []; GAME.npcs = [];
-    
-    GAME.kyberCrystalsCollected = 0;
-    let cursorX = 0;
+/**
+ * js/levels.js
+ * Game level definitions and LevelManager controller module.
+ */
 
-    let totalWidthNeeded = 8000;
-    for(let i = 0; i < 250; i++) {
-        GAME.stars.push({ x: Math.random() * totalWidthNeeded, y: Math.random() * 450, size: Math.random() * 2 + 1, alpha: Math.random() });
+export const LEVELS = [
+  {
+    id: 1,
+    name: "Level 1: The Beginning",
+    tileSize: 32,
+    // Grid Legend: 0 = Empty, 1 = Wall/Platform, 2 = Player Start, 3 = Goal, 4 = Coin
+    grid: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 2, 0, 0, 0, 0, 4, 0, 0, 0, 3, 1],
+      [1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],
+      [1, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    spawnPoints: {
+      player: { x: 1, y: 1 },
+      goal: { x: 10, y: 1 }
+    },
+    entities: [
+      { type: "enemy", x: 5, y: 3, speed: 2, patrolRange: [3, 7] }
+    ],
+    timeLimit: 60
+  },
+  {
+    id: 2,
+    name: "Level 2: The Maze",
+    tileSize: 32,
+    grid: [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 2, 0, 1, 0, 0, 0, 1, 0, 4, 3, 1],
+      [1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+      [1, 0, 4, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    spawnPoints: {
+      player: { x: 1, y: 1 },
+      goal: { x: 10, y: 1 }
+    },
+    entities: [
+      { type: "enemy", x: 4, y: 1, speed: 3, patrolRange: [2, 6] },
+      { type: "enemy", x: 8, y: 3, speed: 2, patrolRange: [6, 10] }
+    ],
+    timeLimit: 45
+  }
+];
+
+export class LevelManager {
+  constructor(levels = LEVELS) {
+    this.levels = levels;
+    this.currentIndex = 0;
+  }
+
+  /**
+   * Get current level configuration.
+   */
+  getCurrentLevel() {
+    return this.levels[this.currentIndex] || null;
+  }
+
+  /**
+   * Advance to the next level.
+   * Returns the next level object, or null if all levels are complete.
+   */
+  nextLevel() {
+    if (this.hasNextLevel()) {
+      this.currentIndex++;
+      return this.getCurrentLevel();
     }
+    return null;
+  }
 
-    function addGround(width, heightY = 540) {
-        GAME.platforms.push({ x: cursorX, y: heightY, width: width, height: 600 - heightY + 100, isGround: true });
-        
-        if (width >= 800 && Math.random() > 0.3) {
-            let bType = Math.random() > 0.5 ? 'imperial' : 'jedi';
-            GAME.buildings.push({
-                x: cursorX + 200, y: heightY - 160,
-                width: 180, height: 160, type: bType
-            });
-        }
+  /**
+   * Reset to first level or reload current level.
+   */
+  resetLevel() {
+    return this.getCurrentLevel();
+  }
 
-        // Taller Laser Barrier (220px high - impossible to jump over)
-        if (width >= 600 && cursorX > 600 && Math.random() > 0.4) {
-            GAME.laserGates.push({
-                x: cursorX + width/2, y: heightY - 220,
-                width: 20, height: 220, destroyed: false
-            });
-        }
-
-        let itemsCount = Math.floor(width / 320);
-        for(let j = 0; j < itemsCount; j++) {
-            let rX = cursorX + 80 + Math.random() * (width - 160);
-            if (Math.random() > 0.5) {
-                GAME.vaporators.push({ x: rX, y: heightY - 180, width: 30, height: 180 });
-            } else {
-                GAME.crates.push({ x: rX, y: heightY - 50, width: 50, height: 50, color: "#f39c12" });
-            }
-        }
-
-        if (width >= 350 && cursorX > 200) {
-            const types = ['r2d2', 'gonk', 'bb8', 'mouse'];
-            let droidType = types[Math.floor(Math.random() * types.length)];
-            let labels = { r2d2: 'Beep Boop!', gonk: 'GONK!', bb8: 'Beep-Bloop!', mouse: 'Whirrr!' };
-            
-            GAME.droids.push({
-                x: cursorX + 100 + Math.random() * (width - 200),
-                y: heightY - 45, baseY: heightY - 45, width: 40, height: 45,
-                type: droidType,
-                dx: droidType === 'mouse' ? 2.2 : 1.2,
-                minX: cursorX + 40, maxX: cursorX + width - 40,
-                bounceY: 0, textTimer: 0, label: labels[droidType], isFloating: false
-            });
-
-            if (Math.random() > 0.5) {
-                let npcType = Math.random() > 0.5 ? 'jawa' : 'rebel';
-                GAME.npcs.push({
-                    x: cursorX + 150, y: heightY - 40, width: 36, height: 40,
-                    type: npcType, textTimer: 0, bounceY: 0,
-                    label: npcType === 'jawa' ? 'Utinni!' : 'For the Republic!'
-                });
-            }
-        }
-
-        cursorX += width;
+  loadLevel(index) {
+    if (index >= 0 && index < this.levels.length) {
+      this.currentIndex = index;
+      return this.getCurrentLevel();
     }
+    return null;
+  }
 
-    function addWaterPit(width) {
-        GAME.waterPits.push({ x: cursorX, width: width, y: 550 });
-        cursorX += width;
-    }
-    
-    function addFloatingPlatform(xOffset, y, width) {
-        GAME.movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 24, dx: 0, dy: 0, minX: 0, maxX: 0, isMoving: false, isVertical: false });
-        for(let s = 0; s < 3; s++) {
-            GAME.studs.push({ x: cursorX + xOffset + 30 + (s * 40), y: y - 35, radius: 7, collected: false, color: "#00bfff" });
-        }
+  hasNextLevel() {
+    return this.currentIndex < this.levels.length - 1;
+  }
 
-        if (GAME.currentMission === 2 && Math.random() > 0.3 && GAME.kyberCrystals.length < 3) {
-            GAME.kyberCrystals.push({ x: cursorX + xOffset + width/2, y: y - 45, width: 20, height: 30, collected: false });
-        }
-    }
-
-    function addVerticalElevator(xOffset, startY, travelHeight, width) {
-        GAME.movingPlatforms.push({
-            x: cursorX + xOffset, y: startY, width: width, height: 24,
-            dx: 0, dy: 1.5,
-            minY: startY - travelHeight, maxY: startY,
-            isMoving: true, isVertical: true
-        });
-        
-        for(let s = 0; s < 3; s++) {
-            GAME.studs.push({ x: cursorX + xOffset + 20 + (s * 35), y: startY - travelHeight - 35, radius: 7, collected: false, color: "#ffd700" });
-        }
-    }
-
-    addGround(1000, 540);
-    let numberOfObstacles = Math.max(3, difficultyMultiplier * 3);
-
-    for (let i = 0; i < numberOfObstacles; i++) {
-        let choice = Math.random();
-        let currentHeight = 520 - (Math.random() * 80);
-
-        if (choice < 0.25) {
-            let pitSize = 220 + (difficultyMultiplier * 50);
-            GAME.movingPlatforms.push({ x: cursorX, y: 440, width: 140, height: 24, dx: 1.5, dy: 0, minX: cursorX, maxX: cursorX + pitSize - 140, isMoving: true, isVertical: false });
-            addWaterPit(pitSize);
-            addGround(700, currentHeight);
-        } else if (choice < 0.50) {
-            let highWallHeight = 320;
-            addVerticalElevator(50, 520, 200, 140);
-            addWaterPit(250);
-            addGround(800, highWallHeight);
-        } else if (choice < 0.75) {
-            jumpPads.push({ x: cursorX + 80, y: 520, width: 60, height: 20, color: "#00ffcc" });
-            addFloatingPlatform(80, 260, 200);
-            addGround(300, 540); 
-            addWaterPit(180); 
-            addGround(700, currentHeight);
-        } else {
-            let forceTypes = ['container', 'speeder', 'brick'];
-            let chosenType = forceTypes[Math.floor(Math.random() * forceTypes.length)];
-            
-            GAME.forceContainers.push({
-                x: cursorX + 250, y: currentHeight - 230,
-                width: chosenType === 'speeder' ? 100 : 90,
-                height: chosenType === 'brick' ? 160 : 220,
-                baseY: currentHeight - 230, isHovering: false, type: chosenType,
-                color: chosenType === 'brick' ? '#e74c3c' : null
-            });
-            addGround(1000, currentHeight);
-        }
-    }
-
-    addGround(1000, 540);
-    GAME.worldWidth = cursorX;
-    GAME.lightsaber.x = GAME.worldWidth - 600;
-
-    // Guaranteed Mission 2 Kyber Crystals Floating High Above Ground
-    while(GAME.currentMission === 2 && GAME.kyberCrystals.length < 3) {
-        let spawnX = 800 + (GAME.kyberCrystals.length * 800);
-        let targetGround = GAME.platforms.find(p => p.isGround && spawnX >= p.x && spawnX <= p.x + p.width);
-        let groundY = targetGround ? targetGround.y : 540;
-        GAME.kyberCrystals.push({ x: spawnX, y: groundY - 60, width: 20, height: 30, collected: false });
-    }
+  getTotalLevels() {
+    return this.levels.length;
+  }
 }
