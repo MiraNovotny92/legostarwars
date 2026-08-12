@@ -65,80 +65,17 @@ function drawLaserGate(ctx, gate) {
     if (gate.destroyed) return;
     ctx.save();
     ctx.fillStyle = "#2c3e50";
-    ctx.fillRect(gate.x - 10, gate.y, 12, gate.height);
-    ctx.fillRect(gate.x + gate.width - 2, gate.y, 12, gate.height);
+    ctx.fillRect(gate.x - 8, gate.y, 12, gate.height);
+    ctx.fillRect(gate.x + gate.width - 4, gate.y, 12, gate.height);
     
-    ctx.shadowBlur = 25; ctx.shadowColor = "#ff0055";
+    ctx.shadowBlur = 20; ctx.shadowColor = "#ff0055";
     ctx.fillStyle = "#ff0055";
-    for (let i = 15; i < gate.height - 10; i += 24) {
-        ctx.fillRect(gate.x + 2, gate.y + i, gate.width - 4, 10);
+    for (let i = 15; i < gate.height - 10; i += 25) {
+        ctx.fillRect(gate.x + 4, gate.y + i, gate.width - 8, 8);
     }
     ctx.shadowBlur = 0;
-
-    ctx.fillStyle = "#ffd700"; ctx.font = "bold 15px 'Comic Sans MS'";
-    ctx.textAlign = "center";
-    ctx.fillText("⚡ SLASH [D]! ⚡", gate.x + gate.width / 2, gate.y - 15);
-    ctx.restore();
-}
-
-function drawObiWan(ctx, x, y) {
-    ctx.save();
-    if (ASSETS['obi'] && ASSETS['obi'].complete && ASSETS['obi'].naturalWidth > 0) {
-        ctx.drawImage(ASSETS['obi'], x, y, 50, 50);
-    } else {
-        // Brown Jedi Robe
-        ctx.fillStyle = "#784212";
-        drawRoundedRect(ctx, x + 8, y + 15, 34, 35, 6);
-        // Jedi Inner Robe
-        ctx.fillStyle = "#f39c12";
-        ctx.fillRect(x + 18, y + 20, 14, 30);
-        // Head
-        ctx.fillStyle = "#f1c40f";
-        ctx.beginPath(); ctx.arc(x + 25, y + 12, 11, 0, Math.PI * 2); ctx.fill();
-        // Beard / Hood
-        ctx.fillStyle = "#e67e22";
-        ctx.fillRect(x + 18, y + 14, 14, 8);
-    }
-    ctx.fillStyle = "#00bfff"; ctx.font = "bold 14px 'Comic Sans MS'";
-    ctx.textAlign = "center";
-    ctx.fillText("Obi-Wan Kenobi", x + 25, y - 10);
-    ctx.restore();
-}
-
-function drawGrogu(ctx, x, y) {
-    ctx.save();
-    let floatY = y + Math.sin(Date.now() / 200) * 8;
-    
-    // Hover-Pod Shell
-    ctx.fillStyle = "#bdc3c7";
-    ctx.beginPath(); ctx.ellipse(x, floatY, 36, 28, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "#34495e"; ctx.lineWidth = 3; ctx.stroke();
-    
-    // Anti-Grav Blue Glow Under Pod
-    ctx.shadowBlur = 20; ctx.shadowColor = "#00bfff";
-    ctx.fillStyle = "#00bfff";
-    ctx.beginPath(); ctx.arc(x, floatY + 24, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Grogu Robe
-    ctx.fillStyle = "#d35400";
-    drawRoundedRect(ctx, x - 14, floatY - 10, 28, 18, 4);
-
-    // Grogu Green Head & Ears
-    let earWiggle = Math.sin(Date.now() / 250) * 0.15;
-    ctx.fillStyle = "#2ecc71";
-    ctx.beginPath(); ctx.ellipse(x - 22, floatY - 14, 16, 6, -0.3 + earWiggle, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + 22, floatY - 14, 16, 6, 0.3 - earWiggle, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x, floatY - 14, 13, 0, Math.PI * 2); ctx.fill();
-
-    // Cute Big Eyes
-    ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.arc(x - 5, floatY - 15, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 5, floatY - 15, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.beginPath(); ctx.arc(x - 6, floatY - 16, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 4, floatY - 16, 1.5, 0, Math.PI * 2); ctx.fill();
-
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px 'Comic Sans MS'";
+    ctx.fillText("CUT [D]", gate.x - 15, gate.y - 12);
     ctx.restore();
 }
 
@@ -158,36 +95,27 @@ function drawDroid(ctx, d) {
         ctx.drawImage(img, d.x, drawY, d.width, d.height);
     } else {
         if (d.type === 'r2d2') {
-            // R2-D2
-            ctx.fillStyle = "#ecf0f1"; drawRoundedRect(ctx, d.x, drawY + 12, d.width, d.height - 12, 6);
-            ctx.fillStyle = "#3498db"; ctx.beginPath(); ctx.arc(d.x + d.width/2, drawY + 14, 18, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(d.x + d.width/2, drawY + 10, 3, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 2.5; ctx.strokeRect(d.x, drawY + 12, d.width, d.height - 12);
+            ctx.fillStyle = "#ecf0f1"; drawRoundedRect(ctx, d.x, drawY, d.width, d.height, 8);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = "#2980b9"; ctx.fillRect(d.x + 8, drawY + 12, 24, 8);
+            ctx.fillStyle = "#e74c3c"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 16, 3, 0, Math.PI*2); ctx.fill();
+        } else if (d.type === 'gonk') {
+            ctx.fillStyle = "#f39c12"; drawRoundedRect(ctx, d.x, drawY, d.width, d.height, 4);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = "#2c3e50"; ctx.fillRect(d.x + 5, drawY + 20, d.width - 10, 4);
         } else if (d.type === 'bb8') {
-            // BB-8
             ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 28, 16, 0, Math.PI*2); ctx.fill();
             ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 3; ctx.stroke();
-            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 12, 10, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = "#34495e"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 10, 3, 0, Math.PI*2); ctx.fill();
-        } else if (d.type === 'gonk') {
-            // Gonk Droid
-            ctx.fillStyle = "#e67e22"; drawRoundedRect(ctx, d.x, drawY, d.width, d.height - 10, 6);
-            ctx.fillStyle = "#2c3e50"; 
-            ctx.fillRect(d.x + 8, drawY + d.height - 10, 8, 10);
-            ctx.fillRect(d.x + d.width - 16, drawY + d.height - 10, 8, 10);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.strokeRect(d.x, drawY, d.width, d.height - 10);
-        } else {
-            // Mouse Droid
-            ctx.fillStyle = "#34495e"; drawRoundedRect(ctx, d.x, drawY + 18, d.width, d.height - 18, 4);
-            ctx.fillStyle = "#000"; 
-            ctx.beginPath(); ctx.arc(d.x + 8, drawY + d.height - 4, 4, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(d.x + d.width - 8, drawY + d.height - 4, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#ecf0f1"; ctx.beginPath(); ctx.arc(d.x + 20, drawY + 10, 10, Math.PI, 0); ctx.fill();
+        } else if (d.type === 'mouse') {
+            ctx.fillStyle = "#34495e"; drawRoundedRect(ctx, d.x, drawY + 20, d.width, d.height - 20, 4);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();
         }
     }
 
     if (d.textTimer > 0 || d.isFloating) {
-        ctx.fillStyle = "#fff"; ctx.font = "bold 14px 'Comic Sans MS'"; ctx.textAlign = "center";
-        ctx.fillText(d.isFloating ? "Woah!! 🌀" : d.label, d.x + d.width/2, drawY - 10);
+        ctx.fillStyle = "#fff"; ctx.font = "bold 14px 'Comic Sans MS'";
+        ctx.fillText(d.isFloating ? "Woah!! " : d.label, d.x - 10, drawY - 10);
     }
     ctx.restore();
 }
@@ -203,10 +131,14 @@ function drawNPC(ctx, npc) {
         ctx.beginPath(); ctx.arc(npc.x + 15, drawY + 16, 2.5, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(npc.x + 21, drawY + 16, 2.5, 0, Math.PI*2); ctx.fill();
         ctx.shadowBlur = 0;
-    } else {
+    } else if (npc.type === 'rebel') {
         ctx.fillStyle = "#27ae60"; drawRoundedRect(ctx, npc.x + 5, drawY + 15, npc.width - 10, npc.height - 15, 4);
         ctx.fillStyle = "#ecf0f1"; drawRoundedRect(ctx, npc.x + 4, drawY, npc.width - 8, 14, 4);
         ctx.fillStyle = "#f1c40f"; ctx.beginPath(); ctx.arc(npc.x + 18, drawY + 18, 6, 0, Math.PI*2); ctx.fill();
+    }
+    if (npc.textTimer > 0) {
+        ctx.fillStyle = "#fff"; ctx.font = "bold 14px 'Comic Sans MS'";
+        ctx.fillText(npc.label, npc.x - 10, drawY - 10);
     }
     ctx.restore();
 }
@@ -218,20 +150,23 @@ function drawForceObject(ctx, obj) {
         ctx.shadowBlur = 25; ctx.shadowColor = "#e0aaff";
         ctx.strokeRect(obj.x - 4, obj.y - 4, obj.width + 8, obj.height + 8);
         ctx.shadowBlur = 0;
-        ctx.fillStyle = "#e0aaff"; ctx.font = "bold 13px 'Comic Sans MS'";
-        ctx.textAlign = "center";
-        ctx.fillText("✨ FORCE [F] ✨", obj.x + obj.width/2, obj.y - 12);
     }
     let spriteKey = obj.type === 'speeder' ? 'speeder' : 'crate';
     let img = ASSETS[spriteKey];
     if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
         ctx.drawImage(img, obj.x, obj.y, obj.width, obj.height);
     } else {
-        let grad = ctx.createLinearGradient(obj.x, obj.y, obj.x + obj.width, obj.y + obj.height);
-        grad.addColorStop(0, "#f39c12"); grad.addColorStop(1, "#d35400");
-        ctx.fillStyle = grad;
-        drawRoundedRect(ctx, obj.x, obj.y, obj.width, obj.height, 8);
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3.5; ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        if (obj.type === 'speeder') {
+            ctx.fillStyle = "#e67e22"; ctx.fillRect(obj.x, obj.y + 15, obj.width, 15);
+            ctx.fillStyle = "#e74c3c"; ctx.fillRect(obj.x + 20, obj.y + 5, 25, 10);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.strokeRect(obj.x, obj.y + 15, obj.width, 15);
+        } else {
+            let grad = ctx.createLinearGradient(obj.x, obj.y, obj.x + obj.width, obj.y + obj.height);
+            grad.addColorStop(0, "#f39c12"); grad.addColorStop(1, "#d35400");
+            ctx.fillStyle = grad;
+            drawRoundedRect(ctx, obj.x, obj.y, obj.width, obj.height, 8);
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3.5; ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
+        }
     }
     ctx.restore();
 }
