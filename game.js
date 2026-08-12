@@ -3,9 +3,9 @@ const ctx = canvas.getContext("2d");
 
 const CHARACTERS = {     
     luke: { name: "Luke Skywalker", color: "#2ecc71", saberColor: "#2ecc71" },     
-    ahsoka: { name: "Ahsoka Tano", color: "#3498db", saberColor: "#ffffff" },     
+    ahsoka: { name: "Ahsoka Tano", color: "#e67e22", saberColor: "#ffffff" },     
     anakin: { name: "Anakin Skywalker", color: "#00bfff", saberColor: "#00bfff" },     
-    vader: { name: "Darth Vader", color: "#e74c3c", saberColor: "#ff4d4d" } 
+    vader: { name: "Darth Vader", color: "#111111", saberColor: "#ff0000" } 
 };
 
 window.selectCharacter = function(key, el) {     
