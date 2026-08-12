@@ -134,4 +134,11 @@ function buildMissionLevel(difficultyMultiplier) {
 
     addGround(1000, 540);
     GAME.worldWidth = cursorX;
+
+    if (GAME.currentMission === 1) {
+        GAME.lightsaber.x = GAME.worldWidth - 500;
+        GAME.lightsaber.y = 480;
+        GAME.obi.x = 300;
+        GAME.obi.y = 490;
+    }
 }
