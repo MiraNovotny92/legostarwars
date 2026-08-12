@@ -186,6 +186,26 @@ function buildMission1() {
     addGround(100, 300);
     addGround(100, 250);
     addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 200);
+    addGround(50, 250);
+    addGround(50, 300);
+    addGround(50, 350);
+    addGround(50, 400);
+
+        GAME.jumpPads.push({ 
+        x: cursorX + 100, y: 520, width: 60, height: 20, color: "#00ffcc" 
+    });
 
         // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
     GAME.forceContainers.push({
@@ -195,6 +215,18 @@ function buildMission1() {
     // Draw 600px of ground under the Force block
     addGround(300, 540);
 
+    // --- SECTION 5: HORIZONTAL MOVING PLATFORM OVER PIT ---
+    // Place a platform moving left and right over the pit
+    GAME.movingPlatforms.push({ 
+        x: cursorX, y: 440, width: 140, height: 24, 
+        dx: 1.8, dy: 0, minX: cursorX, maxX: cursorX + 300, // Moves 300px right
+        minY: 440, maxY: 440, isMoving: true 
+    });
+    // Add the water pit under the moving platform
+    addWaterPit(400);
+    
+
+    
     // --- SECTION 10: GOAL AREA ---
     // Place the Lightsaber 300px into the final section
     GAME.lightsaber = { x: cursorX + 300, y: 480, width: 12, height: 60 };
