@@ -245,12 +245,23 @@ function buildMission1() {
     });
     // Draw 600px of ground under the wall and lifts
     addGround(500, 540);
+
+    // A simple 200px gap to jump over
+    addWaterPit(150);
+    addGround(200, 540);
+
+    // A simple 200px gap to jump over
+    addWaterPit(150);
+    addGround(200, 540);
+    addWaterPit(150);
+
+
     
     // --- SECTION 10: GOAL AREA ---
     // Place the Lightsaber 300px into the final section
     GAME.lightsaber = { x: cursorX + 300, y: 480, width: 12, height: 60 };
     // Draw 800px of ground for the ending area
-    addGround(800, 540);
+    addGround(500, 540);
 
     // Set the final width of the level so the camera stops scrolling
     GAME.worldWidth = cursorX;
