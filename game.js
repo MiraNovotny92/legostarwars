@@ -164,7 +164,7 @@ function update() {
         }     
     });     
 
-    const solidObjects = GAME.platforms    
+    const solidObjects = GAME.platforms     
         .concat(GAME.crates)         
         .concat(GAME.forceContainers)         
         .concat(GAME.laserGates.filter(g => !g.destroyed));     
@@ -278,11 +278,12 @@ function update() {
             playSound('stud'); addParticles(s.x, s.y, s.color, 8);         
         }     
     });     
-// Jump Pads (Fires the player up!)
+
+    // Jump Pads (Fires the player up!)
     GAME.jumpPads.forEach(pad => {         
         if (GAME.player.x < pad.x + pad.width && GAME.player.x + GAME.player.width > pad.x && 
             GAME.player.y + GAME.player.height >= pad.y && GAME.player.y < pad.y + pad.height) {             
-            GAME.player.dy = -22; // This is the massive upward boost
+            GAME.player.dy = -22; 
             playSound('jump'); 
             GAME.camera.shake = 8;             
             addParticles(pad.x + 30, pad.y, "#00ffcc", 10);         
@@ -290,9 +291,6 @@ function update() {
     });
 
     // Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
-    for (let i = GAME.particles.length - 1; i >= 0; i--) {
-        
-// Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
     for (let i = GAME.particles.length - 1; i >= 0; i--) {
         let p = GAME.particles[i];
         p.x += p.dx;
@@ -303,7 +301,6 @@ function update() {
         }
     }
 
-    // --- ADD THIS NEW BLOCK HERE ---
     // MISSION 1: OBI-WAN & LIGHTSABER LOGIC
     if (GAME.currentMission === 1) {
         
@@ -335,7 +332,6 @@ function update() {
             if (dialogueBox) dialogueBox.style.display = "none"; 
         }
     }
-    // -------------------------------
 
     if (GAME.player.y > 800) resetPlayer();  
     if (GAME.deathMessageTimer > 0) GAME.deathMessageTimer--;     
