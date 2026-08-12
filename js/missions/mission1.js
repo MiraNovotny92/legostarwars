@@ -164,6 +164,27 @@ function buildMission1() {
     // 2. The water pit underneath it (140 platform width + 200 travel distance = 340 gap)
     addWaterPit(340);
 
+        // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
+    GAME.forceContainers.push({
+        x: cursorX + 200, y: 310, width: 90, height: 230,
+        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
+    });
+    // Draw 600px of ground under the Force block
+    addGround(300, 540);
+        // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
+    GAME.forceContainers.push({
+        x: cursorX + 200, y: 310, width: 90, height: 230,
+        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
+    });
+    // Draw 600px of ground under the Force block
+    addGround(300, 540);
+        // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
+    GAME.forceContainers.push({
+        x: cursorX + 200, y: 310, width: 90, height: 230,
+        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
+    });
+    // Draw 600px of ground under the Force block
+    addGround(300, 540);
 
     // --- SECTION 10: GOAL AREA ---
     // Place the Lightsaber 300px into the final section
