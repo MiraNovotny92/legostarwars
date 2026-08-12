@@ -49,7 +49,43 @@ function buildMissionLevel(difficultyMultiplier) {
             baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
         });
         addGround(600, 540);
+// A stretch of ground with BB-8 and a Tree
+GAME.vaporators.push({ x: cursorX + 200, y: 360, width: 30, height: 180 });
+GAME.droids.push({
+    x: cursorX + 300, y: 495, baseY: 495, width: 40, height: 45, 
+    type: 'bb8', dx: 1.5, minX: cursorX + 250, maxX: cursorX + 450,
+    bounceY: 0, textTimer: 0, label: 'Beep!', isFloating: false
+});
+addGround(600, 540);
 
+// A water pit
+addWaterPit(250);
+
+// More ground with a Force Block
+GAME.forceContainers.push({
+    x: cursorX + 100, y: 310, width: 100, height: 160,
+    baseY: 310, isHovering: false, type: 'speeder'
+});
+addGround(500, 540);
+
+        // A stretch of ground with BB-8 and a Tree
+GAME.vaporators.push({ x: cursorX + 200, y: 360, width: 30, height: 180 });
+GAME.droids.push({
+    x: cursorX + 300, y: 495, baseY: 495, width: 40, height: 45, 
+    type: 'bb8', dx: 1.5, minX: cursorX + 250, maxX: cursorX + 450,
+    bounceY: 0, textTimer: 0, label: 'Beep!', isFloating: false
+});
+addGround(600, 540);
+
+// A water pit
+addWaterPit(250);
+
+// More ground with a Force Block
+GAME.forceContainers.push({
+    x: cursorX + 100, y: 310, width: 100, height: 160,
+    baseY: 310, isHovering: false, type: 'speeder'
+});
+addGround(500, 540);
         // 5. Goal Area with the Lightsaber!
         GAME.lightsaber = { x: cursorX + 200, y: 480, width: 12, height: 60 };
         addGround(500, 540);
