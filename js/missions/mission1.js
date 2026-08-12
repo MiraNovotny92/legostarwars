@@ -25,7 +25,7 @@ function buildMission1() {
 
     // --- SECTION 2: FIRST WATER PIT ---
     // A simple 200px gap to jump over
-    addWaterPit(200);
+    addWaterPit(150);
     
 
     // --- SECTION 3: DROID GREETING ---
@@ -36,7 +36,7 @@ function buildMission1() {
         bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
     });
     // Draw 500px of ground under the droid
-    addGround(500, 540);
+    addGround(300, 540);
 
 
     // --- SECTION 4: THE FORCE BLOCK ---
@@ -57,7 +57,7 @@ function buildMission1() {
         minY: 440, maxY: 440, isMoving: true 
     });
     // Add the water pit under the moving platform
-    addWaterPit(450);
+    addWaterPit(400);
 
 
     // --- SECTION 6: THE TWO-WAY GIANT WALL ---
@@ -82,7 +82,7 @@ function buildMission1() {
         minY: 200, maxY: 490, isMoving: true
     });
     // Draw 600px of ground under the wall and lifts
-    addGround(600, 540);
+    addGround(500, 540);
 
 
     // --- SECTION 7: LASER GATE OBSTACLE ---
@@ -91,7 +91,7 @@ function buildMission1() {
         x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
     });
     // Draw 500px of ground under the laser gate
-    addGround(500, 540);
+    addGround(400, 540);
 
 
     // --- SECTION 8: JUMP PAD OVER A WALL ---
