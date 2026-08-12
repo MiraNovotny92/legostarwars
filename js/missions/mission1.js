@@ -225,7 +225,26 @@ function buildMission1() {
     // Add the water pit under the moving platform
     addWaterPit(400);
     
+    // Left Vertical Lift (Starts at Y: 490, moves up to Y: 200)
+    GAME.movingPlatforms.push({
+        x: cursorX + 50, y: 490, width: 120, height: 24,
+        dx: 0, dy: -2.0, minX: cursorX + 50, maxX: cursorX + 50,
+        minY: 200, maxY: 490, isMoving: true
+    });
 
+    // The Giant Wall (Solid block, not ground)
+    GAME.platforms.push({
+        x: cursorX + 200, y: 220, width: 100, height: 320, isGround: true
+    });
+
+    // Right Vertical Lift (Starts at Y: 490, moves up to Y: 200)
+    GAME.movingPlatforms.push({
+        x: cursorX + 330, y: 490, width: 120, height: 24,
+        dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
+        minY: 200, maxY: 490, isMoving: true
+    });
+    // Draw 600px of ground under the wall and lifts
+    addGround(500, 540);
     
     // --- SECTION 10: GOAL AREA ---
     // Place the Lightsaber 300px into the final section
