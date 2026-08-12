@@ -6,13 +6,10 @@ function buildMissionLevel(difficultyMultiplier) {
     
     GAME.kyberCrystalsCollected = 0;
     let cursorX = 0;
-    let totalWidthNeeded = 9000;
+    let totalWidthNeeded = 8000;
 
     for(let i = 0; i < 250; i++) {
-        GAME.stars.push({ 
-            x: Math.random() * totalWidthNeeded, y: Math.random() * 450, 
-            size: Math.random() * 2 + 1, alpha: Math.random() 
-        });
+        GAME.stars.push({ x: Math.random() * totalWidthNeeded, y: Math.random() * 450, size: Math.random() * 2 + 1, alpha: Math.random() });
     }
 
     function addGround(width, heightY = 540) {
@@ -20,19 +17,12 @@ function buildMissionLevel(difficultyMultiplier) {
         
         if (width >= 800 && Math.random() > 0.3) {
             let bType = Math.random() > 0.5 ? 'imperial' : 'jedi';
-            GAME.buildings.push({ x: cursorX + 200, y: heightY - 160, width: 180, height: 160, type: bType });
+            GAME.buildings.push({
+                x: cursorX + 200, y: heightY - 160,
+                width: 180, height: 160, type: bType
+            });
         }
-
-        // Spawn Studs/Coins in Arcs and Rows
-        let studCount = GAME.currentMission === 2 ? Math.floor(width / 50) : Math.floor(width / 200);
-        for (let s = 0; s < studCount; s++) {
-            let studX = cursorX + 60 + (s * 45);
-            let colors = ["#ffd700", "#00bfff", "#ff007f", "#2ecc71"];
-            let color = colors[Math.floor(Math.random() * colors.length)];
-            GAME.studs.push({ x: studX, y: heightY - 45 - Math.sin(s * 0.5) * 40, radius: 8, collected: false, color: color });
-        }
-
-        // Spawn Trees & Crates
+        
         let itemsCount = Math.floor(width / 320);
         for(let j = 0; j < itemsCount; j++) {
             let rX = cursorX + 80 + Math.random() * (width - 160);
@@ -43,7 +33,6 @@ function buildMissionLevel(difficultyMultiplier) {
             }
         }
 
-        // Spawn All Droid Types
         if (width >= 350 && cursorX > 200) {
             const types = ['r2d2', 'gonk', 'bb8', 'mouse'];
             let droidType = types[Math.floor(Math.random() * types.length)];
@@ -75,44 +64,40 @@ function buildMissionLevel(difficultyMultiplier) {
         cursorX += width;
     }
 
-    // Starting Safe Zone
-    addGround(1000, 540);
+    function addFloatingPlatform(xOffset, y, width) {
+        GAME.movingPlatforms.push({ x: cursorX + xOffset, y: y, width: width, height: 24, dx: 0, dy: 0, minX: 0, maxX: 0, minY: 0, maxY: 0, isMoving: false });
+        for(let s = 0; s < 3; s++) {
+            GAME.studs.push({ x: cursorX + xOffset + 30 + (s * 40), y: y - 35, radius: 7, collected: false, color: "#00bfff" });
+        }
+    }
 
-    let numberOfObstacles = Math.max(4, difficultyMultiplier * 3);
+    addGround(1000, 540);
+    let numberOfObstacles = Math.max(3, difficultyMultiplier * 3);
     for (let i = 0; i < numberOfObstacles; i++) {
         let choice = Math.random();
-        let currentHeight = 520 - (Math.random() * 40);
+        let currentHeight = 520 - (Math.random() * 80);
 
         if (choice < 0.25) {
-            // Water Pit with Moving Platform
-            let pitSize = 240 + (difficultyMultiplier * 40);
+            // Horizontal Moving Platform over pit
+            let pitSize = 220 + (difficultyMultiplier * 50);
             GAME.movingPlatforms.push({ 
-                x: cursorX + 20, y: 440, width: 130, height: 24, 
-                dx: 1.8, dy: 0, minX: cursorX + 20, maxX: cursorX + pitSize - 130,
+                x: cursorX, y: 440, width: 140, height: 24, 
+                dx: 1.5, dy: 0, minX: cursorX, maxX: cursorX + pitSize - 140, 
                 minY: 440, maxY: 440, isMoving: true 
             });
             addWaterPit(pitSize);
             addGround(700, currentHeight);
 
         } else if (choice < 0.50) {
-            // TALL LIGHTSABER BARRIER (Slash with D)
-            addGround(400, currentHeight);
-            GAME.laserGates.push({
-                x: cursorX - 100, y: currentHeight - 320,
-                width: 28, height: 320, destroyed: false
-            });
-            addGround(500, currentHeight);
-
-        } else if (choice < 0.75) {
-            // GIANT WALL + VERTICAL MOVING PLATFORM (Up / Down)
+            // Vertical Up & Down Moving Platform beside a giant wall
             let wallHeight = 280;
-            let wallWidth = 120;
-            let wallX = cursorX + 320;
+            let wallWidth = 100;
+            let wallX = cursorX + 300;
 
             GAME.movingPlatforms.push({
-                x: cursorX + 140, y: currentHeight - 60, width: 130, height: 24,
-                dx: 0, dy: -2.0, minX: cursorX + 140, maxX: cursorX + 140,
-                minY: currentHeight - 250, maxY: currentHeight - 50, isMoving: true
+                x: cursorX + 120, y: currentHeight - 50, width: 130, height: 24,
+                dx: 0, dy: -2.0, minX: cursorX + 120, maxX: cursorX + 120,
+                minY: currentHeight - 240, maxY: currentHeight - 50, isMoving: true
             });
 
             GAME.platforms.push({
@@ -120,15 +105,19 @@ function buildMissionLevel(difficultyMultiplier) {
                 width: wallWidth, height: wallHeight + 100, isGround: false
             });
 
-            // Stud Rewards On Top of Wall
-            for (let s = 0; s < 5; s++) {
-                GAME.studs.push({ x: wallX + 10 + (s * 22), y: currentHeight - wallHeight - 30, radius: 8, collected: false, color: "#ffd700" });
-            }
+            addGround(800, currentHeight);
 
-            addGround(900, currentHeight);
+        } else if (choice < 0.75) {
+            // Tall Unjumpable Barrier (Slash with D)
+            addGround(300, currentHeight);
+            GAME.laserGates.push({
+                x: cursorX - 80, y: currentHeight - 300,
+                width: 20, height: 300, destroyed: false
+            });
+            addGround(600, currentHeight);
 
         } else {
-            // FORCE LEVITATION CONTAINER OBSTACLE
+            // Force Container
             let forceTypes = ['container', 'speeder', 'brick'];
             let chosenType = forceTypes[Math.floor(Math.random() * forceTypes.length)];
             
@@ -139,28 +128,10 @@ function buildMissionLevel(difficultyMultiplier) {
                 baseY: currentHeight - 230, isHovering: false, type: chosenType,
                 color: chosenType === 'brick' ? '#e74c3c' : null
             });
-            addGround(900, currentHeight);
+            addGround(1000, currentHeight);
         }
     }
 
-    addGround(1200, 540);
+    addGround(1000, 540);
     GAME.worldWidth = cursorX;
-    
-    // Mission 1 setup
-    if (GAME.currentMission === 1) {
-        GAME.lightsaber.x = GAME.worldWidth - 600;
-        GAME.obi.x = 300;
-        GAME.obi.y = 490;
-    }
-
-    // Mission 2 Stud Frenzy Backup Guarantee
-    if (GAME.currentMission === 2) {
-        while(GAME.studs.length < 120) {
-            GAME.studs.push({
-                x: 400 + Math.random() * (GAME.worldWidth - 800),
-                y: 200 + Math.random() * 300,
-                radius: 8, collected: false, color: ["#ffd700", "#00bfff", "#ff007f"][Math.floor(Math.random()*3)]
-            });
-        }
-    }
 }
