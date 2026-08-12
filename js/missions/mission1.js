@@ -145,6 +145,8 @@ function buildMission1() {
     addGround(300, 540);
 
     addGround(200, 480);
+    addGround(200, 400);
+    addGround(100, 350);
     addGround(200, 300);
         GAME.droids.push({
         x: cursorX + 100, y: 495, baseY: 495, width: 45, height: 45, type: 'gonk',
