@@ -278,7 +278,20 @@ function update() {
             playSound('stud'); addParticles(s.x, s.y, s.color, 8);         
         }     
     });     
+// Jump Pads (Fires the player up!)
+    GAME.jumpPads.forEach(pad => {         
+        if (GAME.player.x < pad.x + pad.width && GAME.player.x + GAME.player.width > pad.x && 
+            GAME.player.y + GAME.player.height >= pad.y && GAME.player.y < pad.y + pad.height) {             
+            GAME.player.dy = -22; // This is the massive upward boost
+            playSound('jump'); 
+            GAME.camera.shake = 8;             
+            addParticles(pad.x + 30, pad.y, "#00ffcc", 10);         
+        }     
+    });
 
+    // Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
+    for (let i = GAME.particles.length - 1; i >= 0; i--) {
+        
 // Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
     for (let i = GAME.particles.length - 1; i >= 0; i--) {
         let p = GAME.particles[i];
