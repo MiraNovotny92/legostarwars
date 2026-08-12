@@ -42,17 +42,19 @@ window.buyShield = function() {
     } 
 };
 
-window.startGame = function(difficulty) {     
+window.startGame = function() {     
     window.toggleFullscreen();     
     const startScreen = document.getElementById("start-screen");     
     const scoreText = document.getElementById("score-text");     
     const tjFill = document.getElementById("tj-fill");          
+    
     if (startScreen) startScreen.style.display = "none";     
     GAME.score = 0; if (scoreText) scoreText.innerText = GAME.score;     
     GAME.hasLightsaber = false; GAME.hasShield = false;     
     if (tjFill) tjFill.style.width = "0%";     
     GAME.startTime = Date.now();          
-    buildMissionLevel(difficulty);     
+    
+    buildMissionLevel(); // Removed difficulty parameter
     startBackgroundMusic();     
     GAME.state = "PLAYING"; 
 };
