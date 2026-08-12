@@ -44,7 +44,7 @@ window.GAME = {
     npcs: []
 };
 
-// Fail-Safe Drawing Helper (Guarantees zero browser crashes)
+// Fail-Safe Drawing Helper
 function drawRoundedRect(ctx, x, y, w, h, r = 6) {
     if (w <= 0 || h <= 0) return;
     let radius = typeof r === 'number' ? r : 6;
