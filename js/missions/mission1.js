@@ -46,7 +46,16 @@ function buildMission1() {
         baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
     });
     // Draw 600px of ground under the Force block
-    addGround(600, 540);
+    addGround(300, 540);
+    
+        // --- SECTION 4: THE FORCE BLOCK ---
+    // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
+    GAME.forceContainers.push({
+        x: cursorX + 200, y: 310, width: 90, height: 230,
+        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
+    });
+    // Draw 600px of ground under the Force block
+    addGround(300, 540);
 
 
     // --- SECTION 5: HORIZONTAL MOVING PLATFORM OVER PIT ---
@@ -91,7 +100,15 @@ function buildMission1() {
         x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
     });
     // Draw 500px of ground under the laser gate
-    addGround(400, 540);
+    addGround(300, 540);
+
+        // --- SECTION 7: LASER GATE OBSTACLE ---
+    // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(300, 540);
 
 
     // --- SECTION 8: JUMP PAD OVER A WALL ---
