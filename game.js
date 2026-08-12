@@ -277,7 +277,7 @@ function update() {
         }     
     });     
 
-    // Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
+// Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
     for (let i = GAME.particles.length - 1; i >= 0; i--) {
         let p = GAME.particles[i];
         p.x += p.dx;
@@ -288,7 +288,41 @@ function update() {
         }
     }
 
-    if (GAME.player.y > 800) resetPlayer();     
+    // --- ADD THIS NEW BLOCK HERE ---
+    // MISSION 1: OBI-WAN & LIGHTSABER LOGIC
+    if (GAME.currentMission === 1) {
+        
+        // 1. Did the player touch the lightsaber?
+        if (!GAME.hasLightsaber && 
+            GAME.player.x < GAME.lightsaber.x + GAME.lightsaber.width && 
+            GAME.player.x + GAME.player.width > GAME.lightsaber.x && 
+            GAME.player.y < GAME.lightsaber.y + GAME.lightsaber.height && 
+            GAME.player.y + GAME.player.height > GAME.lightsaber.y) {         
+            
+            GAME.hasLightsaber = true; 
+            playSound('win'); 
+            addParticles(GAME.lightsaber.x, GAME.lightsaber.y, "#00ff00", 25);     
+        }     
+
+        // 2. Dialogue Box for Obi-Wan
+        let distObi = Math.abs(GAME.player.x - GAME.obi.x);     
+        const dialogueBox = document.getElementById("dialogue-box");     
+        const dialogueText = document.getElementById("dialogue-text");     
+        
+        if (distObi < 150 && GAME.player.y > 400) {         
+            if (GAME.hasLightsaber) {
+                triggerWin("Returned Obi-Wan's Lightsaber!");         
+            } else {              
+                if (dialogueBox) dialogueBox.style.display = "block";              
+                if (dialogueText) dialogueText.innerText = "Obi-Wan: Hello there! I lost my lightsaber. Can you help me find it?";          
+            }     
+        } else { 
+            if (dialogueBox) dialogueBox.style.display = "none"; 
+        }
+    }
+    // -------------------------------
+
+    if (GAME.player.y > 800) resetPlayer();  
     if (GAME.deathMessageTimer > 0) GAME.deathMessageTimer--;     
     if (GAME.player.x < 0) GAME.player.x = 0;     
     if (GAME.player.x + GAME.player.width > GAME.worldWidth) GAME.player.x = GAME.worldWidth - GAME.player.width;     
