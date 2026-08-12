@@ -37,10 +37,8 @@ window.buyShield = function() {
         GAME.score -= 50;          
         const scoreText = document.getElementById("score-text");         
         if (scoreText) scoreText.innerText = GAME.score;         
-        GAME.hasShield = true; 
-        GAME.shieldTimer = 300;         
-        playSound('shield'); 
-        addParticles(GAME.player.x, GAME.player.y, "#00bfff", 15);     
+        GAME.hasShield = true; GAME.shieldTimer = 300;         
+        playSound('shield'); addParticles(GAME.player.x, GAME.player.y, "#00bfff", 15);     
     } 
 };
 
@@ -50,10 +48,8 @@ window.startGame = function(difficulty) {
     const scoreText = document.getElementById("score-text");     
     const tjFill = document.getElementById("tj-fill");          
     if (startScreen) startScreen.style.display = "none";     
-    GAME.score = 0; 
-    if (scoreText) scoreText.innerText = GAME.score;     
-    GAME.hasLightsaber = false; 
-    GAME.hasShield = false;     
+    GAME.score = 0; if (scoreText) scoreText.innerText = GAME.score;     
+    GAME.hasLightsaber = false; GAME.hasShield = false;     
     if (tjFill) tjFill.style.width = "0%";     
     GAME.startTime = Date.now();          
     buildMissionLevel(difficulty);     
@@ -65,7 +61,7 @@ function addParticles(x, y, color, count = 5) {
     for (let i = 0; i < count; i++) {         
         GAME.particles.push({             
             x: x, y: y,             
-            dx: (Math.random() - 0.5) * 10, dy: (Math.random() - 0.5) * 10 - 2,             
+            dx: (Math.random() - 0.5) * 8, dy: (Math.random() - 0.5) * 8 - 2,             
             size: Math.random() * 6 + 3, color: color, life: 30         
         });     
     } 
@@ -97,11 +93,7 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft") keys.ArrowLeft = true;     
     if (e.code === "ArrowRight") keys.ArrowRight = true;     
     if (e.code === "Space") {         
-        if (!keys.Space && GAME.player.grounded) { 
-            playSound('jump'); 
-            GAME.player.scaleX = 0.7; 
-            GAME.player.scaleY = 1.3; 
-        }         
+        if (!keys.Space && GAME.player.grounded) { playSound('jump'); GAME.player.scaleX = 0.7; GAME.player.scaleY = 1.3; }         
         keys.Space = true;     
     }     
     if (e.code === "KeyF") keys.F = true;     
@@ -127,33 +119,18 @@ function bindTouch(id, keyName) {
     if (!btn) return;     
     btn.addEventListener("touchstart", (e) => {         
         e.preventDefault(); keys[keyName] = true;         
-        if (keyName === 'Space' && GAME.player.grounded) { 
-            playSound('jump'); 
-            GAME.player.scaleX = 0.7; 
-            GAME.player.scaleY = 1.3; 
-        }         
-        if (keyName === 'D' && GAME.player.saberSwingTimer <= 0) { 
-            GAME.player.saberSwingTimer = 15; 
-            playSound('slash'); 
-        }     
+        if (keyName === 'Space' && GAME.player.grounded) { playSound('jump'); GAME.player.scaleX = 0.7; GAME.player.scaleY = 1.3; }         
+        if (keyName === 'D' && GAME.player.saberSwingTimer <= 0) { GAME.player.saberSwingTimer = 15; playSound('slash'); }     
     });     
     btn.addEventListener("touchend", (e) => { e.preventDefault(); keys[keyName] = false; }); 
 }
 
-bindTouch("btn-left", "ArrowLeft"); 
-bindTouch("btn-right", "ArrowRight"); 
-bindTouch("btn-jump", "Space"); 
-bindTouch("btn-force", "F"); 
-bindTouch("btn-attack", "D");
+bindTouch("btn-left", "ArrowLeft"); bindTouch("btn-right", "ArrowRight"); bindTouch("btn-jump", "Space"); bindTouch("btn-force", "F"); bindTouch("btn-attack", "D");
 
 function resetPlayer() {     
     if (GAME.hasShield) return;     
-    GAME.player.x = GAME.lastSafeX; 
-    GAME.player.y = 300; 
-    GAME.player.dx = 0; 
-    GAME.player.dy = 0;     
-    GAME.deathMessageTimer = 90; 
-    GAME.camera.shake = 12;     
+    GAME.player.x = GAME.lastSafeX; GAME.player.y = 300; GAME.player.dx = 0; GAME.player.dy = 0;     
+    GAME.deathMessageTimer = 90; GAME.camera.shake = 12;     
     GAME.forceContainers.forEach(fc => fc.y = fc.baseY); 
 }
 
@@ -171,13 +148,9 @@ function update() {
     
     if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
     if (keys.ArrowRight) { GAME.player.dx += 1.2; GAME.player.facing = 'right'; }     
-    if (keys.Space && GAME.player.grounded) { 
-        GAME.player.dy = GAME.player.jumpPower; 
-        GAME.player.grounded = false; 
-    }     
+    if (keys.Space && GAME.player.grounded) { GAME.player.dy = GAME.player.jumpPower; GAME.player.grounded = false; }     
     
-    GAME.player.dy += GAME.gravity; 
-    GAME.player.dx *= GAME.friction;     
+    GAME.player.dy += GAME.gravity; GAME.player.dx *= GAME.friction;     
     GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;     
     GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;     
     
@@ -189,28 +162,24 @@ function update() {
         }     
     });     
 
-    const solidObjects = GAME.platforms
+    const solidObjects = GAME.platforms.filter(p => p.isGround)         
         .concat(GAME.crates)         
         .concat(GAME.forceContainers)         
         .concat(GAME.laserGates.filter(g => !g.destroyed));     
 
-    // X Collision
     GAME.player.x += GAME.player.dx;     
     solidObjects.forEach(s => {         
-        if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && 
-            GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
+        if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
             if (GAME.player.dx > 0) GAME.player.x = s.x - GAME.player.width;             
             else if (GAME.player.dx < 0) GAME.player.x = s.x + s.width;             
             GAME.player.dx = 0;         
         }     
     });     
 
-    // Y Collision
     GAME.player.y += GAME.player.dy;     
     GAME.player.grounded = false;     
     solidObjects.forEach(s => {         
-        if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && 
-            GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
+        if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
             if (GAME.player.dy > 0) {                 
                 if (!GAME.player.grounded) { GAME.player.scaleX = 1.2; GAME.player.scaleY = 0.8; }                 
                 GAME.player.grounded = true; GAME.player.dy = 0; GAME.player.y = s.y - GAME.player.height;                 
@@ -221,18 +190,15 @@ function update() {
         }     
     });     
 
-    // LIGHTSABER SLASH (Key D)
+    // Lightsaber Attack
     if (GAME.player.saberSwingTimer > 0) {         
-        let attackBoxX = GAME.player.facing === 'right' ? GAME.player.x + GAME.player.width : GAME.player.x - 50;         
-        let attackBox = { x: attackBoxX, y: GAME.player.y - 40, width: 60, height: GAME.player.height + 80 };         
+        let attackBoxX = GAME.player.facing === 'right' ? GAME.player.x + GAME.player.width : GAME.player.x - 40;         
+        let attackBox = { x: attackBoxX, y: GAME.player.y - 20, width: 40, height: GAME.player.height + 40 };         
         GAME.laserGates.forEach(gate => {             
-            if (!gate.destroyed && 
-                attackBox.x < gate.x + gate.width && attackBox.x + attackBox.width > gate.x && 
-                attackBox.y < gate.y + gate.height && attackBox.y + attackBox.height > gate.y) {                 
+            if (!gate.destroyed && attackBox.x < gate.x + gate.width && attackBox.x + attackBox.width > gate.x && attackBox.y < gate.y + gate.height && attackBox.y + attackBox.height > gate.y) {                 
                 gate.destroyed = true;                 
                 playSound('gateBreak');                 
-                addParticles(gate.x + gate.width / 2, gate.y + gate.height / 2, "#ff0055", 35);                 
-                GAME.camera.shake = 10;
+                addParticles(gate.x + 10, gate.y + gate.height/2, "#ff0055", 25);                 
                 GAME.score += 20;                 
                 const scoreText = document.getElementById("score-text");                 
                 if (scoreText) scoreText.innerText = GAME.score;             
@@ -240,36 +206,28 @@ function update() {
         });     
     }     
 
-    // MOVING PLATFORMS RIDING
+    // Ride Moving Platforms
     GAME.movingPlatforms.forEach(p => {         
         let prevPlayerBottom = (GAME.player.y - GAME.player.dy) + GAME.player.height;         
         if (GAME.player.x < p.x + p.width && GAME.player.x + GAME.player.width > p.x) {             
             if (GAME.player.dy >= 0 && prevPlayerBottom <= p.y + 12 && GAME.player.y + GAME.player.height >= p.y) {                 
                 GAME.player.grounded = true; GAME.player.dy = 0; GAME.player.y = p.y - GAME.player.height;                 
-                if (p.isMoving) { if (p.dx) GAME.player.x += p.dx; }             
+                if (p.isMoving) {
+                    if (p.dx) GAME.player.x += p.dx;
+                    if (p.dy) GAME.player.y += p.dy;
+                }             
             }         
         }     
     });     
 
-    // FORCE LEVITATION (Key F) - Lift Objects & Droids
-    GAME.forceContainers.forEach(fc => {         
-        let dist = Math.abs((GAME.player.x + GAME.player.width/2) - (fc.x + fc.width/2));         
-        if (keys.F && dist < 420) {             
-            fc.y -= 4.5; fc.isHovering = true;             
-            if (fc.y < 60) fc.y = 60;             
-            GAME.camera.shake = Math.random() * 2;             
-            addParticles(fc.x + Math.random() * fc.width, fc.y + fc.height, "#e0aaff", 2);         
-        } else {             
-            fc.isHovering = false; fc.y += 8;             
-            if (fc.y > fc.baseY) fc.y = fc.baseY;         
-        }     
-    });     
-
+    // Droids Interaction & Timer
     GAME.droids.forEach(d => {         
         let dist = Math.hypot((GAME.player.x + 24) - (d.x + 20), (GAME.player.y + 24) - d.y);         
+        if (d.textTimer > 0) d.textTimer--;
+        
         if (keys.F && dist < 420) {             
             d.isFloating = true; d.y -= 3;             
-            if (d.y < 280) d.y = 280;             
+            if (d.y < 300) d.y = 300;             
             d.bounceY = Math.sin(Date.now() / 100) * 8;             
             addParticles(d.x + 20, d.y + 20, "#e0aaff", 1);             
         } else {             
@@ -293,54 +251,41 @@ function update() {
         }     
     });     
 
-    // STUD / COIN COLLECTION & MISSION 2 WIN (100 STUDS)
+    // Force Lift
+    GAME.forceContainers.forEach(fc => {         
+        let dist = Math.abs((GAME.player.x + GAME.player.width/2) - (fc.x + fc.width/2));         
+        if (keys.F && dist < 420) {             
+            fc.y -= 4.5; fc.isHovering = true;             
+            if (fc.y < 60) fc.y = 60;             
+            GAME.camera.shake = Math.random() * 2;             
+            addParticles(fc.x + Math.random() * fc.width, fc.y + fc.height, "#e0aaff", 2);         
+        } else {             
+            fc.isHovering = false; fc.y += 8;             
+            if (fc.y > fc.baseY) fc.y = fc.baseY;         
+        }     
+    });     
+
+    // Stud / Coin Pickup
     GAME.studs.forEach(s => {         
-        if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 36) {             
-            s.collected = true; 
-            GAME.score += 10;             
+        if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {             
+            s.collected = true; GAME.score += 10;             
             const scoreText = document.getElementById("score-text");             
             const tjFill = document.getElementById("tj-fill");             
             if (scoreText) scoreText.innerText = GAME.score;             
             if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";             
-            playSound('stud'); 
-            addParticles(s.x, s.y, s.color, 8);         
-            
-            // MISSION 2 WIN CONDITION: Collect 100 Studs!
-            if (GAME.currentMission === 2 && GAME.score >= 100) {
-                triggerWin("True Jedi Achieved! 100 Studs Collected!");
-            }
+            playSound('stud'); addParticles(s.x, s.y, s.color, 8);         
         }     
     });     
 
-    // MISSION 1: OBI-WAN LIGHTSABER QUEST
-    if (GAME.currentMission === 1 && !GAME.hasLightsaber && 
-        GAME.player.x < GAME.lightsaber.x + GAME.lightsaber.width && 
-        GAME.player.x + GAME.player.width > GAME.lightsaber.x && 
-        GAME.player.y < GAME.lightsaber.y + GAME.lightsaber.height && 
-        GAME.player.y + GAME.player.height > GAME.lightsaber.y) {         
-        
-        GAME.hasLightsaber = true; 
-        playSound('win'); 
-        addParticles(GAME.lightsaber.x, GAME.lightsaber.y, "#00ff00", 25);     
-    }     
-
-    let distObi = Math.abs(GAME.player.x - GAME.obi.x);     
-    const dialogueBox = document.getElementById("dialogue-box");     
-    const dialogueText = document.getElementById("dialogue-text");     
-    if (GAME.currentMission === 1 && distObi < 150 && GAME.player.y > 400) {         
-        if (GAME.hasLightsaber) {
-            triggerWin("Returned Obi-Wan's Lightsaber!");         
-        } else {              
-            if (dialogueBox) dialogueBox.style.display = "block";              
-            if (dialogueText) dialogueText.innerText = "Obi-Wan: Bring back my lightsaber!";          
-        }     
-    } else { 
-        if (dialogueBox) dialogueBox.style.display = "none"; 
-    }     
-
-    // MISSION 3: GROGU RESCUE
-    if (GAME.currentMission === 3 && GAME.player.x > GAME.worldWidth - 500) {
-        triggerWin("Grogu Rescued Safely!");     
+    // Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
+    for (let i = GAME.particles.length - 1; i >= 0; i--) {
+        let p = GAME.particles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+        p.life--;
+        if (p.life <= 0) {
+            GAME.particles.splice(i, 1);
+        }
     }
 
     if (GAME.player.y > 800) resetPlayer();     
@@ -375,30 +320,22 @@ function drawLegoPlatform(p) {
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(p.x, p.y, p.width, 10);         
         return;     
     }     
-    
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);     
-    let headerColor = p.dy ? "#e74c3c" : (p.dx ? "#e67e22" : "#34495e");
-    grad.addColorStop(0, headerColor);     
+    grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");     
     grad.addColorStop(1, "#1a252f");          
     ctx.fillStyle = grad; drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);     
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();     
-    ctx.fillStyle = p.dy ? "#ff4757" : (p.dx ? "#e67e22" : "#00bfff");     
+    ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";     
     ctx.fillRect(p.x, p.y, p.width, 3);     
-    
     let studSpacing = 22;     
     let studCount = Math.floor(p.width / studSpacing);     
     for (let i = 0; i < studCount; i++) {         
         let sx = p.x + (i * studSpacing) + 11;         
         let sy = p.y - 4;         
-        ctx.fillStyle = p.dy ? "#ff6b81" : (p.dx ? "#d35400" : "#0097e6");         
+        ctx.fillStyle = p.isMoving ? "#d35400" : "#0097e6";         
         ctx.fillRect(sx - 5, sy, 10, 4);         
         ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.fillRect(sx - 5, sy, 10, 1);     
     } 
-
-    if (p.dy) {
-        ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px Arial"; ctx.textAlign = "center";
-        ctx.fillText("↕ UP / DOWN", p.x + p.width / 2, p.y + 16);
-    }
 }
 
 function draw() {     
@@ -444,27 +381,13 @@ function draw() {
         GAME.npcs.forEach(n => drawNPC(ctx, n));         
         GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });     
     } catch(e) {}     
-    
-    // MISSION 1: OBI-WAN & LIGHTSABER
-    try {         
-        if (GAME.currentMission === 1) {             
-            drawObiWan(ctx, GAME.obi.x, GAME.obi.y);
-            if (!GAME.hasLightsaber) {                 
-                ctx.fillStyle = "#2ecc71"; ctx.shadowBlur = 15; ctx.shadowColor = "#2ecc71";                 
-                ctx.fillRect(GAME.lightsaber.x, GAME.lightsaber.y + Math.sin(Date.now() / 150) * 8, GAME.lightsaber.width, GAME.lightsaber.height);                 
-                ctx.shadowBlur = 0;             
-            }         
-        }         
-        if (GAME.currentMission === 3) drawGrogu(ctx, GAME.worldWidth - 400, 480);     
-    } catch(e) {}     
-
     try {         
         GAME.particles.forEach(p => {             
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();         
         });     
     } catch(e) {}     
     
-    // PLAYER & LIGHTSABER RENDER
+    // Player Character & Saber Swing
     try {         
         ctx.save();         
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
@@ -485,34 +408,19 @@ function draw() {
         ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);         
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
         ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
-
-        // Lightsaber & Swing Arc Animation
-        ctx.save();             
-        let isSwinging = GAME.player.saberSwingTimer > 0;
-        let swingProgress = isSwinging ? (15 - GAME.player.saberSwingTimer) / 15 : 0;             
-        let swingAngle = GAME.player.facing === 'right' ? 
-            (-Math.PI/2 + (swingProgress * Math.PI)) : 
-            (Math.PI/2 - (swingProgress * Math.PI));                          
         
-        ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
-        ctx.rotate(swingAngle);             
-        ctx.shadowBlur = 25; ctx.shadowColor = currentChar.saberColor;             
-        ctx.fillStyle = currentChar.saberColor;             
-        ctx.fillRect(0, -45, 8, 45);             
-        ctx.shadowBlur = 0;             
-        ctx.restore();         
-
-        if (isSwinging) {
-            ctx.save();
-            ctx.strokeStyle = currentChar.saberColor; ctx.lineWidth = 6;
-            ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;
-            ctx.beginPath();
-            let arcDir = GAME.player.facing === 'right' ? 1 : -1;
-            ctx.arc(0, -GAME.player.height/2, 45, -Math.PI/3 * arcDir, Math.PI/3 * arcDir, GAME.player.facing !== 'right');
-            ctx.stroke();
-            ctx.restore();
-        }
-
+        if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
+            ctx.save();             
+            let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
+            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                          
+            ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
+            ctx.rotate(swingAngle);             
+            ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;             
+            ctx.fillStyle = currentChar.saberColor;             
+            ctx.fillRect(0, -35, 6, 35);             
+            ctx.shadowBlur = 0;             
+            ctx.restore();         
+        }         
         ctx.restore();     
     } catch(e) {}     
     ctx.restore();     
@@ -524,9 +432,7 @@ function draw() {
 }
 
 function gameLoop() {     
-    update(); 
-    draw(); 
-    requestAnimationFrame(gameLoop); 
+    update(); draw(); requestAnimationFrame(gameLoop); 
 }
 
 gameLoop();
