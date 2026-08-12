@@ -13,6 +13,7 @@ loadGameAsset('speeder', 'assets/speeder.png');
 loadGameAsset('r2d2', 'assets/r2d2.png');
 loadGameAsset('bb8', 'assets/bb8.png');
 loadGameAsset('gonk', 'assets/gonk.png');
+loadGameAsset('obi', 'assets/obi.png');
 
 function drawVaporator(ctx, v) {
     let img = ASSETS['tree'];
