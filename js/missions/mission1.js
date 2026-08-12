@@ -142,11 +142,15 @@ function buildMission1() {
         dx: 2.5, minX: cursorX + 450, maxX: cursorX + 750, bounceY: 0, textTimer: 0, label: 'Whirrr!', isFloating: false
     });
     // Draw 900px of ground
-    addGround(700, 540);
+    addGround(300, 540);
 
     addGround(200, 480);
-    addGround(400, 400);
-    addGround(400, 400);
+    addGround(200, 300);
+        GAME.droids.push({
+        x: cursorX + 100, y: 495, baseY: 495, width: 45, height: 45, type: 'gonk',
+        dx: 1.0, minX: cursorX + 50, maxX: cursorX + 400, bounceY: 0, textTimer: 0, label: 'GONK!', isFloating: false
+    });
+    addGround(200, 400);
 
     // 1. The moving platform
     // dx: 1.5 means it moves left and right. 
