@@ -452,6 +452,30 @@ function draw() {
             }
         }
     } catch(e) {}
+
+    // Mission 2: Spaceship Rendering
+    try {
+        if (GAME.currentMission === 2 && GAME.spaceship) {
+            ctx.save();
+            // Main Grey Hull
+            ctx.fillStyle = "#95a5a6";
+            drawRoundedRect(ctx, GAME.spaceship.x, GAME.spaceship.y + 60, GAME.spaceship.width, 60, 20);
+            // Blue Cockpit window
+            ctx.fillStyle = "#2980b9";
+            drawRoundedRect(ctx, GAME.spaceship.x + 180, GAME.spaceship.y + 20, 70, 50, 15);
+            // Red Engine Glow
+            ctx.shadowBlur = 20; ctx.shadowColor = "#e74c3c";
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(GAME.spaceship.x - 15, GAME.spaceship.y + 75, 20, 30);
+            ctx.shadowBlur = 0;
+            
+            // Text Label
+            ctx.fillStyle = "#00bfff"; ctx.font = "bold 18px 'Comic Sans MS'"; ctx.textAlign = "center";
+            ctx.fillText("Escape Ship!", GAME.spaceship.x + GAME.spaceship.width/2, GAME.spaceship.y);
+            ctx.restore();
+        }
+    } catch(e) {}
+    
     
     try {         
         ctx.save();         
