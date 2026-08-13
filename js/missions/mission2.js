@@ -12,370 +12,159 @@ function buildMission2() {
         cursorX += width;
     }
 
-    // NEW HELPER: Draws a straight horizontal line of coins
+    // HELPER: Draws a straight horizontal line of coins
     function addCoins(startX, y, count) {
         for (let i = 0; i < count; i++) {
             GAME.studs.push({ x: startX + (i * 40), y: y, radius: 8, collected: false, color: "#ffd700" });
         }
     }
 
-    // NEW HELPER: Draws a massive jumping arc of coins!
-    function addCoinArc(startX, baseY, count) {
+    // HELPER: Draws a jumping arc of coins
+    function addCoinArc(startX, baseY, count, spacing = 45, arcHeight = 150) {
         for (let i = 0; i < count; i++) {
-            // Math.sin creates a perfect arc shape in the air
-            let arcY = baseY - Math.sin((i / (count - 1)) * Math.PI) * 150; 
-            GAME.studs.push({ x: startX + (i * 45), y: arcY, radius: 8, collected: false, color: "#00bfff" });
+            let arcY = baseY - Math.sin((i / (count - 1)) * Math.PI) * arcHeight; 
+            GAME.studs.push({ x: startX + (i * spacing), y: arcY, radius: 8, collected: false, color: "#00bfff" });
+        }
+    }
+
+    // NEW HELPER: Draws a massive block/grid of coins
+    function addCoinGrid(startX, startY, rows, cols) {
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                GAME.studs.push({ x: startX + (c * 40), y: startY + (r * 40), radius: 8, collected: false, color: "#ffd700" });
+            }
         }
     }
 
     // ==========================================
-    // MISSION 2 LAYOUT: 50-COIN FRENZY & ESCAPE
+    // MISSION 2 LAYOUT: 200+ COIN FRENZY & ESCAPE
     // ==========================================
     
     // --- SECTION 1: STARTING SAFE AREA ---
+    // 24 Coins in a block right at the start
+    addCoinGrid(cursorX + 200, 400, 3, 8); 
     addGround(600, 540);
-    addCoins(200, 500, 5); // 5 coins
 
     // --- SECTION 2: THE STAIRCASE CLIMB ---
+    // 24 Coins scattered above the steps
+    addCoinGrid(cursorX, 400, 2, 4); 
     addGround(200, 480);
-    addCoins(cursorX - 180, 440, 4); // 4 coins above the stairs
+    
+    addCoinGrid(cursorX, 340, 2, 4); 
     addGround(200, 420);
-    addCoins(cursorX - 180, 380, 4);
+    
+    addCoinGrid(cursorX, 280, 2, 4); 
     addGround(200, 360);
-    addCoins(cursorX - 180, 320, 4);
 
-    // --- SECTION 3: JUMP PAD INTO MASSIVE COIN ARC ---
+    // --- SECTION 3: JUMP PAD INTO DOUBLE COIN ARC ---
     GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
-    addWaterPit(280); // Huge gap!
-    addCoinArc(cursorX - 550, 340, 14); // 14 coins in a massive arc over the water
+    // 20 Coins soaring over the pit
+    addCoinArc(cursorX - 50, 340, 10, 40, 200); 
+    addCoinArc(cursorX - 50, 300, 10, 40, 200); 
+    addWaterPit(300);
 
     // --- SECTION 4: LANDING ZONE WITH BB-8 ---
+    // FIXED: y and baseY set to 495 so BB-8 sits on the floor
     GAME.droids.push({
-        x: cursorX + 100, y: 545, baseY: 545, width: 40, height: 45, type: 'bb8',
+        x: cursorX + 100, y: 495, baseY: 495, width: 40, height: 45, type: 'bb8',
         dx: 2.0, minX: cursorX + 50, maxX: cursorX + 350, bounceY: 0, textTimer: 0, label: 'Beep-Bloop!', isFloating: false
     });
+    addCoinGrid(cursorX + 50, 420, 2, 8); // 16 coins hovering above BB-8
     addGround(400, 540);
-    addCoins(cursorX - 400, 500, 8); // 8 coins on the ground
 
     // --- SECTION 5: HIGH-SPEED MOVING PLATFORMS ---
     GAME.movingPlatforms.push({ 
         x: cursorX, y: 440, width: 240, height: 24, 
         dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 440, maxY: 440, isMoving: true 
     });
-    addCoins(cursorX + 50, 400, 6); // 6 coins hovering above the first platform
+    addCoins(cursorX + 50, 400, 6); // 6 coins
     addWaterPit(300);
 
     GAME.movingPlatforms.push({ 
         x: cursorX, y: 340, width: 240, height: 24, 
-        dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 340, maxY: 440, isMoving: true 
+        dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 340, maxY: 340, isMoving: true 
     });
-    addCoins(cursorX + 50, 300, 6); // 6 coins hovering above the second platform
+    addCoins(cursorX + 50, 300, 6); // 6 coins
     addWaterPit(250);
 
-    // --- SECTION 6: FORCE LIFT OBSTACLE ---
+    // --- SECTION 6: FORCE SPEEDER LIFT ---
     GAME.forceContainers.push({
         x: cursorX + 150, y: 310, width: 100, height: 230,
         baseY: 310, isHovering: false, type: 'speeder', color: null
     });
+    addCoinGrid(cursorX + 100, 200, 3, 10); // 30 coins in the sky
     addGround(600, 540);
-    addCoins(cursorX - 400, 250, 5); // 5 coins hiding above the speeder!
 
-    // --- SECTION 7: FINAL SPRINT TO THE SPACESHIP ---
-    addCoins(cursorX + 100, 500, 10); // 10 coins leading to the ship
-
-          // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
+    // --- SECTION 7: FORCE BRICK LIFT ---
     GAME.forceContainers.push({
-        x: cursorX + 200, y: 310, width: 90, height: 230,
+        x: cursorX + 100, y: 310, width: 90, height: 230,
         baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
     });
-    // Draw 600px of ground under the Force block
+    addCoinGrid(cursorX + 50, 200, 2, 6); // 12 coins
     addGround(300, 540);
 
-    // --- SECTION 5: HORIZONTAL MOVING PLATFORM OVER PIT ---
-    // Place a platform moving left and right over the pit
+    // --- SECTION 8: MOVING PLATFORM OVER PIT ---
     GAME.movingPlatforms.push({ 
         x: cursorX, y: 440, width: 140, height: 24, 
-        dx: 1.8, dy: 0, minX: cursorX, maxX: cursorX + 300, // Moves 300px right
+        dx: 1.8, dy: 0, minX: cursorX, maxX: cursorX + 300, 
         minY: 440, maxY: 440, isMoving: true 
     });
-    // Add the water pit under the moving platform
+    addCoins(cursorX + 50, 400, 5); // 5 coins
     addWaterPit(250);
+    addCoins(cursorX + 50, 500, 4); // 4 coins on the safe landing
     addGround(200, 540);
 
-    
-// Left Vertical Lift (Starts low at Y: 490, moves up to Y: 200)
+    // --- SECTION 9: TWO-WAY WALL OF DOOM ---
+    // Coins going UP the left lift
+    addCoins(cursorX + 50, 400, 1);
+    addCoins(cursorX + 50, 300, 1);
+    addCoins(cursorX + 50, 200, 1);
     GAME.movingPlatforms.push({
         x: cursorX + 50, y: 490, width: 120, height: 24,
         dx: 0, dy: -2.0, minX: cursorX + 50, maxX: cursorX + 50,
         minY: 200, maxY: 490, isMoving: true
     });
 
-    // The Giant Wall in the middle
-    // Note: Set isGround: false so it renders as a high-tech metal pillar instead of dirt
     GAME.platforms.push({
         x: cursorX + 200, y: 220, width: 100, height: 320, isGround: false
     });
+    addCoinArc(cursorX + 150, 200, 5, 40, 100); // 5 coins arched over the wall
 
-    // Right Vertical Lift (Starts higher up at Y: 290, moves up to Y: 200)
     GAME.movingPlatforms.push({
         x: cursorX + 330, y: 290, width: 120, height: 24,
         dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
         minY: 200, maxY: 490, isMoving: true
     });
+    // Coins going DOWN the right lift
+    addCoins(cursorX + 350, 400, 1);
+    addCoins(cursorX + 350, 300, 1);
+    addCoins(cursorX + 350, 200, 1);
+    addWaterPit(500);
 
-    // --- SECTION 2: FIRST WATER PIT ---
-    // A simple 200px gap to jump over
+    // --- SECTION 10: WATER PIT HOPS ---
+    addGround(200, 540);
+    addCoinArc(cursorX, 500, 4, 40, 100); // 4 coins
     addWaterPit(150);
     
+    addGround(200, 540);
+    addCoinArc(cursorX, 500, 4, 40, 100); // 4 coins
+    addWaterPit(150);
 
-    // --- SECTION 3: DROID GREETING ---
-    // Place an R2D2 droid 100px into this new section
+    // --- SECTION 11: R2D2 AND THE BIG PAYOUT ---
     GAME.droids.push({
         x: cursorX + 100, y: 495, baseY: 495, width: 40, height: 45, type: 'r2d2',
         dx: 1.5, minX: cursorX + 50, maxX: cursorX + 350,
         bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
     });
-        // Place an R2D2 droid 100px into this new section
-    GAME.droids.push({
-        x: cursorX + 150, y: 495, baseY: 495, width: 40, height: 45, type: 'r2d2',
-        dx: 1.5, minX: cursorX + 50, maxX: cursorX + 350,
-        bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
-    });
-    // Draw 300px of ground under the droid
-    addGround(300, 540);
-
-
-    // --- SECTION 4: THE FORCE BLOCK ---
-    // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
-    GAME.forceContainers.push({
-        x: cursorX + 200, y: 310, width: 90, height: 230,
-        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
-    });
-    // Draw 600px of ground under the Force block
-    addGround(300, 540);
-    
-        // --- SECTION 4: THE FORCE BLOCK ---
-    // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
-    GAME.forceContainers.push({
-        x: cursorX + 200, y: 310, width: 90, height: 230,
-        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
-    });
-    // Draw 600px of ground under the Force block
-    addGround(300, 540);
-
-
-    // --- SECTION 5: HORIZONTAL MOVING PLATFORM OVER PIT ---
-    // Place a platform moving left and right over the pit
-    GAME.movingPlatforms.push({ 
-        x: cursorX, y: 440, width: 140, height: 24, 
-        dx: 1.8, dy: 0, minX: cursorX, maxX: cursorX + 300, // Moves 300px right
-        minY: 440, maxY: 440, isMoving: true 
-    });
-    // Add the water pit under the moving platform
-    addWaterPit(400);
-
-
-    // --- SECTION 6: THE TWO-WAY GIANT WALL ---
-    // This requires a lift on the left (to go) and a lift on the right (to come back)
-    
-    // Left Vertical Lift (Starts at Y: 490, moves up to Y: 200)
-    GAME.movingPlatforms.push({
-        x: cursorX + 50, y: 490, width: 120, height: 24,
-        dx: 0, dy: -2.0, minX: cursorX + 50, maxX: cursorX + 50,
-        minY: 200, maxY: 490, isMoving: true
-    });
-
-    // The Giant Wall (Solid block, not ground)
-    GAME.platforms.push({
-        x: cursorX + 200, y: 220, width: 100, height: 320, isGround: true
-    });
-
-    // Right Vertical Lift (Starts at Y: 490, moves up to Y: 200)
-    GAME.movingPlatforms.push({
-        x: cursorX + 330, y: 490, width: 120, height: 24,
-        dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
-        minY: 200, maxY: 490, isMoving: true
-    });
-    // Draw 600px of ground under the wall and lifts
-    addGround(500, 540);
-
-
-    // --- SECTION 7: LASER GATE OBSTACLE ---
-    // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
-    GAME.laserGates.push({
-        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
-    });
-    // Draw 500px of ground under the laser gate
-    addGround(300, 540);
-
-        // --- SECTION 7: LASER GATE OBSTACLE ---
-    // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
-    GAME.laserGates.push({
-        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
-    });
-    // Draw 500px of ground under the laser gate
-    addGround(300, 540);
-
-
-// --- SECTION 8: JUMP PAD OVER A WALL ---
-    // Left side: A green jump pad that shoots the player into the air
-    GAME.jumpPads.push({ 
-        x: cursorX + 100, y: 520, width: 60, height: 20, color: "#00ffcc" 
-    });
-
-    // The Wall they are jumping over
-    GAME.platforms.push({
-        x: cursorX + 200, y: 200, width: 100, height: 340, isGround: true
-    });
-
-    // Right side: Another green jump pad so they can get back over on the return trip
-    GAME.jumpPads.push({ 
-        x: cursorX + 350, y: 520, width: 60, height: 20, color: "#00ffcc" 
-    });
-    
-    // Draw 600px of ground under the pads and wall
+    // A massive grid of 60 coins right before the end!
+    addCoinGrid(cursorX + 50, 250, 5, 12); 
     addGround(600, 540);
 
+    // --- SECTION 12: FINAL SPRINT TO THE SPACESHIP ---
+    // FIXED: Y position calculated so it sits exactly on the floor (540 floor - 260 height = 280)
+    GAME.spaceship = { x: cursorX + 100, y: 280, width: 380, height: 260 }; 
+    addGround(800, 540);
 
-    // --- SECTION 9: DROID VALLEY ---
-    // Place a Gonk Droid and a Mouse Droid walking around
-    GAME.droids.push({
-        x: cursorX + 100, y: 495, baseY: 495, width: 45, height: 45, type: 'gonk',
-        dx: 1.0, minX: cursorX + 50, maxX: cursorX + 400, bounceY: 0, textTimer: 0, label: 'GONK!', isFloating: false
-    });
-    GAME.droids.push({
-        x: cursorX + 500, y: 515, baseY: 515, width: 40, height: 25, type: 'mouse',
-        dx: 2.5, minX: cursorX + 450, maxX: cursorX + 750, bounceY: 0, textTimer: 0, label: 'Whirrr!', isFloating: false
-    });
-    // Draw 900px of ground
-    addGround(300, 540);
-
-    addGround(200, 480);
-    addGround(200, 400);
-    addGround(100, 350);
-    addGround(200, 300);
-        GAME.droids.push({
-        x: cursorX + 100, y: 495, baseY: 495, width: 45, height: 45, type: 'gonk',
-        dx: 1.0, minX: cursorX + 50, maxX: cursorX + 400, bounceY: 0, textTimer: 0, label: 'GONK!', isFloating: false
-    });
-    addGround(200, 400);
-
-    // 1. The moving platform
-    // dx: 1.5 means it moves left and right. 
-    // minX and maxX define how far it travels.
-    GAME.movingPlatforms.push({ 
-        x: cursorX, y: 440, width: 140, height: 24, 
-        dx: 1.5, dy: 0, minX: cursorX, maxX: cursorX + 200, 
-        minY: 440, maxY: 440, isMoving: true 
-    });
-    
-    // 2. The water pit underneath it (140 platform width + 200 travel distance = 340 gap)
-    addWaterPit(340);
-
-        // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
-    GAME.forceContainers.push({
-        x: cursorX + 200, y: 310, width: 90, height: 230,
-        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
-    });
-    // Draw 600px of ground under the Force block
-    addGround(300, 540);
-        // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
-    GAME.forceContainers.push({
-        x: cursorX + 200, y: 310, width: 90, height: 230,
-        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
-    });
-    // Draw 600px of ground under the Force block
-    addGround(300, 540);
-    addGround(100, 480);
-    addGround(100, 400);
-    addGround(100, 350);
-    addGround(100, 300);
-    addGround(100, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 200);
-    addGround(50, 250);
-    addGround(50, 300);
-    addGround(50, 350);
-    addGround(50, 400);
-
-        GAME.jumpPads.push({ 
-        x: cursorX + 100, y: 520, width: 60, height: 20, color: "#00ffcc" 
-    });
-
-        // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
-    GAME.forceContainers.push({
-        x: cursorX + 200, y: 310, width: 90, height: 230,
-        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
-    });
-    // Draw 600px of ground under the Force block
-    addGround(300, 540);
-
-    // --- SECTION 5: HORIZONTAL MOVING PLATFORM OVER PIT ---
-    // Place a platform moving left and right over the pit
-    GAME.movingPlatforms.push({ 
-        x: cursorX, y: 440, width: 140, height: 24, 
-        dx: 1.8, dy: 0, minX: cursorX, maxX: cursorX + 300, // Moves 300px right
-        minY: 440, maxY: 440, isMoving: true 
-    });
-    // Add the water pit under the moving platform
-    addWaterPit(250);
-    addGround(200, 540);
-
-    
-// Left Vertical Lift (Starts low at Y: 490, moves up to Y: 200)
-    GAME.movingPlatforms.push({
-        x: cursorX + 50, y: 490, width: 120, height: 24,
-        dx: 0, dy: -2.0, minX: cursorX + 50, maxX: cursorX + 50,
-        minY: 200, maxY: 490, isMoving: true
-    });
-
-    // The Giant Wall in the middle
-    // Note: Set isGround: false so it renders as a high-tech metal pillar instead of dirt
-    GAME.platforms.push({
-        x: cursorX + 200, y: 220, width: 100, height: 320, isGround: false
-    });
-
-    // Right Vertical Lift (Starts higher up at Y: 290, moves up to Y: 200)
-    GAME.movingPlatforms.push({
-        x: cursorX + 330, y: 290, width: 120, height: 24,
-        dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
-        minY: 200, maxY: 490, isMoving: true
-    });
-
-    // THIS IS THE SECRET:
-    // Instead of addGround, we add a water pit that spans the entire 600px width of this obstacle!
-    addWaterPit(300);
-
-    // A simple 200px gap to jump over
-    addGround(200, 540);
-
-    // A simple 200px gap to jump over
-    addWaterPit(150);
-    addGround(200, 540);
-    addWaterPit(150);
-
-    // Place an R2D2 droid 100px into this new section
-    GAME.droids.push({
-        x: cursorX + 100, y: 495, baseY: 495, width: 40, height: 45, type: 'r2d2',
-        dx: 1.5, minX: cursorX + 50, maxX: cursorX + 350,
-        bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
-    });
-    
-    // Define the Spaceship at the end
-    GAME.spaceship = { x: cursorX + 500, y: 380, width: 380, height: 260 };
-    addGround(1000, 540);
-
-    // Set final width so the camera stops
+    // Set final width so the camera stops panning
     GAME.worldWidth = cursorX;
 }
