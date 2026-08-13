@@ -67,7 +67,7 @@ function buildMission2() {
 
     GAME.movingPlatforms.push({ 
         x: cursorX, y: 340, width: 240, height: 24, 
-        dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 340, maxY: 340, isMoving: true 
+        dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 340, maxY: 440, isMoving: true 
     });
     addCoins(cursorX + 50, 300, 6); // 6 coins hovering above the second platform
     addWaterPit(450);
