@@ -4,7 +4,6 @@
     -webkit-user-select: none;
     user-select: none;
 }
-
 html, body {
     width: 100%;
     height: 100%;
@@ -18,7 +17,6 @@ html, body {
     justify-content: center;
     align-items: center;
 }
-
 #game-container {
     position: relative;
     width: 100vw;
@@ -31,14 +29,12 @@ html, body {
     justify-content: space-between;
     box-shadow: 0 0 40px rgba(0, 200, 255, 0.6);
 }
-
-canvas { 
+canvas {
     width: 100%;
     flex-grow: 1;
     object-fit: contain;
     background: #050510;
 }
-
 #dashboard {
     display: flex;
     justify-content: space-between;
@@ -50,20 +46,17 @@ canvas {
     z-index: 2;
     border-bottom: 3px solid #1e293b;
 }
-
 .true-jedi-container {
     display: flex;
     align-items: center;
     gap: 8px;
 }
-
 .tj-label {
     font-size: 12px;
     font-weight: bold;
     color: #ffd700;
     text-shadow: 0 0 5px #ffd700;
 }
-
 .tj-bar {
     width: 120px;
     height: 14px;
@@ -72,14 +65,12 @@ canvas {
     border-radius: 10px;
     overflow: hidden;
 }
-
 #tj-fill {
     width: 0%;
     height: 100%;
     background: linear-gradient(90deg, #f1c40f, #ff007f);
     transition: width 0.3s;
 }
-
 .shop-btn {
     background: #9b59b6;
     color: white;
@@ -89,7 +80,6 @@ canvas {
     border-radius: 12px;
     font-weight: bold;
 }
-
 .mini-fs-btn {
     padding: 4px 10px;
     margin: 0;
@@ -98,7 +88,6 @@ canvas {
     background: #34495e;
     color: white;
 }
-
 #dialogue-box {
     position: absolute;
     top: 60px;
@@ -114,7 +103,6 @@ canvas {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     text-align: center;
 }
-
 .overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -126,10 +114,8 @@ canvas {
     z-index: 10;
     padding: 10px;
 }
-
 .overlay h2 { font-size: 30px; margin: 0 0 5px 0; color: #fca311; text-shadow: 0 0 12px #fca311; }
 .overlay p { font-size: 14px; color: white; margin: 4px 0; font-weight: bold; }
-
 .stats-box {
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid #00bfff;
@@ -139,7 +125,17 @@ canvas {
     text-align: center;
 }
 
-.character-select, .mission-select {
+/* --- LARGE CHARACTER SELECTION CARDS --- */
+.character-select {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    margin-bottom: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mission-select {
     display: flex;
     gap: 10px;
     margin-bottom: 8px;
@@ -147,31 +143,51 @@ canvas {
 
 .char-card {
     background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 6px;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    width: 70px;
+    width: 110px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.char-card.selected, .mission-btn.selected {
+.char-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.char-card.selected {
+    border-color: #00bfff;
+    box-shadow: 0 0 22px rgba(0, 191, 255, 0.85);
+    background: rgba(0, 191, 255, 0.25);
+    transform: scale(1.08);
+}
+
+.mission-btn.selected {
     border-color: #00bfff;
     box-shadow: 0 0 12px rgba(0, 191, 255, 0.6);
     background: rgba(0, 191, 255, 0.2);
 }
 
-.char-avatar { 
-    width: 36px; 
-    height: 36px; 
-    border-radius: 50%; 
-    margin-bottom: 4px; 
-    object-fit: cover; /* Prevents the image from stretching */
-    border: 2px solid rgba(255, 255, 255, 0.4); /* Nice subtle ring around the portrait */
+.char-avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
-.char-card span { font-size: 12px; color: white; }
+
+.char-card span {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
 
 .mission-btn {
     background: rgba(255,255,255,0.1);
@@ -183,9 +199,7 @@ canvas {
     margin: 0;
     cursor: pointer;
 }
-
 .menu-buttons { display: flex; flex-wrap: wrap; justify-content: center; }
-
 button {
     background-color: #00bfff;
     color: #000;
@@ -200,7 +214,6 @@ button {
     box-shadow: 0 4px 12px rgba(0, 191, 255, 0.4);
     touch-action: manipulation;
 }
-
 #touch-controls {
     display: flex;
     justify-content: space-between;
@@ -208,9 +221,7 @@ button {
     background: #0f172a;
     z-index: 2;
 }
-
 .touch-group { display: flex; gap: 8px; }
-
 .touch-btn {
     padding: 12px 18px;
     font-size: 16px;
@@ -218,7 +229,6 @@ button {
     border-radius: 12px;
     touch-action: manipulation;
 }
-
 .jump-btn { background-color: #2ecc71; color: white; }
 .force-btn { background-color: #9b59b6; color: white; }
 .attack-btn { background-color: #e67e22; color: white; }
