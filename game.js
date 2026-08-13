@@ -340,7 +340,7 @@ function update() {
         
         // Is the player standing in front of the spaceship?
         if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {
-            if (coinsCollected >= 50) {
+            if (coinsCollected >= 500) {
                 // They have 50+ coins! Let them fly!
                 triggerWin("Escaped with 50 Coins!");
             } else {
