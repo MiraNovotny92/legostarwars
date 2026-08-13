@@ -795,17 +795,53 @@ function draw() {
 // Mission 3: High-Clarity Space Objects
     try {
         if (GAME.currentMission === 3) {
-            // 1. Draw Destination Moon / Planet at the end
+// 1. Draw Earth-like Planet with Secret Base Landing Pad
             if (GAME.moon) {
+                let px = GAME.moon.x + 300;
+                let py = GAME.moon.y + 300;
+                let pr = 300;
+
                 ctx.save();
-                ctx.shadowBlur = 40; ctx.shadowColor = "#a4b0be";
-                ctx.fillStyle = "#57606f";
+                // Atmosphere Outer Glow & Blue Ocean Base
+                ctx.shadowBlur = 50; ctx.shadowColor = "#70a1ff";
+                ctx.fillStyle = "#1e3799"; // Deep Blue Ocean
                 ctx.beginPath();
-                ctx.arc(GAME.moon.x + 300, GAME.moon.y + 300, 300, 0, Math.PI * 2);
+                ctx.arc(px, py, pr, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = "#ffffff"; ctx.font = "bold 20px 'Comic Sans MS'"; ctx.textAlign = "center";
-                ctx.fillText("SECRET MOON BASE", GAME.moon.x + 100, GAME.moon.y + 150);
+
+                // Green Continents
+                ctx.fillStyle = "#2ed573";
+                ctx.beginPath(); ctx.arc(px - 100, py - 120, 110, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(px - 140, py + 80, 130, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(px - 40, py + 220, 90, 0, Math.PI * 2); ctx.fill();
+
+                // Soft White Cloud Swirls
+                ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+                ctx.beginPath(); ctx.arc(px - 80, py - 40, 140, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(px - 180, py + 160, 100, 0, Math.PI * 2); ctx.fill();
+
+                // SECRET BASE LANDING PAD (Glowing Red/Yellow Square with Target Crosshair)
+                let padX = GAME.moon.x + 25;
+                let padY = GAME.moon.y + 220;
+
+                ctx.shadowBlur = 20; ctx.shadowColor = "#ff4757";
+                ctx.fillStyle = "#ff4757"; // Glowing Red Square Pad
+                ctx.fillRect(padX, padY, 42, 42);
+                ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 3.5; // Yellow Border
+                ctx.strokeRect(padX, padY, 42, 42);
+
+                // Target Crosshair (+) inside Square
+                ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(padX + 21, padY + 6); ctx.lineTo(padX + 21, padY + 36); // Vertical line
+                ctx.moveTo(padX + 6, padY + 21); ctx.lineTo(padX + 36, padY + 21); // Horizontal line
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Label Text
+                ctx.fillStyle = "#ffd700"; ctx.font = "bold 18px 'Comic Sans MS'"; ctx.textAlign = "center";
+                ctx.fillText("SECRET BASE", padX + 21, padY - 10);
                 ctx.restore();
             }
 
