@@ -435,6 +435,8 @@ function update() {
             if (GAME.score >= 200) {                 
                 if (GAME.state === "PLAYING") {
                     GAME.state = "CUTSCENE_SHIP";
+                    GAME.spaceship.cutsceneTimer = 0; // Reset timer
+                    GAME.spaceship.dy = 0;            // Start stationary
                     if (dialogueBox) dialogueBox.style.display = "none";
                     playSound('rocket');
                 }
