@@ -455,13 +455,20 @@ function update() {
         const dialogueBox = document.getElementById("dialogue-box");     
         const dialogueText = document.getElementById("dialogue-text");     
         
-        if (distObi < 150 && GAME.player.y > 400) {         
-            if (GAME.hasLightsaber) {
-                triggerWin("Returned Obi-Wan's Lightsaber!");         
-            } else {              
-                if (dialogueBox) dialogueBox.style.display = "block";              
-                if (dialogueText) dialogueText.innerText = "Obi-Wan: Hello there! I lost my lightsaber. Can you help me find it?";          
-            }     
+        if (distObi < 150 && GAME.player.y > 400) {          
+            if (GAME.hasLightsaber) {                 
+                if (GAME.state === "PLAYING") {
+                    GAME.state = "CUTSCENE_JUMP";
+                    GAME.cutsceneTimer = 0;
+                    GAME.player.baseY = GAME.player.y;
+                    GAME.obi.baseY = GAME.obi.y;
+                    if (dialogueBox) dialogueBox.style.display = "none";
+                    playSound('win');
+                }          
+            } else {                                
+                if (dialogueBox) dialogueBox.style.display = "block";                                
+                if (dialogueText) dialogueText.innerText = "Obi-Wan: Hello there! I lost my lightsaber. Can you help me find it?";                        
+            }      
         } else { 
             if (dialogueBox) dialogueBox.style.display = "none"; 
         }
