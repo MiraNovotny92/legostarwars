@@ -1,10 +1,10 @@
 function buildMission3() {
-    // 1. Map Width & Player Ship Spawn (12,000px - Twice as long!)
+    // 1. Map Width (Massive 12,000px Space Corridor)
     GAME.worldWidth = 12000;
     GAME.player = {
         x: 100,
         y: 270,
-        width: 65,  // Larger 65px ship
+        width: 65,  // 65px Starfighter
         height: 36,
         dx: 0,
         dy: 0,
@@ -35,7 +35,7 @@ function buildMission3() {
         { targetId: "gen4", x: 10500, y: 0, width: 30, height: 600, active: true }
     ];
 
-    // 5. Massive Asteroid Field (Varied colors, jagged shapes, tails, and sizes)
+    // 5. Varied Asteroid Field
     GAME.asteroids = [
         // --- ZONE 1: Entry Corridor (0 - 2,500px) ---
         { x: 500,  y: 180, radius: 45, destructible: true,  hp: 3, maxHp: 3, color: "#8e44ad", active: true },
@@ -52,7 +52,7 @@ function buildMission3() {
         { x: 3400, y: 220, radius: 30, destructible: true,  hp: 2, maxHp: 2, color: "#9b59b6", active: true, dx: -3, minX: 3100, maxX: 3600, hasTail: true },
         { x: 3800, y: 450, radius: 50, destructible: false, color: "#d63031", active: true }, // Red Clay Rock
         { x: 4100, y: 180, radius: 40, destructible: true,  hp: 3, maxHp: 3, color: "#8e44ad", active: true },
-        { x: 4400, y: 320, radius: 90, destructible: false, color: "#2d3436", active: true }, // Massive Hazard
+        { x: 4400, y: 320, radius: 90, destructible: false, color: "#2d3436", active: true },
         { x: 4800, y: 120, radius: 35, destructible: true,  hp: 3, maxHp: 3, color: "#8e44ad", active: true, dy: 2.8, minY: 80, maxY: 480 },
 
         // --- ZONE 3: Cosmic Storm (5,500 - 8,500px) ---
