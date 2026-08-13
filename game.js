@@ -141,7 +141,7 @@ const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: f
 
 window.addEventListener("keydown", (e) => {     
     if (e.code === "ArrowLeft" || e.code === "KeyA") keys.ArrowLeft = true;     
-    if (e.code === "ArrowRight") keys.ArrowRight = true; // Fixed: Removed "KeyD" from here!
+    if (e.code === "ArrowRight") keys.ArrowRight = true;
     if (e.code === "ArrowUp" || e.code === "KeyW") keys.ArrowUp = true;     
     if (e.code === "ArrowDown" || e.code === "KeyS") keys.ArrowDown = true;     
     if (e.code === "Space") {         
@@ -176,6 +176,7 @@ window.addEventListener("keyup", (e) => {
     if (e.code === "KeyF") keys.F = false;     
     if (e.code === "KeyD") keys.D = false; 
 });
+
 function bindTouch(id, keyName) {     
     const btn = document.getElementById(id);     
     if (!btn) return;     
@@ -279,7 +280,7 @@ function update() {
 
         addParticles(GAME.player.x, GAME.player.y + 15, "#ff9f43", 2);
 
-if (GAME.cutsceneTimer > 180) {
+        if (GAME.cutsceneTimer > 180) {
             triggerWin("Landed Safely at the Secret Planet Base!");
         }
         return;
@@ -297,7 +298,7 @@ if (GAME.cutsceneTimer > 180) {
     if (GAME.shieldTimer > 0) GAME.shieldTimer--; else GAME.hasShield = false;     
     if (GAME.player.saberSwingTimer > 0) GAME.player.saberSwingTimer--;     
     
-// --- MISSION 3: ZERO-GRAVITY FLIGHT, SHOOTING & MAZE PUZZLES ---
+    // --- MISSION 3: ZERO-GRAVITY FLIGHT, SHOOTING & MAZE PUZZLES ---
     if (GAME.currentMission === 3) {
         if (keys.ArrowLeft) GAME.player.dx -= 0.6;
         if (keys.ArrowRight) GAME.player.dx += 0.6;
@@ -487,7 +488,7 @@ if (GAME.cutsceneTimer > 180) {
                 GAME.cutsceneTimer = 0;
             }
         }
-    }
+    } 
     // --- MISSIONS 1 & 2: STANDARD PLATFORMER MOVEMENT ---
     else {
         if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
@@ -852,66 +853,59 @@ function draw() {
         }
     } catch(e) {}
 
-// Mission 3: High-Clarity Space Objects
+    // Mission 3: High-Clarity Space Objects
     try {
         if (GAME.currentMission === 3) {
-// 1. Draw Earth-like Planet with Secret Base Landing Pad
+            // 1. Draw Earth-like Planet with Secret Base Landing Pad
             if (GAME.moon) {
                 let px = GAME.moon.x + 300;
                 let py = GAME.moon.y + 300;
                 let pr = 300;
 
                 ctx.save();
-                // Atmosphere Outer Glow & Blue Ocean Base
                 ctx.shadowBlur = 50; ctx.shadowColor = "#70a1ff";
-                ctx.fillStyle = "#1e3799"; // Deep Blue Ocean
+                ctx.fillStyle = "#1e3799";
                 ctx.beginPath();
                 ctx.arc(px, py, pr, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // Green Continents
                 ctx.fillStyle = "#2ed573";
                 ctx.beginPath(); ctx.arc(px - 100, py - 120, 110, 0, Math.PI * 2); ctx.fill();
                 ctx.beginPath(); ctx.arc(px - 140, py + 80, 130, 0, Math.PI * 2); ctx.fill();
                 ctx.beginPath(); ctx.arc(px - 40, py + 220, 90, 0, Math.PI * 2); ctx.fill();
 
-                // Soft White Cloud Swirls
                 ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
                 ctx.beginPath(); ctx.arc(px - 80, py - 40, 140, 0, Math.PI * 2); ctx.fill();
                 ctx.beginPath(); ctx.arc(px - 180, py + 160, 100, 0, Math.PI * 2); ctx.fill();
 
-                // SECRET BASE LANDING PAD (Glowing Red/Yellow Square with Target Crosshair)
                 let padX = GAME.moon.x + 25;
                 let padY = GAME.moon.y + 220;
 
                 ctx.shadowBlur = 20; ctx.shadowColor = "#ff4757";
-                ctx.fillStyle = "#ff4757"; // Glowing Red Square Pad
+                ctx.fillStyle = "#ff4757";
                 ctx.fillRect(padX, padY, 42, 42);
-                ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 3.5; // Yellow Border
+                ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 3.5;
                 ctx.strokeRect(padX, padY, 42, 42);
 
-                // Target Crosshair (+) inside Square
                 ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.moveTo(padX + 21, padY + 6); ctx.lineTo(padX + 21, padY + 36); // Vertical line
-                ctx.moveTo(padX + 6, padY + 21); ctx.lineTo(padX + 36, padY + 21); // Horizontal line
+                ctx.moveTo(padX + 21, padY + 6); ctx.lineTo(padX + 21, padY + 36);
+                ctx.moveTo(padX + 6, padY + 21); ctx.lineTo(padX + 36, padY + 21);
                 ctx.stroke();
                 ctx.shadowBlur = 0;
 
-                // Label Text
                 ctx.fillStyle = "#ffd700"; ctx.font = "bold 18px 'Comic Sans MS'"; ctx.textAlign = "center";
                 ctx.fillText("SECRET BASE", padX + 21, padY - 10);
                 ctx.restore();
             }
 
-// 2. Draw Bumpy Jagged Asteroids with Custom Colors & Comet Tails
+            // 2. Draw Bumpy Jagged Asteroids with Custom Colors & Comet Tails
             if (GAME.asteroids) {
                 GAME.asteroids.forEach(ast => {
                     if (!ast.active) return;
                     ctx.save();
 
-                    // Draw Comet Plasma Tail for fast moving rocks
                     if (ast.hasTail) {
                         ctx.shadowBlur = 20; ctx.shadowColor = "#ff9f43";
                         ctx.fillStyle = "rgba(255, 159, 67, 0.6)";
@@ -924,12 +918,10 @@ function draw() {
                         ctx.shadowBlur = 0;
                     }
 
-                    // Base Fill Color & Border
                     ctx.fillStyle = ast.color || (ast.destructible ? "#8e44ad" : "#485460");
                     ctx.strokeStyle = ast.destructible ? "#e0aaff" : "#1e272e";
                     ctx.lineWidth = 3;
 
-                    // Bumpy / Jagged Polygon Shape
                     ctx.beginPath();
                     let points = 9;
                     for (let i = 0; i < points; i++) {
@@ -945,12 +937,10 @@ function draw() {
                     ctx.fill();
                     ctx.stroke();
 
-                    // Destroyable Crystal Core or Indestructible Danger Light
                     if (ast.destructible) {
                         ctx.fillStyle = "#e0aaff";
                         ctx.fillRect(ast.x - 6, ast.y - 6, 12, 12);
 
-                        // Health Bar
                         if (ast.hp < ast.maxHp) {
                             ctx.fillStyle = "rgba(0,0,0,0.6)";
                             ctx.fillRect(ast.x - 20, ast.y - ast.radius - 14, 40, 6);
@@ -958,7 +948,6 @@ function draw() {
                             ctx.fillRect(ast.x - 20, ast.y - ast.radius - 14, 40 * (ast.hp / ast.maxHp), 6);
                         }
                     } else {
-                        // Blinking Red Warning Beacon
                         let blink = Math.sin(Date.now() / 150) > 0;
                         ctx.fillStyle = blink ? "#ff0000" : "#7f8c8d";
                         ctx.beginPath();
@@ -982,24 +971,22 @@ function draw() {
                 });
             }
 
-if (GAME.shieldGenerators) {
+            if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!gen.active) return;
                     ctx.save();
                     
-                    // Pod Body
                     ctx.fillStyle = gen.isSuper ? "#1e272e" : "#34495e";
                     drawRoundedRect(ctx, gen.x, gen.y, gen.width, gen.height, 8);
                     ctx.strokeStyle = gen.isSuper ? "#ff4757" : "#00bfff"; 
                     ctx.lineWidth = gen.isSuper ? 4 : 3; 
                     ctx.stroke();
 
-                    // Dynamic Health Color (Green -> Yellow -> Orange -> Red)
                     let hpRatio = gen.hp / gen.maxHp;
-                    let coreColor = "#2ecc71"; // Green
-                    if (hpRatio <= 0.25) coreColor = "#ff4757"; // Red
-                    else if (hpRatio <= 0.5) coreColor = "#ff793f"; // Orange
-                    else if (hpRatio <= 0.75) coreColor = "#f1c40f"; // Yellow
+                    let coreColor = "#2ecc71";
+                    if (hpRatio <= 0.25) coreColor = "#ff4757";
+                    else if (hpRatio <= 0.5) coreColor = "#ff793f";
+                    else if (hpRatio <= 0.75) coreColor = "#f1c40f";
 
                     ctx.shadowBlur = gen.isSuper ? 25 : 15; 
                     ctx.shadowColor = coreColor;
@@ -1009,7 +996,6 @@ if (GAME.shieldGenerators) {
                     ctx.fill();
                     ctx.shadowBlur = 0;
 
-                    // Label Text & Health Counter
                     ctx.fillStyle = gen.isSuper ? "#ff4757" : "#00bfff"; 
                     ctx.font = "bold 12px 'Comic Sans MS'"; 
                     ctx.textAlign = "center";
@@ -1018,10 +1004,8 @@ if (GAME.shieldGenerators) {
                     ctx.restore();
                 });
             }
-        }
-    } catch(e) {}
 
-// 4. Draw Space Station Maze Walls, Sockets, Batteries & Blast Doors
+            // 4. Draw Space Station Maze Walls, Sockets, Batteries & Blast Doors
             if (GAME.mazeWalls) {
                 GAME.mazeWalls.forEach(w => {
                     ctx.fillStyle = "#1e272e";
@@ -1085,29 +1069,28 @@ if (GAME.shieldGenerators) {
                     ctx.restore();
                 });
             }
-    
+        }
+    } catch(e) {}
     
     try {         
         if (GAME.state !== "CUTSCENE_SHIP") { 
             ctx.save();         
             
-// --- MISSION 3: HERO STARFIGHTER ---
+            // --- MISSION 3: HERO STARFIGHTER ---
             if (GAME.currentMission === 3) {
                 let currentChar = CHARACTERS[GAME.selectedCharKey];
                 let px = GAME.player.x;
                 let py = GAME.player.y;
 
                 ctx.save();
-                // Engine Thruster Flame
                 ctx.shadowBlur = 20; ctx.shadowColor = "#ff9f43";
                 ctx.fillStyle = ["#ff4757", "#ffa502", "#eccc68"][Math.floor(Math.random()*3)];
                 ctx.fillRect(px - 14, py + 12, 16, 12);
                 ctx.shadowBlur = 0;
 
-                // Main Starfighter Fuselage
                 ctx.fillStyle = currentChar.color;
                 ctx.beginPath();
-                ctx.moveTo(px + 65, py + 18); // Nose cone (65px wide!)
+                ctx.moveTo(px + 65, py + 18);
                 ctx.lineTo(px, py + 2);
                 ctx.lineTo(px + 15, py + 18);
                 ctx.lineTo(px, py + 34);
@@ -1115,16 +1098,14 @@ if (GAME.shieldGenerators) {
                 ctx.fill();
                 ctx.strokeStyle = "#000000"; ctx.lineWidth = 3; ctx.stroke();
 
-                // Cyan Glass Cockpit Dome
                 ctx.fillStyle = "#00bfff";
                 drawRoundedRect(ctx, px + 24, py + 11, 20, 14, 5);
 
-                // Wing Laser Cannons
                 ctx.fillStyle = currentChar.saberColor;
                 ctx.fillRect(px + 10, py - 2, 28, 4);
                 ctx.fillRect(px + 10, py + 34, 28, 4);
                 ctx.restore();
-            }
+            } 
             // --- MISSIONS 1 & 2: LEGO MINIFIGURE ---
             else {
                 ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
