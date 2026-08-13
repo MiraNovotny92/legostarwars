@@ -1020,6 +1020,72 @@ if (GAME.shieldGenerators) {
             }
         }
     } catch(e) {}
+
+// 4. Draw Space Station Maze Walls, Sockets, Batteries & Blast Doors
+            if (GAME.mazeWalls) {
+                GAME.mazeWalls.forEach(w => {
+                    ctx.fillStyle = "#1e272e";
+                    drawRoundedRect(ctx, w.x, w.y, w.width, w.height, 4);
+                    ctx.strokeStyle = "#485460"; ctx.lineWidth = 3;
+                    ctx.strokeRect(w.x, w.y, w.width, w.height);
+                });
+            }
+
+            if (GAME.puzzleSockets) {
+                GAME.puzzleSockets.forEach(s => {
+                    ctx.save();
+                    ctx.fillStyle = "#34495e";
+                    drawRoundedRect(ctx, s.x, s.y, s.width, s.height, 8);
+                    ctx.strokeStyle = s.active ? "#2ecc71" : "#e74c3c"; ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    ctx.shadowBlur = 15; ctx.shadowColor = s.active ? "#2ecc71" : "#e74c3c";
+                    ctx.fillStyle = s.active ? "#2ecc71" : "#e74c3c";
+                    ctx.beginPath();
+                    ctx.arc(s.x + s.width/2, s.y + s.height/2, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px 'Comic Sans MS'"; ctx.textAlign = "center";
+                    ctx.fillText(s.active ? "POWERED" : "INSERT BATTERY", s.x + s.width/2, s.y - 8);
+                    ctx.restore();
+                });
+            }
+
+            if (GAME.puzzleBatteries) {
+                GAME.puzzleBatteries.forEach(bat => {
+                    ctx.save();
+                    ctx.shadowBlur = 20; ctx.shadowColor = "#2ecc71";
+                    ctx.fillStyle = "#2ecc71";
+                    drawRoundedRect(ctx, bat.x, bat.y, bat.width, bat.height, 6);
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    if (!bat.placed) {
+                        ctx.fillStyle = "#e0aaff"; ctx.font = "bold 12px 'Comic Sans MS'"; ctx.textAlign = "center";
+                        ctx.fillText("HOLD [F] FORCE", bat.x + bat.width/2, bat.y - 8);
+                    }
+                    ctx.restore();
+                });
+            }
+
+            if (GAME.puzzleDoors) {
+                GAME.puzzleDoors.forEach(door => {
+                    if (!door.active) return;
+                    ctx.save();
+                    ctx.shadowBlur = 20; ctx.shadowColor = "#ff4757";
+                    ctx.fillStyle = "#d63031";
+                    ctx.fillRect(door.x, door.y, door.width, door.height);
+                    ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 4;
+                    ctx.strokeRect(door.x, door.y, door.width, door.height);
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = "#ffffff"; ctx.font = "bold 14px 'Comic Sans MS'"; ctx.textAlign = "center";
+                    ctx.fillText("LOCKED BLAST DOOR", door.x + door.width/2, door.y + door.height/2 + 5);
+                    ctx.restore();
+                });
+            }
+    
     
     try {         
         if (GAME.state !== "CUTSCENE_SHIP") { 
