@@ -265,6 +265,26 @@ function update() {
         return;
     }
 
+    // --- MISSION 3: MOON LANDING CUTSCENE ---
+    if (GAME.state === "CUTSCENE_LANDING") {
+        if (GAME.cutsceneTimer === undefined) GAME.cutsceneTimer = 0;
+        GAME.cutsceneTimer++;
+
+        // Fly ship smoothly toward the surface of the moon
+        GAME.player.x += 2.5;
+        if (GAME.player.y < GAME.moon.y + 80) GAME.player.y += 0.8;
+        if (GAME.player.y > GAME.moon.y + 80) GAME.player.y -= 0.8;
+
+        // Engine trail particles
+        addParticles(GAME.player.x, GAME.player.y + 15, "#ff9f43", 2);
+
+        // After 3 seconds, land and win!
+        if (GAME.cutsceneTimer > 180) {
+            triggerWin("Landed Safely on the Secret Moon Base!");
+        }
+        return;
+    }
+
     if (GAME.state !== "PLAYING") return;
     
     GAME.elapsedTime = Date.now() - GAME.startTime;  
