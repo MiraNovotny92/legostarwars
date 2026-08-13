@@ -779,44 +779,77 @@ function draw() {
         }
     } catch(e) {}
 
-    // Mission 3: Space Objects (Moon, Asteroids, Shields)
+// Mission 3: High-Clarity Space Objects
     try {
         if (GAME.currentMission === 3) {
+            // 1. Draw Destination Moon / Planet at the end
             if (GAME.moon) {
                 ctx.save();
-                ctx.shadowBlur = 30; ctx.shadowColor = "#a4b0be";
-                ctx.fillStyle = "#747d8c";
+                ctx.shadowBlur = 40; ctx.shadowColor = "#a4b0be";
+                ctx.fillStyle = "#57606f";
                 ctx.beginPath();
                 ctx.arc(GAME.moon.x + 300, GAME.moon.y + 300, 300, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
+                ctx.fillStyle = "#ffffff"; ctx.font = "bold 20px 'Comic Sans MS'"; ctx.textAlign = "center";
+                ctx.fillText("SECRET MOON BASE", GAME.moon.x + 100, GAME.moon.y + 150);
                 ctx.restore();
             }
 
+            // 2. Draw Clear Asteroids
             if (GAME.asteroids) {
                 GAME.asteroids.forEach(ast => {
                     if (!ast.active) return;
                     ctx.save();
-                    ctx.fillStyle = ast.destructible ? "#8c7ae6" : "#485460";
-                    ctx.strokeStyle = "#2f3542"; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
-                    ctx.fill(); ctx.stroke();
+                    if (ast.destructible) {
+                        // DESTROYABLE: Glowing Purple Crystal Rock
+                        ctx.shadowBlur = 15; ctx.shadowColor = "#9b59b6";
+                        ctx.fillStyle = "#8e44ad";
+                        ctx.strokeStyle = "#e0aaff"; ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                        ctx.shadowBlur = 0;
 
-                    if (ast.destructible && ast.hp < ast.maxHp) {
-                        ctx.fillStyle = "#ff4757";
-                        ctx.fillRect(ast.x - 12, ast.y - ast.radius - 10, 24 * (ast.hp / ast.maxHp), 4);
+                        // Crystal Ores
+                        ctx.fillStyle = "#e0aaff";
+                        ctx.fillRect(ast.x - 8, ast.y - 8, 16, 16);
+
+                        // Health bar if damaged
+                        if (ast.hp < ast.maxHp) {
+                            ctx.fillStyle = "rgba(0,0,0,0.6)";
+                            ctx.fillRect(ast.x - 20, ast.y - ast.radius - 14, 40, 6);
+                            ctx.fillStyle = "#2ecc71";
+                            ctx.fillRect(ast.x - 20, ast.y - ast.radius - 14, 40 * (ast.hp / ast.maxHp), 6);
+                        }
+                    } else {
+                        // INDESTRUCTIBLE: Dark Iron Metal Fortress Rock
+                        ctx.fillStyle = "#2c3e50";
+                        ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 4; // Red Warning Border
+                        ctx.beginPath();
+                        ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+
+                        // Blinking Danger Light
+                        let blink = Math.sin(Date.now() / 150) > 0;
+                        ctx.fillStyle = blink ? "#ff0000" : "#7f8c8d";
+                        ctx.beginPath();
+                        ctx.arc(ast.x, ast.y, 6, 0, Math.PI * 2);
+                        ctx.fill();
                     }
                     ctx.restore();
                 });
             }
 
+            // 3. Draw Shield Barriers & Generators
             if (GAME.shieldBarriers) {
                 GAME.shieldBarriers.forEach(sb => {
                     if (!sb.active) return;
-                    ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
-                    ctx.fillStyle = "rgba(0, 191, 255, 0.4)";
+                    ctx.shadowBlur = 20; ctx.shadowColor = "#00bfff";
+                    ctx.fillStyle = "rgba(0, 191, 255, 0.45)";
                     ctx.fillRect(sb.x, sb.y, sb.width, sb.height);
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
+                    ctx.strokeRect(sb.x, sb.y, sb.width, sb.height);
                     ctx.shadowBlur = 0;
                 });
             }
@@ -824,10 +857,25 @@ function draw() {
             if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!gen.active) return;
-                    let colors = ["#ff4757", "#ffa502", "#2ecc71"];
-                    ctx.fillStyle = colors[gen.hp - 1] || "#2ecc71";
-                    drawRoundedRect(ctx, gen.x, gen.y, gen.width, gen.height, 6);
-                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.save();
+                    // Satellite Pod Base
+                    ctx.fillStyle = "#34495e";
+                    drawRoundedRect(ctx, gen.x, gen.y, gen.width, gen.height, 8);
+                    ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 3; ctx.stroke();
+
+                    // Glowing Stage HP Core (3 = Green, 2 = Yellow, 1 = Red)
+                    let coreColors = ["#e74c3c", "#f1c40f", "#2ecc71"];
+                    ctx.shadowBlur = 15; ctx.shadowColor = coreColors[gen.hp - 1];
+                    ctx.fillStyle = coreColors[gen.hp - 1];
+                    ctx.beginPath();
+                    ctx.arc(gen.x + gen.width/2, gen.y + gen.height/2, 12, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Label
+                    ctx.fillStyle = "#00bfff"; ctx.font = "bold 12px 'Comic Sans MS'"; ctx.textAlign = "center";
+                    ctx.fillText(`SHOOT 3X (${gen.hp})`, gen.x + gen.width/2, gen.y - 8);
+                    ctx.restore();
                 });
             }
         }
