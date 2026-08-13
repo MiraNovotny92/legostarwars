@@ -33,8 +33,8 @@ window.toggleFullscreen = function() {
 };
 
 window.buyShield = function() {     
-    if (GAME.score >= 50) {         
-        GAME.score -= 50;          
+    if (GAME.score >= 10) {         
+        GAME.score -= 10;          
         const scoreText = document.getElementById("score-text");         
         if (scoreText) scoreText.innerText = GAME.score;         
         GAME.hasShield = true; GAME.shieldTimer = 300;         
@@ -42,19 +42,68 @@ window.buyShield = function() {
     } 
 };
 
+let pauseTimeStart = 0;
+
+window.togglePause = function() {
+    const pauseScreen = document.getElementById("pause-screen");
+    const dialogueBox = document.getElementById("dialogue-box");
+
+    if (GAME.state === "PLAYING") {
+        GAME.state = "PAUSED";
+        pauseTimeStart = Date.now();
+        if (pauseScreen) pauseScreen.style.display = "flex";
+        if (dialogueBox) dialogueBox.style.display = "none";
+        
+        if (typeof bgMusic !== 'undefined' && bgMusic) {
+            bgMusic.pause();
+        }
+    } else if (GAME.state === "PAUSED") {
+        GAME.state = "PLAYING";
+        // Adjust startTime so the timer doesn't run while paused
+        GAME.startTime += (Date.now() - pauseTimeStart);
+        if (pauseScreen) pauseScreen.style.display = "none";
+        
+        if (typeof isMuted !== 'undefined' && !isMuted && typeof bgMusic !== 'undefined' && bgMusic) {
+            bgMusic.play().catch(() => {});
+        }
+    }
+};
+
+window.goToMainMenu = function() {
+    GAME.state = "START";
+    
+    const pauseScreen = document.getElementById("pause-screen");
+    const winScreen = document.getElementById("win-screen");
+    const startScreen = document.getElementById("start-screen");
+    const dialogueBox = document.getElementById("dialogue-box");
+    
+    if (pauseScreen) pauseScreen.style.display = "none";
+    if (winScreen) winScreen.style.display = "none";
+    if (dialogueBox) dialogueBox.style.display = "none";
+    if (startScreen) startScreen.style.display = "flex";
+    
+    if (typeof bgMusic !== 'undefined' && bgMusic) {
+        bgMusic.pause();
+    }
+};
+
 window.startGame = function() {     
+    if (window.audioCtx && window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume().catch(() => {});
+    }
+
     window.toggleFullscreen();     
     const startScreen = document.getElementById("start-screen");     
     const scoreText = document.getElementById("score-text");     
-    const tjFill = document.getElementById("tj-fill");          
+    const tjFill = document.getElementById("tj-fill");         
     
     if (startScreen) startScreen.style.display = "none";     
     GAME.score = 0; if (scoreText) scoreText.innerText = GAME.score;     
     GAME.hasLightsaber = false; GAME.hasShield = false;     
     if (tjFill) tjFill.style.width = "0%";     
-    GAME.startTime = Date.now();          
+    GAME.startTime = Date.now();         
     
-    buildMissionLevel(); // Removed difficulty parameter
+    buildMissionLevel();
     startBackgroundMusic();     
     GAME.state = "PLAYING"; 
 };
@@ -106,6 +155,12 @@ window.addEventListener("keydown", (e) => {
         }         
         keys.D = true;     
     } 
+    // Pause Shortcut (P or Escape)
+    if (e.code === "Escape" || e.code === "KeyP") {
+        if (GAME.state === "PLAYING" || GAME.state === "PAUSED") {
+            togglePause();
+        }
+    }
 });
 
 window.addEventListener("keyup", (e) => {     
@@ -200,7 +255,7 @@ function update() {
             if (!gate.destroyed && attackBox.x < gate.x + gate.width && attackBox.x + attackBox.width > gate.x && attackBox.y < gate.y + gate.height && attackBox.y + attackBox.height > gate.y) {                 
                 gate.destroyed = true;                 
                 playSound('gateBreak');                 
-                addParticles(gate.x + 10, gate.y + gate.height/2, "#ff0055", 25);                       
+                addParticles(gate.x + 10, gate.y + gate.height/2, "#ff0055", 25);                                   
             }         
         });     
     }     
@@ -241,7 +296,7 @@ function update() {
         if (d.bounceY > 0 && !d.isFloating) d.bounceY -= 1;         
         if (dist < 45 && d.textTimer === 0 && !d.isFloating) {             
             d.bounceY = 12; d.textTimer = 60; playSound(d.type);             
-            addParticles(d.x + 20, d.y, "#00bfff", 6);                
+            addParticles(d.x + 20, d.y, "#00bfff", 6);                        
         }     
     });     
 
@@ -259,18 +314,18 @@ function update() {
         }     
     });     
 
-        // Stud / Coin Pickup     
-        GAME.studs.forEach(s => {                  
-                if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {                          
-                        s.collected = true; 
-                        GAME.score += 1; // 1 Coin = 1 Point!                         
-                        const scoreText = document.getElementById("score-text");                          
-                        const tjFill = document.getElementById("tj-fill");                          
-                        if (scoreText) scoreText.innerText = GAME.score;                          
-                        if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";                          
-                        playSound('stud'); addParticles(s.x, s.y, s.color, 8);                  
-                }          
-        }); 
+    // Stud / Coin Pickup     
+    GAME.studs.forEach(s => {                 
+        if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {                         
+            s.collected = true; 
+            GAME.score += 1; // 1 Coin = 1 Point!                         
+            const scoreText = document.getElementById("score-text");                         
+            const tjFill = document.getElementById("tj-fill");                         
+            if (scoreText) scoreText.innerText = GAME.score;                         
+            if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";                         
+            playSound('stud'); addParticles(s.x, s.y, s.color, 8);                 
+        }         
+    }); 
 
     // Jump Pads (Fires the player up!)
     GAME.jumpPads.forEach(pad => {         
@@ -321,17 +376,17 @@ function update() {
                 if (dialogueBox) dialogueBox.style.display = "block";              
                 if (dialogueText) dialogueText.innerText = "Obi-Wan: Hello there! I lost my lightsaber. Can you help me find it?";          
             }     
-} else { 
+        } else { 
             if (dialogueBox) dialogueBox.style.display = "none"; 
         }
     }
 
-// MISSION 2: SPACESHIP ESCAPE LOGIC     
+    // MISSION 2: SPACESHIP ESCAPE LOGIC     
     if (GAME.currentMission === 2 && GAME.spaceship) {         
         // Is the player standing in front of the spaceship?         
         if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {             
             if (GAME.score >= 200) {                 
-                // They have 50+ coins! Let them fly!                 
+                // They have 200+ coins! Let them fly!                 
                 triggerWin("Escaped with 200 Coins!");             
             } else {                 
                 // Not enough coins! Lock the door and tell them how many they have.                 
@@ -383,7 +438,7 @@ function drawLegoPlatform(p) {
     }     
     let grad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.height);     
     grad.addColorStop(0, p.isMoving ? "#34495e" : "#2c3e50");     
-    grad.addColorStop(1, "#1a252f");          
+    grad.addColorStop(1, "#1a252f");         
     ctx.fillStyle = grad; drawRoundedRect(ctx, p.x, p.y, p.width, p.height, 8);     
     ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.stroke();     
     ctx.fillStyle = p.isMoving ? "#e67e22" : "#00bfff";     
@@ -403,7 +458,7 @@ function draw() {
     let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);     
     bgGrad.addColorStop(0, "#090a14"); bgGrad.addColorStop(0.5, "#160e2e"); bgGrad.addColorStop(1, "#281140");     
     ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);     
-    ctx.save();      
+    ctx.save();       
     
     let shakeX = (Math.random() - 0.5) * GAME.camera.shake;     
     let shakeY = (Math.random() - 0.5) * GAME.camera.shake;     
@@ -492,7 +547,6 @@ function draw() {
         }
     } catch(e) {}
     
-    
     try {         
         ctx.save();         
         ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
@@ -512,12 +566,12 @@ function draw() {
         ctx.fillStyle = "#2c3e50";         
         ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);         
         ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
-        ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
-        
-if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
+        ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);          
+
+        if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
             ctx.save();             
             let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
-            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                      
+            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                     
             ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
             ctx.rotate(swingAngle);             
             
