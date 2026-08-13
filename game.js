@@ -200,10 +200,7 @@ function update() {
             if (!gate.destroyed && attackBox.x < gate.x + gate.width && attackBox.x + attackBox.width > gate.x && attackBox.y < gate.y + gate.height && attackBox.y + attackBox.height > gate.y) {                 
                 gate.destroyed = true;                 
                 playSound('gateBreak');                 
-                addParticles(gate.x + 10, gate.y + gate.height/2, "#ff0055", 25);                 
-                GAME.score += 20;                 
-                const scoreText = document.getElementById("score-text");                 
-                if (scoreText) scoreText.innerText = GAME.score;             
+                addParticles(gate.x + 10, gate.y + gate.height/2, "#ff0055", 25);                       
             }         
         });     
     }     
@@ -244,12 +241,7 @@ function update() {
         if (d.bounceY > 0 && !d.isFloating) d.bounceY -= 1;         
         if (dist < 45 && d.textTimer === 0 && !d.isFloating) {             
             d.bounceY = 12; d.textTimer = 60; playSound(d.type);             
-            addParticles(d.x + 20, d.y, "#00bfff", 6);             
-            GAME.score += 5;              
-            const scoreText = document.getElementById("score-text");             
-            const tjFill = document.getElementById("tj-fill");             
-            if (scoreText) scoreText.innerText = GAME.score;             
-            if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";         
+            addParticles(d.x + 20, d.y, "#00bfff", 6);                
         }     
     });     
 
@@ -267,17 +259,18 @@ function update() {
         }     
     });     
 
-    // Stud / Coin Pickup
-    GAME.studs.forEach(s => {         
-        if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {             
-            s.collected = true; GAME.score += 10;             
-            const scoreText = document.getElementById("score-text");             
-            const tjFill = document.getElementById("tj-fill");             
-            if (scoreText) scoreText.innerText = GAME.score;             
-            if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";             
-            playSound('stud'); addParticles(s.x, s.y, s.color, 8);         
-        }     
-    });     
+        // Stud / Coin Pickup     
+        GAME.studs.forEach(s => {                  
+                if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {                          
+                        s.collected = true; 
+                        GAME.score += 1; // 1 Coin = 1 Point!                         
+                        const scoreText = document.getElementById("score-text");                          
+                        const tjFill = document.getElementById("tj-fill");                          
+                        if (scoreText) scoreText.innerText = GAME.score;                          
+                        if (tjFill) tjFill.style.width = Math.min(100, (GAME.score / 100) * 100) + "%";                          
+                        playSound('stud'); addParticles(s.x, s.y, s.color, 8);                  
+                }          
+        }); 
 
     // Jump Pads (Fires the player up!)
     GAME.jumpPads.forEach(pad => {         
