@@ -788,6 +788,64 @@ function draw() {
             ctx.restore();
         }
     } catch(e) {}
+
+// Mission 3: Space Objects (Moon, Asteroids, Shields)
+    try {
+        if (GAME.currentMission === 3) {
+            // 1. Draw Moon / Planet at the end
+            if (GAME.moon) {
+                ctx.save();
+                ctx.shadowBlur = 30; ctx.shadowColor = "#a4b0be";
+                ctx.fillStyle = "#747d8c";
+                ctx.beginPath();
+                ctx.arc(GAME.moon.x + 300, GAME.moon.y + 300, 300, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+
+            // 2. Draw Asteroids
+            if (GAME.asteroids) {
+                GAME.asteroids.forEach(ast => {
+                    if (!ast.active) return;
+                    ctx.save();
+                    ctx.fillStyle = ast.destructible ? "#8c7ae6" : "#485460"; // Purple = Destroyable, Grey = Solid
+                    ctx.strokeStyle = "#2f3542"; ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
+                    ctx.fill(); ctx.stroke();
+
+                    // Display HP damage on destroyable rocks
+                    if (ast.destructible && ast.hp < ast.maxHp) {
+                        ctx.fillStyle = "#ff4757";
+                        ctx.fillRect(ast.x - 12, ast.y - ast.radius - 10, 24 * (ast.hp / ast.maxHp), 4);
+                    }
+                    ctx.restore();
+                });
+            }
+
+            // 3. Draw Shield Generators & Forcefields
+            if (GAME.shieldBarriers) {
+                GAME.shieldBarriers.forEach(sb => {
+                    if (!sb.active) return;
+                    ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";
+                    ctx.fillStyle = "rgba(0, 191, 255, 0.4)";
+                    ctx.fillRect(sb.x, sb.y, sb.width, sb.height);
+                    ctx.shadowBlur = 0;
+                });
+            }
+
+            if (GAME.shieldGenerators) {
+                GAME.shieldGenerators.forEach(gen => {
+                    if (!gen.active) return;
+                    let colors = ["#ff4757", "#ffa502", "#2ecc71"]; // Red -> Yellow -> Green
+                    ctx.fillStyle = colors[gen.hp - 1] || "#2ecc71";
+                    drawRoundedRect(ctx, gen.x, gen.y, gen.width, gen.height, 6);
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.stroke();
+                });
+            }
+        }
+    } catch(e) {}
     
     try {         
         if (GAME.state !== "CUTSCENE_SHIP") { 
