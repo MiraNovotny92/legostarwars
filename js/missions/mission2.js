@@ -219,6 +219,8 @@ function buildMission2() {
     addWaterPit(200);
     addGround(150, 540);
     addWaterPit(200);
+    addCoinGrid(cursorX, 400, 2, 4); 
+    addGround(200, 480);
 
     // --- SECTION 12: FINAL SPRINT TO THE SPACESHIP ---
     // FIXED: Y position calculated so it sits exactly on the floor (540 floor - 260 height = 280)
