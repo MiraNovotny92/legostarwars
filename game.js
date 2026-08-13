@@ -597,52 +597,52 @@ function draw() {
         }
     } catch(e) {}
     
-    try {         
-        ctx.save();         
-        ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
-        ctx.scale(GAME.player.scaleX, GAME.player.scaleY);         
-        
-        if (GAME.hasShield) {             
-            ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";             
-            ctx.beginPath(); ctx.arc(0, -GAME.player.height/2, GAME.player.width/1.2, 0, Math.PI*2); ctx.stroke();             
-            ctx.shadowBlur = 0;         
-        }         
-        
-        let currentChar = CHARACTERS[GAME.selectedCharKey];         
-        ctx.fillStyle = currentChar.color;         
-        ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
-        ctx.fillStyle = "#f1c40f";         
-        ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();         
-        ctx.fillStyle = "#2c3e50";         
-        ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);         
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
-        ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);          
+try {         
+        if (GAME.state !== "CUTSCENE_SHIP") { // Hides player after entering the ship
+            ctx.save();         
+            ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
+            ctx.scale(GAME.player.scaleX, GAME.player.scaleY);         
+            
+            if (GAME.hasShield) {             
+                ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";             
+                ctx.beginPath(); ctx.arc(0, -GAME.player.height/2, GAME.player.width/1.2, 0, Math.PI*2); ctx.stroke();             
+                ctx.shadowBlur = 0;         
+            }         
+            
+            let currentChar = CHARACTERS[GAME.selectedCharKey];         
+            ctx.fillStyle = currentChar.color;         
+            ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
+            ctx.fillStyle = "#f1c40f";         
+            ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();         
+            ctx.fillStyle = "#2c3e50";         
+            ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);         
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
+            ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);          
 
-        if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
-            ctx.save();             
-            let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
-            let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                     
-            ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
-            ctx.rotate(swingAngle);             
-            
-            // Vader gets a longer saber (55px), others get standard (35px)
-            let saberLength = GAME.selectedCharKey === 'vader' ? 55 : 35;
-            
-            ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;             
-            ctx.fillStyle = currentChar.saberColor;             
-            ctx.fillRect(0, -saberLength, 6, saberLength); // Main Saber
-            
-            // Ahsoka gets a second smaller saber in her other hand!
-            if (GAME.selectedCharKey === 'ahsoka') {
-                let dualOffset = GAME.player.facing === 'right' ? -25 : 25;
-                ctx.fillRect(dualOffset, -25, 5, 25); // Second Shoto blade
-            }
-            
-            ctx.shadowBlur = 0;             
-            ctx.restore();         
-        }       
-        ctx.restore();     
-    } catch(e) {}     
+            if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
+                ctx.save();             
+                let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
+                let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                     
+                ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
+                ctx.rotate(swingAngle);             
+                
+                let saberLength = GAME.selectedCharKey === 'vader' ? 55 : 35;
+                
+                ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;             
+                ctx.fillStyle = currentChar.saberColor;             
+                ctx.fillRect(0, -saberLength, 6, saberLength);
+                
+                if (GAME.selectedCharKey === 'ahsoka') {
+                    let dualOffset = GAME.player.facing === 'right' ? -25 : 25;
+                    ctx.fillRect(dualOffset, -25, 5, 25);
+                }
+                
+                ctx.shadowBlur = 0;             
+                ctx.restore();         
+            }       
+            ctx.restore();     
+        }
+    } catch(e) {} 
     ctx.restore();     
     
     if (GAME.deathMessageTimer > 0) {         
