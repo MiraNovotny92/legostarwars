@@ -18,7 +18,7 @@ function buildMission1() {
     
     // --- SECTION 1: STARTING AREA ---
     // Place Obi-Wan at the start of the level
-    GAME.obi = { x: 300, y: 490, width: 50, height: 50 };
+    GAME.obi = { x: 300, y: 490, width: 90, height: 90 };
     // Draw 600px of safe ground for the start
     addGround(600, 540); 
 
