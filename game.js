@@ -141,11 +141,15 @@ const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: f
 
 window.addEventListener("keydown", (e) => {     
     if (e.code === "ArrowLeft" || e.code === "KeyA") keys.ArrowLeft = true;     
-    if (e.code === "ArrowRight" || e.code === "KeyD") keys.ArrowRight = true; 
+    if (e.code === "ArrowRight") keys.ArrowRight = true; // Fixed: Removed "KeyD" from here!
     if (e.code === "ArrowUp" || e.code === "KeyW") keys.ArrowUp = true;     
     if (e.code === "ArrowDown" || e.code === "KeyS") keys.ArrowDown = true;     
     if (e.code === "Space") {         
-        if (!keys.Space && GAME.player.grounded) { playSound('jump'); GAME.player.scaleX = 0.7; GAME.player.scaleY = 1.3; }         
+        if (!keys.Space && GAME.player.grounded) { 
+            playSound('jump'); 
+            GAME.player.scaleX = 0.7; 
+            GAME.player.scaleY = 1.3; 
+        }         
         keys.Space = true;     
     }     
     if (e.code === "KeyF") keys.F = true;     
@@ -172,7 +176,6 @@ window.addEventListener("keyup", (e) => {
     if (e.code === "KeyF") keys.F = false;     
     if (e.code === "KeyD") keys.D = false; 
 });
-
 function bindTouch(id, keyName) {     
     const btn = document.getElementById(id);     
     if (!btn) return;     
