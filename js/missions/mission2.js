@@ -59,18 +59,18 @@ function buildMission2() {
 
     // --- SECTION 5: HIGH-SPEED MOVING PLATFORMS ---
     GAME.movingPlatforms.push({ 
-        x: cursorX, y: 440, width: 140, height: 24, 
+        x: cursorX, y: 440, width: 240, height: 24, 
         dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 440, maxY: 440, isMoving: true 
     });
     addCoins(cursorX + 50, 400, 6); // 6 coins hovering above the first platform
-    addWaterPit(450);
+    addWaterPit(300);
 
     GAME.movingPlatforms.push({ 
         x: cursorX, y: 340, width: 240, height: 24, 
         dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 340, maxY: 440, isMoving: true 
     });
     addCoins(cursorX + 50, 300, 6); // 6 coins hovering above the second platform
-    addWaterPit(450);
+    addWaterPit(250);
 
     // --- SECTION 6: FORCE LIFT OBSTACLE ---
     GAME.forceContainers.push({
