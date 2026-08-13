@@ -99,6 +99,16 @@ window.playSound = function(type) {
             osc.connect(gain); gain.connect(window.audioCtx.destination);
             osc.start(); osc.stop(now + 1.8);
         }
+        } else if (type === 'laser') {
+            const osc = window.audioCtx.createOscillator(); const gain = window.audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(150, now + 0.12);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+            osc.connect(gain); gain.connect(window.audioCtx.destination);
+            osc.start(); osc.stop(now + 0.12);
+        }
         
     } catch(e) {}
 };
