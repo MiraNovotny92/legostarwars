@@ -192,24 +192,35 @@ function resetPlayer() {
 }
 
 function update() {     
-    // --- SPACESHIP TAKEOFF CUTSCENE ---
+// --- SPACESHIP TAKEOFF CUTSCENE ---
     if (GAME.state === "CUTSCENE_SHIP") {
-        if (!GAME.spaceship.dy) GAME.spaceship.dy = -1;
-        GAME.spaceship.dy -= 0.25; // Rocket acceleration upwards
-        GAME.spaceship.y += GAME.spaceship.dy;
+        if (GAME.spaceship.cutsceneTimer === undefined) GAME.spaceship.cutsceneTimer = 0;
+        GAME.spaceship.cutsceneTimer++;
 
-        // Spawn Flame and Smoke Particles from the Thruster Engine
+        // Phase 1: Engine Warm-up (First 120 frames / ~2 seconds)
+        if (GAME.spaceship.cutsceneTimer < 120) {
+            GAME.camera.shake = 4; // Gentle rumble while engines rev on the ground
+        } 
+        // Phase 2: Slow Liftoff (After 2 seconds)
+        else {
+            if (!GAME.spaceship.dy) GAME.spaceship.dy = -0.5; // Very gentle initial lift
+            GAME.spaceship.dy -= 0.06; // Much slower acceleration (was 0.25)
+            GAME.spaceship.y += GAME.spaceship.dy;
+            GAME.camera.shake = 8; // Strong rumble during takeoff
+        }
+
+        // Spawn Flame and Smoke Particles from the Engine
         let engineX = GAME.spaceship.x + 10;
         let engineY = GAME.spaceship.y + 105;
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 5; i++) {
             GAME.particles.push({
-                x: engineX + (Math.random() - 0.5) * 16,
+                x: engineX + (Math.random() - 0.5) * 20,
                 y: engineY,
-                dx: (Math.random() - 0.5) * 3,
+                dx: (Math.random() - 0.5) * 4,
                 dy: Math.random() * 6 + 4,
-                size: Math.random() * 8 + 4,
+                size: Math.random() * 10 + 4,
                 color: ["#ff4757", "#ffa502", "#eccc68", "#ffffff"][Math.floor(Math.random() * 4)],
-                life: 20
+                life: 25
             });
         }
 
@@ -222,10 +233,8 @@ function update() {
             if (p.life <= 0) GAME.particles.splice(i, 1);
         }
 
-        GAME.camera.shake = 6; // Screen rumble effect
-
-        // Trigger Win once the ship flies high into space
-        if (GAME.spaceship.y < -300) {
+        // Trigger Win screen once the ship flies completely off-screen
+        if (GAME.spaceship.y < -400) {
             triggerWin("Escaped with 200 Coins!");
         }
         return;
@@ -418,12 +427,7 @@ function update() {
         } else { 
             if (dialogueBox) dialogueBox.style.display = "none"; 
         }
-    }
-
-    // MISSION 2: SPACESHIP ESCAPE LOGIC     
-    if (GAME.currentMission === 2 && GAME.spaceship) {         
-        const dialogueBox = document.getElementById("dialogue-box");                      
-        const dialogueText = document.getElementById("dialogue-text");                      
+    }                    
 
 // MISSION 2: SPACESHIP ESCAPE LOGIC     
     if (GAME.currentMission === 2 && GAME.spaceship) {         
