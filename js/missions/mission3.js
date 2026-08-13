@@ -1,9 +1,9 @@
 function buildMission3() {
-    // 1. Level Dimensions & Player Ship Spawn
-    GAME.worldWidth = 6000; // Long space map
+    // 1. Map Width & Player Ship Spawn
+    GAME.worldWidth = 6000; // Long space corridor
     GAME.player = {
         x: 100,
-        y: 300,
+        y: 280,
         width: 40,
         height: 25,
         dx: 0,
@@ -11,24 +11,17 @@ function buildMission3() {
         shootTimer: 0
     };
 
-    // 2. Clear ground platformer objects so space remains empty
-    GAME.platforms = [];
-    GAME.movingPlatforms = [];
-    GAME.crates = [];
-    GAME.forceContainers = [];
-    GAME.laserGates = [];
-    GAME.droids = [];
-    GAME.npcs = [];
-    GAME.jumpPads = [];
-    GAME.waterPits = [];
-    GAME.vaporators = [];
-    GAME.buildings = [];
+    // 2. Initialize / Reset Space Specific Arrays
     GAME.playerLasers = [];
+    GAME.asteroids = [];
+    GAME.shieldGenerators = [];
+    GAME.shieldBarriers = [];
 
-    // 3. Moon / Destination Planet at the end of space
+    // 3. Destination Moon / Planet at the end of space ($X = 5500$)
     GAME.moon = { x: 5500, y: 50 };
 
-    // 4. Forcefield Barriers & 3-Hit Generators
+    // 4. Forcefield Barriers & 3-Hit Shield Generators
+    // (Generators take 3 laser hits to destroy and deactivate their barrier)
     GAME.shieldGenerators = [
         { id: "gen1", x: 1750, y: 120, width: 35, height: 35, hp: 3, active: true },
         { id: "gen2", x: 3750, y: 480, width: 35, height: 35, hp: 3, active: true }
@@ -39,7 +32,8 @@ function buildMission3() {
         { targetId: "gen2", x: 3900, y: 0, width: 25, height: 700, active: true }
     ];
 
-    // 5. Asteroid Field (Destroyable vs. Solid, Static vs. Moving)
+    // 5. Asteroid Field
+    // (Purple/hp = Destroyable by shooting, Grey = Solid/Indestructible)
     GAME.asteroids = [
         // --- ZONE 1: Warm-up Asteroids ---
         { x: 500,  y: 200, radius: 35, destructible: true,  hp: 3, maxHp: 3, active: true },
@@ -59,19 +53,18 @@ function buildMission3() {
         { x: 4200, y: 200, radius: 40, destructible: false, active: true, dy: 3, minY: 80, maxY: 500 },
         { x: 4400, y: 400, radius: 35, destructible: true,  hp: 3, maxHp: 3, active: true },
         { x: 4700, y: 120, radius: 45, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 500, y: 300, radius: 60, destructible: false, active: true },
+        { x: 5000, y: 300, radius: 60, destructible: false, active: true },
         { x: 5200, y: 250, radius: 30, destructible: true,  hp: 3, maxHp: 3, active: true }
     ];
 
     // 6. Space Studs / Coins to Collect
-    GAME.studs = [];
     for (let x = 300; x < 5300; x += 150) {
-        let y = 100 + Math.sin(x / 200) * 200 + 150; // Wavy pattern through space
+        let y = 100 + Math.sin(x / 200) * 180 + 150; // Dynamic sine wave path through space
         GAME.studs.push({
             x: x,
             y: y,
             radius: 8,
-            color: x % 300 === 0 ? "#ffd700" : "#00bfff", // Gold & Cyan coins
+            color: x % 300 === 0 ? "#ffd700" : "#00bfff", // Alternating Gold & Cyan coins
             collected: false
         });
     }
