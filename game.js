@@ -383,23 +383,31 @@ function update() {
 
     // MISSION 2: SPACESHIP ESCAPE LOGIC     
     if (GAME.currentMission === 2 && GAME.spaceship) {         
-        // Is the player standing in front of the spaceship?         
+        const dialogueBox = document.getElementById("dialogue-box");                      
+        const dialogueText = document.getElementById("dialogue-text");                      
+
+        // 1. Is the player standing in front of the spaceship at the end?
         if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {             
             if (GAME.score >= 200) {                 
                 // They have 200+ coins! Let them fly!                 
                 triggerWin("Escaped with 200 Coins!");             
             } else {                 
                 // Not enough coins! Lock the door and tell them how many they have.                 
-                const dialogueBox = document.getElementById("dialogue-box");                      
-                const dialogueText = document.getElementById("dialogue-text");                      
                 if (dialogueBox && dialogueText) {                     
                     dialogueBox.style.display = "block";                     
                     dialogueText.innerText = `Ship locked! You need 200 coins. You only have ${GAME.score}.`;                 
                 }             
             }         
-        } else if (GAME.currentMission === 2) {             
-            // Hide the dialogue box if they walk away from the ship             
-            const dialogueBox = document.getElementById("dialogue-box");                  
+        } 
+        // 2. Is the player at the start of the level? (Show instructions)
+        else if (GAME.player.x < 400) {
+            if (dialogueBox && dialogueText) {
+                dialogueBox.style.display = "block";
+                dialogueText.innerText = "Mission Goal: Collect 200 coins to power the Escape Ship!";
+            }
+        } 
+        // 3. Player is running through the middle of the level (Hide dialogue box)
+        else {             
             if (dialogueBox) dialogueBox.style.display = "none";         
         }     
     }
