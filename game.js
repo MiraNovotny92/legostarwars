@@ -292,13 +292,57 @@ function update() {
     if (GAME.shieldTimer > 0) GAME.shieldTimer--; else GAME.hasShield = false;     
     if (GAME.player.saberSwingTimer > 0) GAME.player.saberSwingTimer--;     
     
-    if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
-    if (keys.ArrowRight) { GAME.player.dx += 1.2; GAME.player.facing = 'right'; }     
-    if (keys.Space && GAME.player.grounded) { GAME.player.dy = GAME.player.jumpPower; GAME.player.grounded = false; }     
-    
-    GAME.player.dy += GAME.gravity; GAME.player.dx *= GAME.friction;     
-    GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;     
-    GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;     
+// --- MISSION 3: ZERO-GRAVITY FLIGHT & SHOOTING ---
+    if (GAME.currentMission === 3) {
+        if (keys.ArrowLeft) GAME.player.dx -= 1.2;
+        if (keys.ArrowRight) GAME.player.dx += 1.2;
+        if (keys.ArrowUp) GAME.player.dy -= 1.2;
+        if (keys.ArrowDown) GAME.player.dy += 1.2;
+
+        GAME.player.dx *= GAME.friction;
+        GAME.player.dy *= GAME.friction;
+
+        GAME.player.x += GAME.player.dx;
+        GAME.player.y += GAME.player.dy;
+
+        // Bound player inside flight screen
+        if (GAME.player.y < 30) { GAME.player.y = 30; GAME.player.dy = 0; }
+        if (GAME.player.y > 490) { GAME.player.y = 490; GAME.player.dy = 0; }
+
+        // Laser Cannon Shooting [D] Key
+        if (!GAME.playerLasers) GAME.playerLasers = [];
+        if (keys.D && (GAME.player.shootTimer || 0) <= 0) {
+            GAME.player.shootTimer = 10; // Rapid fire rate
+            GAME.playerLasers.push({
+                x: GAME.player.x + GAME.player.width,
+                y: GAME.player.y + GAME.player.height / 2 - 3,
+                width: 22,
+                height: 6,
+                dx: 16
+            });
+            playSound('laser');
+        }
+        if (GAME.player.shootTimer > 0) GAME.player.shootTimer--;
+
+        // Move Lasers forward
+        for (let i = GAME.playerLasers.length - 1; i >= 0; i--) {
+            let l = GAME.playerLasers[i];
+            l.x += l.dx;
+            if (l.x > GAME.camera.x + canvas.width + 100) {
+                GAME.playerLasers.splice(i, 1);
+            }
+        }
+    } 
+    // --- MISSIONS 1 & 2: STANDARD PLATFORMER MOVEMENT ---
+    else {
+        if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
+        if (keys.ArrowRight) { GAME.player.dx += 1.2; GAME.player.facing = 'right'; }     
+        if (keys.Space && GAME.player.grounded) { GAME.player.dy = GAME.player.jumpPower; GAME.player.grounded = false; }     
+        
+        GAME.player.dy += GAME.gravity; GAME.player.dx *= GAME.friction;     
+        GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;     
+        GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;
+    } 
     
     // Moving Platforms
     GAME.movingPlatforms.forEach(mp => {         
