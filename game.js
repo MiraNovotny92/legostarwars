@@ -297,21 +297,21 @@ if (GAME.cutsceneTimer > 180) {
     if (GAME.shieldTimer > 0) GAME.shieldTimer--; else GAME.hasShield = false;     
     if (GAME.player.saberSwingTimer > 0) GAME.player.saberSwingTimer--;     
     
-    // --- MISSION 3: ZERO-GRAVITY FLIGHT & SHOOTING ---
+// --- MISSION 3: ZERO-GRAVITY FLIGHT, SHOOTING & MAZE PUZZLES ---
     if (GAME.currentMission === 3) {
-        if (keys.ArrowLeft) GAME.player.dx -= 1.2;
-        if (keys.ArrowRight) GAME.player.dx += 1.2;
-        if (keys.ArrowUp) GAME.player.dy -= 1.2;
-        if (keys.ArrowDown) GAME.player.dy += 1.2;
+        if (keys.ArrowLeft) GAME.player.dx -= 0.6;
+        if (keys.ArrowRight) GAME.player.dx += 0.6;
+        if (keys.ArrowUp) GAME.player.dy -= 0.6;
+        if (keys.ArrowDown) GAME.player.dy += 0.6;
 
-        GAME.player.dx *= GAME.friction;
-        GAME.player.dy *= GAME.friction;
+        GAME.player.dx *= 0.88;
+        GAME.player.dy *= 0.88;
 
         GAME.player.x += GAME.player.dx;
         GAME.player.y += GAME.player.dy;
 
         if (GAME.player.y < 30) { GAME.player.y = 30; GAME.player.dy = 0; }
-        if (GAME.player.y > 490) { GAME.player.y = 490; GAME.player.dy = 0; }
+        if (GAME.player.y > 510) { GAME.player.y = 510; GAME.player.dy = 0; }
 
         if (!GAME.playerLasers) GAME.playerLasers = [];
         if (keys.D && (GAME.player.shootTimer || 0) <= 0) {
@@ -327,7 +327,7 @@ if (GAME.cutsceneTimer > 180) {
         }
         if (GAME.player.shootTimer > 0) GAME.player.shootTimer--;
 
-        // Move Lasers forward & check hits
+        // 1. Move Lasers forward & check hits
         for (let i = GAME.playerLasers.length - 1; i >= 0; i--) {
             let l = GAME.playerLasers[i];
             l.x += l.dx;
@@ -352,7 +352,7 @@ if (GAME.cutsceneTimer > 180) {
                 });
             }
 
-if (GAME.shieldGenerators) {
+            if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!hit && gen.active && l.x > gen.x && l.x < gen.x + gen.width && l.y > gen.y && l.y < gen.y + gen.height) {
                         hit = true;
@@ -364,13 +364,12 @@ if (GAME.shieldGenerators) {
                             gen.active = false;
                             addParticles(gen.x + gen.width/2, gen.y + gen.height/2, gen.isSuper ? "#ff4757" : "#00bfff", 45);
                             
-                            // Deactivate barriers ONLY if ALL of their required generators are destroyed!
                             if (GAME.shieldBarriers) {
                                 GAME.shieldBarriers.forEach(sb => {
-                                    let allDestroyed = sb.targetIds.every(id => {
+                                    let allDestroyed = sb.targetIds ? sb.targetIds.every(id => {
                                         let g = GAME.shieldGenerators.find(item => item.id === id);
                                         return !g || !g.active;
-                                    });
+                                    }) : true;
                                     if (allDestroyed) sb.active = false;
                                 });
                             }
@@ -384,21 +383,18 @@ if (GAME.shieldGenerators) {
             }
         }
 
-if (GAME.asteroids) {
+        // 2. Animate Moving Asteroids & Rain
+        if (GAME.asteroids) {
             GAME.asteroids.forEach(ast => {
                 if (!ast.active) return;
                 
-                // Vertical movement
                 if (ast.dy) {
                     ast.y += ast.dy;
                     if (ast.y > ast.maxY || ast.y < ast.minY) ast.dy *= -1;
                 }
                 
-                // Horizontal / Rain movement
                 if (ast.dx) {
                     ast.x += ast.dx;
-                    
-                    // Rain asteroids loop endlessly from right to left
                     if (ast.isRain) {
                         if (ast.x < GAME.camera.x - 100) {
                             ast.x = GAME.camera.x + canvas.width + Math.random() * 300;
@@ -419,6 +415,7 @@ if (GAME.asteroids) {
             });
         }
 
+        // 3. Shield Barriers Blocking Ship
         if (GAME.shieldBarriers) {
             GAME.shieldBarriers.forEach(sb => {
                 if (sb.active && GAME.player.x < sb.x + sb.width && GAME.player.x + GAME.player.width > sb.x &&
@@ -428,13 +425,69 @@ if (GAME.asteroids) {
             });
         }
 
+        // 4. Force Carrying Puzzle Batteries & Socket Snapping
+        if (GAME.puzzleBatteries) {
+            GAME.puzzleBatteries.forEach(bat => {
+                if (bat.placed) return;
+
+                let socket = GAME.puzzleSockets ? GAME.puzzleSockets.find(s => s.id === bat.targetSocketId) : null;
+                let distToPlayer = Math.hypot((GAME.player.x + GAME.player.width/2) - (bat.x + bat.width/2), (GAME.player.y + GAME.player.height/2) - (bat.y + bat.height/2));
+
+                // Hold [F] key near battery to carry it with the Force
+                if (keys.F && distToPlayer < 250) {
+                    bat.x += (GAME.player.x + GAME.player.width + 10 - bat.x) * 0.2;
+                    bat.y += (GAME.player.y + GAME.player.height/2 - bat.height/2 - bat.y) * 0.2;
+                    addParticles(bat.x + bat.width/2, bat.y + bat.height/2, "#e0aaff", 1);
+                }
+
+                // Snap Battery to Socket when brought close!
+                if (socket) {
+                    let distToSocket = Math.hypot((bat.x + bat.width/2) - (socket.x + socket.width/2), (bat.y + bat.height/2) - (socket.y + socket.height/2));
+                    if (distToSocket < 60) {
+                        bat.x = socket.x + (socket.width - bat.width)/2;
+                        bat.y = socket.y + (socket.height - bat.height)/2;
+                        bat.placed = true;
+                        socket.active = true;
+                        playSound('win');
+                        addParticles(socket.x + socket.width/2, socket.y + socket.height/2, "#2ecc71", 30);
+
+                        // Unlock corresponding Blast Door
+                        if (GAME.puzzleDoors) {
+                            GAME.puzzleDoors.forEach(door => {
+                                if (door.targetSocketId === socket.id) door.active = false;
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        // 5. Solid Maze Walls & Closed Blast Doors Collisions
+        let mazeObstacles = (GAME.mazeWalls || []).concat((GAME.puzzleDoors || []).filter(d => d.active));
+        mazeObstacles.forEach(w => {
+            if (GAME.player.x < w.x + w.width && GAME.player.x + GAME.player.width > w.x &&
+                GAME.player.y < w.y + w.height && GAME.player.y + GAME.player.height > w.y) {
+                if (GAME.player.dx > 0 && GAME.player.x + GAME.player.width - GAME.player.dx <= w.x) {
+                    GAME.player.x = w.x - GAME.player.width; GAME.player.dx = 0;
+                } else if (GAME.player.dx < 0 && GAME.player.x - GAME.player.dx >= w.x + w.width) {
+                    GAME.player.x = w.x + w.width; GAME.player.dx = 0;
+                }
+                if (GAME.player.dy > 0 && GAME.player.y + GAME.player.height - GAME.player.dy <= w.y) {
+                    GAME.player.y = w.y - GAME.player.height; GAME.player.dy = 0;
+                } else if (GAME.player.dy < 0 && GAME.player.y - GAME.player.dy >= w.y + w.height) {
+                    GAME.player.y = w.y + w.height; GAME.player.dy = 0;
+                }
+            }
+        });
+
+        // 6. Trigger Planet Landing Cutscene
         if (GAME.moon && GAME.player.x + GAME.player.width >= GAME.moon.x - 50) {
             if (GAME.state === "PLAYING") {
                 GAME.state = "CUTSCENE_LANDING";
                 GAME.cutsceneTimer = 0;
             }
         }
-    } 
+    }
     // --- MISSIONS 1 & 2: STANDARD PLATFORMER MOVEMENT ---
     else {
         if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
