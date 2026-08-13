@@ -759,10 +759,42 @@ try {
     } catch(e) {}
     
 try {         
-        if (GAME.state !== "CUTSCENE_SHIP") { // Hides player after entering the ship
+        if (GAME.state !== "CUTSCENE_SHIP") { 
             ctx.save();         
-            ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
-            ctx.scale(GAME.player.scaleX, GAME.player.scaleY);         
+            
+            // --- MISSION 3: HERO STARFIGHTER ---
+            if (GAME.currentMission === 3) {
+                let currentChar = CHARACTERS[GAME.selectedCharKey];
+                let px = GAME.player.x;
+                let py = GAME.player.y;
+                let w = GAME.player.width;
+                let h = GAME.player.height;
+
+                // Main Wing / Body
+                ctx.fillStyle = currentChar.color;
+                ctx.beginPath();
+                ctx.moveTo(px + w, py + h / 2); // Nose cone
+                ctx.lineTo(px, py + 5);
+                ctx.lineTo(px + 10, py + h / 2);
+                ctx.lineTo(px, py + h - 5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.stroke();
+
+                // Blue Glass Cockpit
+                ctx.fillStyle = "#00bfff";
+                drawRoundedRect(ctx, px + 20, py + h / 2 - 6, 16, 12, 4);
+
+                // Engine Glow Thruster
+                ctx.shadowBlur = 15; ctx.shadowColor = "#ff9f43";
+                ctx.fillStyle = "#ff9f43";
+                ctx.fillRect(px - 6, py + h / 2 - 4, 8, 8);
+                ctx.shadowBlur = 0;
+            } 
+            // --- MISSIONS 1 & 2: LEGO MINIFIGURE ---
+            else {
+                ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
+                ctx.scale(GAME.player.scaleX, GAME.player.scaleY);       
             
             if (GAME.hasShield) {             
                 ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";             
