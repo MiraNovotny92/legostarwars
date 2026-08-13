@@ -89,6 +89,16 @@ window.playSound = function(type) {
             osc.frequency.setValueAtTime(659, now + 0.3);
             gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
             osc.start(); osc.stop(now + 0.5);
+        } else if (type === 'rocket') {
+            const osc = window.audioCtx.createOscillator(); const gain = window.audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(80, now);
+            osc.frequency.linearRampToValueAtTime(220, now + 1.8);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+            osc.connect(gain); gain.connect(window.audioCtx.destination);
+            osc.start(); osc.stop(now + 1.8);
         }
+        
     } catch(e) {}
 };
