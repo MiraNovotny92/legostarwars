@@ -159,6 +159,14 @@ function buildMission2() {
     // A massive grid of 60 coins right before the end!
     addCoinGrid(cursorX + 50, 250, 5, 12); 
     addGround(600, 540);
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+
 
     // --- SECTION 12: FINAL SPRINT TO THE SPACESHIP ---
     // FIXED: Y position calculated so it sits exactly on the floor (540 floor - 260 height = 280)
