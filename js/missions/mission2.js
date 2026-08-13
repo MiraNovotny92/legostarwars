@@ -46,7 +46,7 @@ function buildMission2() {
 
     // --- SECTION 3: JUMP PAD INTO MASSIVE COIN ARC ---
     GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
-    addWaterPit(600); // Huge gap!
+    addWaterPit(400); // Huge gap!
     addCoinArc(cursorX - 550, 340, 14); // 14 coins in a massive arc over the water
 
     // --- SECTION 4: LANDING ZONE WITH BB-8 ---
