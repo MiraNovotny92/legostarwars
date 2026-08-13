@@ -390,8 +390,11 @@ function update() {
         if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {             
             if (GAME.score >= 200) {                 
                 // They have 200+ coins! Let them fly!                 
-                triggerWin("Escaped with 200 Coins!");             
-            } else {                 
+        if (GAME.state === "PLAYING") {
+                    GAME.state = "CUTSCENE_SHIP";
+                    if (dialogueBox) dialogueBox.style.display = "none";
+                    playSound('rocket');
+                }            } else {                 
                 // Not enough coins! Lock the door and tell them how many they have.                 
                 if (dialogueBox && dialogueText) {                     
                     dialogueBox.style.display = "block";                     
