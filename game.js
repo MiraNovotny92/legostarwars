@@ -233,14 +233,52 @@ function update() {
             if (p.life <= 0) GAME.particles.splice(i, 1);
         }
 
-        // Trigger Win screen once the ship flies completely off-screen
+// Trigger Win screen once the ship flies completely off-screen
         if (GAME.spaceship.y < -400) {
             triggerWin("Escaped with 200 Coins!");
         }
         return;
     }
 
-    if (GAME.state !== "PLAYING") return;     
+    // --- MISSION 1: JUMP CELEBRATION CUTSCENE ---
+    if (GAME.state === "CUTSCENE_JUMP") {
+        if (GAME.cutsceneTimer === undefined) GAME.cutsceneTimer = 0;
+        GAME.cutsceneTimer++;
+
+        // Bouncy jumping animation for both character & Obi-Wan
+        let playerBounce = Math.abs(Math.sin(GAME.cutsceneTimer * 0.18)) * 35;
+        let obiBounce = Math.abs(Math.sin(GAME.cutsceneTimer * 0.18 + 0.4)) * 35;
+
+        GAME.player.y = GAME.player.baseY - playerBounce;
+        GAME.obi.y = GAME.obi.baseY - obiBounce;
+
+        // Party sparkles popping at their feet
+        if (GAME.cutsceneTimer % 5 === 0) {
+            let colors = ["#ffd700", "#00bfff", "#ff007f", "#2ecc71", "#ffffff"];
+            addParticles(GAME.player.x + 24, GAME.player.y + 30, colors[Math.floor(Math.random() * colors.length)], 3);
+            addParticles(GAME.obi.x + 25, GAME.obi.y + 30, colors[Math.floor(Math.random() * colors.length)], 3);
+        }
+
+        // Animate particles during cutscene
+        for (let i = GAME.particles.length - 1; i >= 0; i--) {
+            let p = GAME.particles[i];
+            p.x += p.dx;
+            p.y += p.dy;
+            p.life--;
+            if (p.life <= 0) GAME.particles.splice(i, 1);
+        }
+
+        // After ~3.5 seconds (210 frames), finish mission
+        if (GAME.cutsceneTimer > 210) {
+            GAME.player.y = GAME.player.baseY;
+            GAME.obi.y = GAME.obi.baseY;
+            triggerWin("Returned Obi-Wan's Lightsaber!");
+        }
+        return;
+    }
+
+    if (GAME.state !== "PLAYING") return;
+    
     GAME.elapsedTime = Date.now() - GAME.startTime;  
     let mins = Math.floor(GAME.elapsedTime / 60000);     
     let secs = Math.floor((GAME.elapsedTime % 60000) / 1000);     
