@@ -192,8 +192,47 @@ function resetPlayer() {
 }
 
 function update() {     
+    // --- SPACESHIP TAKEOFF CUTSCENE ---
+    if (GAME.state === "CUTSCENE_SHIP") {
+        if (!GAME.spaceship.dy) GAME.spaceship.dy = -1;
+        GAME.spaceship.dy -= 0.25; // Rocket acceleration upwards
+        GAME.spaceship.y += GAME.spaceship.dy;
+
+        // Spawn Flame and Smoke Particles from the Thruster Engine
+        let engineX = GAME.spaceship.x + 10;
+        let engineY = GAME.spaceship.y + 105;
+        for (let i = 0; i < 4; i++) {
+            GAME.particles.push({
+                x: engineX + (Math.random() - 0.5) * 16,
+                y: engineY,
+                dx: (Math.random() - 0.5) * 3,
+                dy: Math.random() * 6 + 4,
+                size: Math.random() * 8 + 4,
+                color: ["#ff4757", "#ffa502", "#eccc68", "#ffffff"][Math.floor(Math.random() * 4)],
+                life: 20
+            });
+        }
+
+        // Animate particles during cutscene
+        for (let i = GAME.particles.length - 1; i >= 0; i--) {
+            let p = GAME.particles[i];
+            p.x += p.dx;
+            p.y += p.dy;
+            p.life--;
+            if (p.life <= 0) GAME.particles.splice(i, 1);
+        }
+
+        GAME.camera.shake = 6; // Screen rumble effect
+
+        // Trigger Win once the ship flies high into space
+        if (GAME.spaceship.y < -300) {
+            triggerWin("Escaped with 200 Coins!");
+        }
+        return;
+    }
+
     if (GAME.state !== "PLAYING") return;     
-    GAME.elapsedTime = Date.now() - GAME.startTime;     
+    GAME.elapsedTime = Date.now() - GAME.startTime;  
     let mins = Math.floor(GAME.elapsedTime / 60000);     
     let secs = Math.floor((GAME.elapsedTime % 60000) / 1000);     
     let ms = Math.floor((GAME.elapsedTime % 1000) / 100);     
