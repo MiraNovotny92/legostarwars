@@ -268,8 +268,8 @@ function update() {
             if (p.life <= 0) GAME.particles.splice(i, 1);
         }
 
-        // After ~3.5 seconds (210 frames), finish mission
-        if (GAME.cutsceneTimer > 210) {
+        // After ~10 seconds (600 frames), finish mission
+        if (GAME.cutsceneTimer > 600) {
             GAME.player.y = GAME.player.baseY;
             GAME.obi.y = GAME.obi.baseY;
             triggerWin("Returned Obi-Wan's Lightsaber!");
