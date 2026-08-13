@@ -825,17 +825,18 @@ try {
                 ctx.fillStyle = currentChar.saberColor;             
                 ctx.fillRect(0, -saberLength, 6, saberLength);
                 
-                if (GAME.selectedCharKey === 'ahsoka') {
+if (GAME.selectedCharKey === 'ahsoka') {
                     let dualOffset = GAME.player.facing === 'right' ? -25 : 25;
                     ctx.fillRect(dualOffset, -25, 5, 25);
                 }
                 
                 ctx.shadowBlur = 0;             
                 ctx.restore();         
-            }       
+            } 
+            }      
             ctx.restore();     
         }
-    } catch(e) {} 
+    } catch(e) {}
     ctx.restore();     
     
     if (GAME.deathMessageTimer > 0) {         
