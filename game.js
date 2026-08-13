@@ -425,16 +425,21 @@ function update() {
         const dialogueBox = document.getElementById("dialogue-box");                      
         const dialogueText = document.getElementById("dialogue-text");                      
 
+// MISSION 2: SPACESHIP ESCAPE LOGIC     
+    if (GAME.currentMission === 2 && GAME.spaceship) {         
+        const dialogueBox = document.getElementById("dialogue-box");                      
+        const dialogueText = document.getElementById("dialogue-text");                      
+
         // 1. Is the player standing in front of the spaceship at the end?
         if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {             
             if (GAME.score >= 200) {                 
-                // They have 200+ coins! Let them fly!                 
-        if (GAME.state === "PLAYING") {
+                if (GAME.state === "PLAYING") {
                     GAME.state = "CUTSCENE_SHIP";
                     if (dialogueBox) dialogueBox.style.display = "none";
                     playSound('rocket');
-                }            } else {                 
-                // Not enough coins! Lock the door and tell them how many they have.                 
+                }
+            } else {                 
+                // Not enough coins! Lock the door and show message
                 if (dialogueBox && dialogueText) {                     
                     dialogueBox.style.display = "block";                     
                     dialogueText.innerText = `Ship locked! You need 200 coins. You only have ${GAME.score}.`;                 
