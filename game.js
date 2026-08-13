@@ -270,15 +270,12 @@ function update() {
         if (GAME.cutsceneTimer === undefined) GAME.cutsceneTimer = 0;
         GAME.cutsceneTimer++;
 
-        // Fly ship smoothly toward the surface of the moon
         GAME.player.x += 2.5;
         if (GAME.player.y < GAME.moon.y + 80) GAME.player.y += 0.8;
         if (GAME.player.y > GAME.moon.y + 80) GAME.player.y -= 0.8;
 
-        // Engine trail particles
         addParticles(GAME.player.x, GAME.player.y + 15, "#ff9f43", 2);
 
-        // After 3 seconds, land and win!
         if (GAME.cutsceneTimer > 180) {
             triggerWin("Landed Safely on the Secret Moon Base!");
         }
@@ -327,13 +324,12 @@ function update() {
         }
         if (GAME.player.shootTimer > 0) GAME.player.shootTimer--;
 
-// 1. Move Lasers forward & check hits
+        // Move Lasers forward & check hits
         for (let i = GAME.playerLasers.length - 1; i >= 0; i--) {
             let l = GAME.playerLasers[i];
             l.x += l.dx;
             let hit = false;
 
-            // Laser vs Asteroids
             if (GAME.asteroids) {
                 GAME.asteroids.forEach(ast => {
                     if (!hit && ast.active && Math.hypot(l.x - ast.x, l.y - ast.y) < ast.radius) {
@@ -353,7 +349,6 @@ function update() {
                 });
             }
 
-            // Laser vs Shield Generators (Takes 3 Hits to disable forcefield!)
             if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!hit && gen.active && l.x > gen.x && l.x < gen.x + gen.width && l.y > gen.y && l.y < gen.y + gen.height) {
@@ -361,11 +356,9 @@ function update() {
                         gen.hp--;
                         addParticles(l.x, l.y, "#00bfff", 12);
                         playSound('gateBreak');
-
                         if (gen.hp <= 0) {
                             gen.active = false;
                             addParticles(gen.x + gen.width/2, gen.y + gen.height/2, "#00bfff", 30);
-                            // Deactivate connected Forcefield
                             if (GAME.shieldBarriers) {
                                 GAME.shieldBarriers.forEach(sb => {
                                     if (sb.targetId === gen.id) sb.active = false;
@@ -381,12 +374,9 @@ function update() {
             }
         }
 
-        // 2. Animate Moving Asteroids & Push Ship Physics
         if (GAME.asteroids) {
             GAME.asteroids.forEach(ast => {
                 if (!ast.active) return;
-                
-                // Move Asteroid
                 if (ast.dy) {
                     ast.y += ast.dy;
                     if (ast.y > ast.maxY || ast.y < ast.minY) ast.dy *= -1;
@@ -396,7 +386,6 @@ function update() {
                     if (ast.x > ast.maxX || ast.x < ast.minX) ast.dx *= -1;
                 }
 
-                // Push Ship if Rock collides with Player Ship
                 let dist = Math.hypot((GAME.player.x + 20) - ast.x, (GAME.player.y + 15) - ast.y);
                 if (dist < ast.radius + 18) {
                     let angle = Math.atan2((GAME.player.y + 15) - ast.y, (GAME.player.x + 20) - ast.x);
@@ -407,24 +396,22 @@ function update() {
             });
         }
 
-        // 3. Forcefield Barriers Blocking Ship
         if (GAME.shieldBarriers) {
             GAME.shieldBarriers.forEach(sb => {
                 if (sb.active && GAME.player.x < sb.x + sb.width && GAME.player.x + GAME.player.width > sb.x &&
                     GAME.player.y < sb.y + sb.height && GAME.player.y + GAME.player.height > sb.y) {
-                    GAME.player.x = sb.x - GAME.player.width; // Block ship from passing
+                    GAME.player.x = sb.x - GAME.player.width;
                 }
             });
         }
 
-        // 4. Trigger Moon Landing Cutscene when reaching the Moon
         if (GAME.moon && GAME.player.x + GAME.player.width >= GAME.moon.x - 50) {
             if (GAME.state === "PLAYING") {
                 GAME.state = "CUTSCENE_LANDING";
                 GAME.cutsceneTimer = 0;
             }
         }
-    }
+    } 
     // --- MISSIONS 1 & 2: STANDARD PLATFORMER MOVEMENT ---
     else {
         if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
@@ -434,43 +421,43 @@ function update() {
         GAME.player.dy += GAME.gravity; GAME.player.dx *= GAME.friction;     
         GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;     
         GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;
+
+        // Moving Platforms
+        GAME.movingPlatforms.forEach(mp => {         
+            if (mp.isMoving) {             
+                if (mp.dx) { mp.x += mp.dx; if (mp.x > mp.maxX || mp.x < mp.minX) mp.dx *= -1; }
+                if (mp.dy) { mp.y += mp.dy; if (mp.y > mp.maxY || mp.y < mp.minY) mp.dy *= -1; }
+            }     
+        });     
+
+        const solidObjects = GAME.platforms     
+            .concat(GAME.crates)         
+            .concat(GAME.forceContainers)         
+            .concat(GAME.laserGates.filter(g => !g.destroyed));     
+
+        GAME.player.x += GAME.player.dx;     
+        solidObjects.forEach(s => {         
+            if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
+                if (GAME.player.dx > 0) GAME.player.x = s.x - GAME.player.width;             
+                else if (GAME.player.dx < 0) GAME.player.x = s.x + s.width;             
+                GAME.player.dx = 0;         
+            }     
+        });     
+
+        GAME.player.y += GAME.player.dy;     
+        GAME.player.grounded = false;     
+        solidObjects.forEach(s => {         
+            if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
+                if (GAME.player.dy > 0) {                 
+                    if (!GAME.player.grounded) { GAME.player.scaleX = 1.2; GAME.player.scaleY = 0.8; }                 
+                    GAME.player.grounded = true; GAME.player.dy = 0; GAME.player.y = s.y - GAME.player.height;                 
+                    if (s.y >= 480) GAME.lastSafeX = Math.max(50, GAME.player.x - 30);             
+                } else if (GAME.player.dy < 0) {                 
+                    GAME.player.y = s.y + s.height; GAME.player.dy = 0;             
+                }         
+            }     
+        });
     }
-    
-    // Moving Platforms
-    GAME.movingPlatforms.forEach(mp => {         
-        if (mp.isMoving) {             
-            if (mp.dx) { mp.x += mp.dx; if (mp.x > mp.maxX || mp.x < mp.minX) mp.dx *= -1; }
-            if (mp.dy) { mp.y += mp.dy; if (mp.y > mp.maxY || mp.y < mp.minY) mp.dy *= -1; }
-        }     
-    });     
-
-    const solidObjects = GAME.platforms     
-        .concat(GAME.crates)         
-        .concat(GAME.forceContainers)         
-        .concat(GAME.laserGates.filter(g => !g.destroyed));     
-
-    GAME.player.x += GAME.player.dx;     
-    solidObjects.forEach(s => {         
-        if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
-            if (GAME.player.dx > 0) GAME.player.x = s.x - GAME.player.width;             
-            else if (GAME.player.dx < 0) GAME.player.x = s.x + s.width;             
-            GAME.player.dx = 0;         
-        }     
-    });     
-
-    GAME.player.y += GAME.player.dy;     
-    GAME.player.grounded = false;     
-    solidObjects.forEach(s => {         
-        if (GAME.player.x < s.x + s.width && GAME.player.x + GAME.player.width > s.x && GAME.player.y < s.y + s.height && GAME.player.y + GAME.player.height > s.y) {             
-            if (GAME.player.dy > 0) {                 
-                if (!GAME.player.grounded) { GAME.player.scaleX = 1.2; GAME.player.scaleY = 0.8; }                 
-                GAME.player.grounded = true; GAME.player.dy = 0; GAME.player.y = s.y - GAME.player.height;                 
-                if (s.y >= 480) GAME.lastSafeX = Math.max(50, GAME.player.x - 30);             
-            } else if (GAME.player.dy < 0) {                 
-                GAME.player.y = s.y + s.height; GAME.player.dy = 0;             
-            }         
-        }     
-    });     
 
     // Lightsaber Attack
     if (GAME.player.saberSwingTimer > 0) {         
@@ -789,10 +776,9 @@ function draw() {
         }
     } catch(e) {}
 
-// Mission 3: Space Objects (Moon, Asteroids, Shields)
+    // Mission 3: Space Objects (Moon, Asteroids, Shields)
     try {
         if (GAME.currentMission === 3) {
-            // 1. Draw Moon / Planet at the end
             if (GAME.moon) {
                 ctx.save();
                 ctx.shadowBlur = 30; ctx.shadowColor = "#a4b0be";
@@ -804,18 +790,16 @@ function draw() {
                 ctx.restore();
             }
 
-            // 2. Draw Asteroids
             if (GAME.asteroids) {
                 GAME.asteroids.forEach(ast => {
                     if (!ast.active) return;
                     ctx.save();
-                    ctx.fillStyle = ast.destructible ? "#8c7ae6" : "#485460"; // Purple = Destroyable, Grey = Solid
+                    ctx.fillStyle = ast.destructible ? "#8c7ae6" : "#485460";
                     ctx.strokeStyle = "#2f3542"; ctx.lineWidth = 3;
                     ctx.beginPath();
                     ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
                     ctx.fill(); ctx.stroke();
 
-                    // Display HP damage on destroyable rocks
                     if (ast.destructible && ast.hp < ast.maxHp) {
                         ctx.fillStyle = "#ff4757";
                         ctx.fillRect(ast.x - 12, ast.y - ast.radius - 10, 24 * (ast.hp / ast.maxHp), 4);
@@ -824,7 +808,6 @@ function draw() {
                 });
             }
 
-            // 3. Draw Shield Generators & Forcefields
             if (GAME.shieldBarriers) {
                 GAME.shieldBarriers.forEach(sb => {
                     if (!sb.active) return;
@@ -838,7 +821,7 @@ function draw() {
             if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!gen.active) return;
-                    let colors = ["#ff4757", "#ffa502", "#2ecc71"]; // Red -> Yellow -> Green
+                    let colors = ["#ff4757", "#ffa502", "#2ecc71"];
                     ctx.fillStyle = colors[gen.hp - 1] || "#2ecc71";
                     drawRoundedRect(ctx, gen.x, gen.y, gen.width, gen.height, 6);
                     ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.stroke();
@@ -859,10 +842,9 @@ function draw() {
                 let w = GAME.player.width;
                 let h = GAME.player.height;
 
-                // Main Wing / Body
                 ctx.fillStyle = currentChar.color;
                 ctx.beginPath();
-                ctx.moveTo(px + w, py + h / 2); // Nose cone
+                ctx.moveTo(px + w, py + h / 2);
                 ctx.lineTo(px, py + 5);
                 ctx.lineTo(px + 10, py + h / 2);
                 ctx.lineTo(px, py + h - 5);
@@ -870,11 +852,9 @@ function draw() {
                 ctx.fill();
                 ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.stroke();
 
-                // Blue Glass Cockpit
                 ctx.fillStyle = "#00bfff";
                 drawRoundedRect(ctx, px + 20, py + h / 2 - 6, 16, 12, 4);
 
-                // Engine Glow Thruster
                 ctx.shadowBlur = 15; ctx.shadowColor = "#ff9f43";
                 ctx.fillStyle = "#ff9f43";
                 ctx.fillRect(px - 6, py + h / 2 - 4, 8, 8);
@@ -936,7 +916,9 @@ function draw() {
 }
 
 function gameLoop() {     
-    update(); draw(); requestAnimationFrame(gameLoop); 
+    update(); 
+    draw(); 
+    requestAnimationFrame(gameLoop); 
 }
 
 gameLoop();
