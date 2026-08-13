@@ -796,26 +796,52 @@ function draw() {
                 ctx.restore();
             }
 
-            // 2. Draw Clear Asteroids
+// 2. Draw Bumpy Jagged Asteroids with Custom Colors & Comet Tails
             if (GAME.asteroids) {
                 GAME.asteroids.forEach(ast => {
                     if (!ast.active) return;
                     ctx.save();
-                    if (ast.destructible) {
-                        // DESTROYABLE: Glowing Purple Crystal Rock
-                        ctx.shadowBlur = 15; ctx.shadowColor = "#9b59b6";
-                        ctx.fillStyle = "#8e44ad";
-                        ctx.strokeStyle = "#e0aaff"; ctx.lineWidth = 3;
+
+                    // Draw Comet Plasma Tail for fast moving rocks
+                    if (ast.hasTail) {
+                        ctx.shadowBlur = 20; ctx.shadowColor = "#ff9f43";
+                        ctx.fillStyle = "rgba(255, 159, 67, 0.6)";
                         ctx.beginPath();
-                        ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
-                        ctx.fill(); ctx.stroke();
+                        ctx.moveTo(ast.x, ast.y - ast.radius * 0.7);
+                        ctx.lineTo(ast.x + ast.radius * 2.5, ast.y);
+                        ctx.lineTo(ast.x, ast.y + ast.radius * 0.7);
+                        ctx.closePath();
+                        ctx.fill();
                         ctx.shadowBlur = 0;
+                    }
 
-                        // Crystal Ores
+                    // Base Fill Color & Border
+                    ctx.fillStyle = ast.color || (ast.destructible ? "#8e44ad" : "#485460");
+                    ctx.strokeStyle = ast.destructible ? "#e0aaff" : "#1e272e";
+                    ctx.lineWidth = 3;
+
+                    // Bumpy / Jagged Polygon Shape
+                    ctx.beginPath();
+                    let points = 9;
+                    for (let i = 0; i < points; i++) {
+                        let angle = (i / points) * Math.PI * 2;
+                        let bump = Math.sin(i * 3 + ast.x) * (ast.radius * 0.22);
+                        let r = ast.radius + bump;
+                        let bx = ast.x + Math.cos(angle) * r;
+                        let by = ast.y + Math.sin(angle) * r;
+                        if (i === 0) ctx.moveTo(bx, by);
+                        else ctx.lineTo(bx, by);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Destroyable Crystal Core or Indestructible Danger Light
+                    if (ast.destructible) {
                         ctx.fillStyle = "#e0aaff";
-                        ctx.fillRect(ast.x - 8, ast.y - 8, 16, 16);
+                        ctx.fillRect(ast.x - 6, ast.y - 6, 12, 12);
 
-                        // Health bar if damaged
+                        // Health Bar
                         if (ast.hp < ast.maxHp) {
                             ctx.fillStyle = "rgba(0,0,0,0.6)";
                             ctx.fillRect(ast.x - 20, ast.y - ast.radius - 14, 40, 6);
@@ -823,14 +849,7 @@ function draw() {
                             ctx.fillRect(ast.x - 20, ast.y - ast.radius - 14, 40 * (ast.hp / ast.maxHp), 6);
                         }
                     } else {
-                        // INDESTRUCTIBLE: Dark Iron Metal Fortress Rock
-                        ctx.fillStyle = "#2c3e50";
-                        ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 4; // Red Warning Border
-                        ctx.beginPath();
-                        ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
-                        ctx.fill(); ctx.stroke();
-
-                        // Blinking Danger Light
+                        // Blinking Red Warning Beacon
                         let blink = Math.sin(Date.now() / 150) > 0;
                         ctx.fillStyle = blink ? "#ff0000" : "#7f8c8d";
                         ctx.beginPath();
