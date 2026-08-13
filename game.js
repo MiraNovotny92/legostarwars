@@ -377,16 +377,29 @@ function update() {
             }
         }
 
-        if (GAME.asteroids) {
+if (GAME.asteroids) {
             GAME.asteroids.forEach(ast => {
                 if (!ast.active) return;
+                
+                // Vertical movement
                 if (ast.dy) {
                     ast.y += ast.dy;
                     if (ast.y > ast.maxY || ast.y < ast.minY) ast.dy *= -1;
                 }
+                
+                // Horizontal / Rain movement
                 if (ast.dx) {
                     ast.x += ast.dx;
-                    if (ast.x > ast.maxX || ast.x < ast.minX) ast.dx *= -1;
+                    
+                    // Rain asteroids loop endlessly from right to left
+                    if (ast.isRain) {
+                        if (ast.x < GAME.camera.x - 100) {
+                            ast.x = GAME.camera.x + canvas.width + Math.random() * 300;
+                            ast.y = 80 + Math.random() * 400;
+                        }
+                    } else {
+                        if (ast.x > ast.maxX || ast.x < ast.minX) ast.dx *= -1;
+                    }
                 }
 
                 let dist = Math.hypot((GAME.player.x + 20) - ast.x, (GAME.player.y + 15) - ast.y);
