@@ -19,8 +19,8 @@ function buildMission1() {
     // --- SECTION 1: STARTING AREA ---
     // Place Obi-Wan at the start of the level
     GAME.obi = { x: 300, y: 490, width: 50, height: 50 };
-    // Draw 800px of safe ground for the start
-    addGround(800, 540); 
+    // Draw 600px of safe ground for the start
+    addGround(600, 540); 
 
 
     // --- SECTION 2: FIRST WATER PIT ---
@@ -35,7 +35,13 @@ function buildMission1() {
         dx: 1.5, minX: cursorX + 50, maxX: cursorX + 350,
         bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
     });
-    // Draw 500px of ground under the droid
+        // Place an R2D2 droid 100px into this new section
+    GAME.droids.push({
+        x: cursorX + 150, y: 495, baseY: 495, width: 40, height: 45, type: 'r2d2',
+        dx: 1.5, minX: cursorX + 50, maxX: cursorX + 350,
+        bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
+    });
+    // Draw 300px of ground under the droid
     addGround(300, 540);
 
 
@@ -224,27 +230,32 @@ function buildMission1() {
     });
     // Add the water pit under the moving platform
     addWaterPit(400);
+    addGround(200, 540);
+
     
-    // Left Vertical Lift (Starts at Y: 490, moves up to Y: 200)
+// Left Vertical Lift (Starts low at Y: 490, moves up to Y: 200)
     GAME.movingPlatforms.push({
         x: cursorX + 50, y: 490, width: 120, height: 24,
         dx: 0, dy: -2.0, minX: cursorX + 50, maxX: cursorX + 50,
         minY: 200, maxY: 490, isMoving: true
     });
 
-    // The Giant Wall (Solid block, not ground)
+    // The Giant Wall in the middle
+    // Note: Set isGround: false so it renders as a high-tech metal pillar instead of dirt
     GAME.platforms.push({
-        x: cursorX + 200, y: 220, width: 100, height: 320, isGround: true
+        x: cursorX + 200, y: 220, width: 100, height: 320, isGround: false
     });
 
-    // Right Vertical Lift (Starts at Y: 490, moves up to Y: 200)
+    // Right Vertical Lift (Starts higher up at Y: 290, moves up to Y: 200)
     GAME.movingPlatforms.push({
-        x: cursorX + 330, y: 490, width: 120, height: 24,
+        x: cursorX + 330, y: 290, width: 120, height: 24,
         dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
-        minY: 200, maxY: 490, isMoving: true
+        minY: 200, maxY: 290, isMoving: true
     });
-    // Draw 600px of ground under the wall and lifts
-    addGround(500, 540);
+
+    // THIS IS THE SECRET:
+    // Instead of addGround, we add a water pit that spans the entire 600px width of this obstacle!
+    addWaterPit(600);
 
     // A simple 200px gap to jump over
     addWaterPit(150);
@@ -255,12 +266,17 @@ function buildMission1() {
     addGround(200, 540);
     addWaterPit(150);
 
-
+    // Place an R2D2 droid 100px into this new section
+    GAME.droids.push({
+        x: cursorX + 100, y: 495, baseY: 495, width: 40, height: 45, type: 'r2d2',
+        dx: 1.5, minX: cursorX + 50, maxX: cursorX + 350,
+        bounceY: 0, textTimer: 0, label: 'Beep Boop!', isFloating: false
+    });
     
     // --- SECTION 10: GOAL AREA ---
     // Place the Lightsaber 300px into the final section
     GAME.lightsaber = { x: cursorX + 300, y: 480, width: 12, height: 60 };
-    // Draw 800px of ground for the ending area
+    // Draw 500px of ground for the ending area
     addGround(500, 540);
 
     // Set the final width of the level so the camera stops scrolling
