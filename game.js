@@ -326,30 +326,27 @@ function update() {
         }
     }
 
-    // MISSION 2: SPACESHIP ESCAPE LOGIC
-    if (GAME.currentMission === 2 && GAME.spaceship) {
-        // Each stud is worth 10 points, so divide score by 10 to get coin count
-        let coinsCollected = GAME.score / 10; 
-        
-        // Is the player standing in front of the spaceship?
-        if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {
-            if (coinsCollected >= 500) {
-                // They have 50+ coins! Let them fly!
-                triggerWin("Escaped with 50 Coins!");
-            } else {
-                // Not enough coins! Lock the door and tell them how many they have.
-                const dialogueBox = document.getElementById("dialogue-box");     
-                const dialogueText = document.getElementById("dialogue-text");     
-                if (dialogueBox && dialogueText) {
-                    dialogueBox.style.display = "block";
-                    dialogueText.innerText = `Ship locked! You need 50 coins. You only have ${coinsCollected}.`;
-                }
-            }
-        } else if (GAME.currentMission === 2) {
-            // Hide the dialogue box if they walk away from the ship
-            const dialogueBox = document.getElementById("dialogue-box");     
-            if (dialogueBox) dialogueBox.style.display = "none";
-        }
+// MISSION 2: SPACESHIP ESCAPE LOGIC     
+    if (GAME.currentMission === 2 && GAME.spaceship) {         
+        // Is the player standing in front of the spaceship?         
+        if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {             
+            if (GAME.score >= 50) {                 
+                // They have 50+ coins! Let them fly!                 
+                triggerWin("Escaped with 50 Coins!");             
+            } else {                 
+                // Not enough coins! Lock the door and tell them how many they have.                 
+                const dialogueBox = document.getElementById("dialogue-box");                      
+                const dialogueText = document.getElementById("dialogue-text");                      
+                if (dialogueBox && dialogueText) {                     
+                    dialogueBox.style.display = "block";                     
+                    dialogueText.innerText = `Ship locked! You need 50 coins. You only have ${GAME.score}.`;                 
+                }             
+            }         
+        } else if (GAME.currentMission === 2) {             
+            // Hide the dialogue box if they walk away from the ship             
+            const dialogueBox = document.getElementById("dialogue-box");                  
+            if (dialogueBox) dialogueBox.style.display = "none";         
+        }     
     }
 
     if (GAME.player.y > 800) resetPlayer();
