@@ -6,7 +6,7 @@ try {
 }
 
 let isMuted = false;
-const bgMusic = new Audio('assets/theme.mp3');
+const bgMusic = new Audio();
 bgMusic.loop = true;
 bgMusic.volume = 0.35;
 
@@ -24,6 +24,10 @@ window.toggleMute = function() {
 
 window.startBackgroundMusic = function() {
     if (isMuted) return;
+    
+    // Check which mission is running and load the matching song
+    bgMusic.src = `assets/theme${window.GAME.currentMission}.mp3`;
+    
     bgMusic.play().catch(() => {});
 };
 
