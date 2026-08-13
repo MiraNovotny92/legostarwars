@@ -26,14 +26,14 @@ function buildMission3() {
         { id: "gen1", x: 2200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
 
         // Gate 2: DUAL GENERATORS (Must destroy BOTH gen2a & gen2b to open barrier!)
-        { id: "gen2a", x: 5000, y: 90,  width: 45, height: 45, hp: 3, maxHp: 3, active: true },
-        { id: "gen2b", x: 5000, y: 430, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+        { id: "gen2a", x: 5200, y: 90,  width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+        { id: "gen2b", x: 5200, y: 430, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
 
         // Gate 3: Standard Single Generator (3 Hits)
         { id: "gen3", x: 8200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
 
         // Gate 4: SUPER SHIELD GENERATOR (10 Hits!)
-        { id: "gen4", x: 10150, y: 250, width: 60, height: 60, hp: 10, maxHp: 10, isSuper: true, active: true }
+        { id: "gen4", x: 10350, y: 250, width: 60, height: 60, hp: 10, maxHp: 10, isSuper: true, active: true }
     ];
 
     GAME.shieldBarriers = [
