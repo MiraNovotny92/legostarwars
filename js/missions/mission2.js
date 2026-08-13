@@ -82,6 +82,46 @@ function buildMission2() {
 
     // --- SECTION 7: FINAL SPRINT TO THE SPACESHIP ---
     addCoins(cursorX + 100, 500, 10); // 10 coins leading to the ship
+
+          // Place a heavy red brick 200px into this section. The player must hold 'F' to lift it.
+    GAME.forceContainers.push({
+        x: cursorX + 200, y: 310, width: 90, height: 230,
+        baseY: 310, isHovering: false, type: 'brick', color: '#e74c3c'
+    });
+    // Draw 600px of ground under the Force block
+    addGround(300, 540);
+
+    // --- SECTION 5: HORIZONTAL MOVING PLATFORM OVER PIT ---
+    // Place a platform moving left and right over the pit
+    GAME.movingPlatforms.push({ 
+        x: cursorX, y: 440, width: 140, height: 24, 
+        dx: 1.8, dy: 0, minX: cursorX, maxX: cursorX + 300, // Moves 300px right
+        minY: 440, maxY: 440, isMoving: true 
+    });
+    // Add the water pit under the moving platform
+    addWaterPit(250);
+    addGround(200, 540);
+
+    
+// Left Vertical Lift (Starts low at Y: 490, moves up to Y: 200)
+    GAME.movingPlatforms.push({
+        x: cursorX + 50, y: 490, width: 120, height: 24,
+        dx: 0, dy: -2.0, minX: cursorX + 50, maxX: cursorX + 50,
+        minY: 200, maxY: 490, isMoving: true
+    });
+
+    // The Giant Wall in the middle
+    // Note: Set isGround: false so it renders as a high-tech metal pillar instead of dirt
+    GAME.platforms.push({
+        x: cursorX + 200, y: 220, width: 100, height: 320, isGround: false
+    });
+
+    // Right Vertical Lift (Starts higher up at Y: 290, moves up to Y: 200)
+    GAME.movingPlatforms.push({
+        x: cursorX + 330, y: 290, width: 120, height: 24,
+        dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
+        minY: 200, maxY: 490, isMoving: true
+    });
     
     // Define the Spaceship at the end
     GAME.spaceship = { x: cursorX + 500, y: 380, width: 280, height: 160 };
