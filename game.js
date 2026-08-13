@@ -694,11 +694,25 @@ function draw() {
         GAME.npcs.forEach(n => drawNPC(ctx, n));         
         GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });     
     } catch(e) {}     
-    try {         
+try {         
         GAME.particles.forEach(p => {             
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();         
         });     
     } catch(e) {}     
+
+    // Render Player Lasers
+    try {
+        if (GAME.playerLasers) {
+            GAME.playerLasers.forEach(l => {
+                ctx.shadowBlur = 12; ctx.shadowColor = "#ff0055";
+                ctx.fillStyle = "#ff0055";
+                drawRoundedRect(ctx, l.x, l.y, l.width, l.height, 3);
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(l.x + 2, l.y + 1, l.width - 4, l.height - 2);
+                ctx.shadowBlur = 0;
+            });
+        }
+    } catch(e) {}    
     
     // Player Character & Saber Swing
     try {
