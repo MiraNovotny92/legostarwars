@@ -18,25 +18,29 @@ function buildMission3() {
     GAME.shieldBarriers = [];
 
     // 3. Destination Moon / Planet
-    GAME.moon = { x: 15400, y: 50 };
+    GAME.moon = { x: 11400, y: 50 };
 
-    // 4. 4 Shield Gates along the 12,000px journey
+    // 4. Single, Dual, and Super Shield Generators
     GAME.shieldGenerators = [
+        // Gate 1: Standard Single Generator (3 Hits)
         { id: "gen1", x: 2200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
-        { id: "gen2", x: 5200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
-        { id: "gen3", x: 8200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
-        { id: "gen4", x: 10200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
-        { id: "gen5", x: 12200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true }
 
+        // Gate 2: DUAL GENERATORS (Must destroy BOTH gen2a & gen2b to open barrier!)
+        { id: "gen2a", x: 5000, y: 90,  width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+        { id: "gen2b", x: 5000, y: 430, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+
+        // Gate 3: Standard Single Generator (3 Hits)
+        { id: "gen3", x: 8200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+
+        // Gate 4: SUPER SHIELD GENERATOR (10 Hits!)
+        { id: "gen4", x: 10150, y: 250, width: 60, height: 60, hp: 10, maxHp: 10, isSuper: true, active: true }
     ];
 
     GAME.shieldBarriers = [
-        { targetId: "gen1", x: 2500, y: 0, width: 30, height: 600, active: true },
-        { targetId: "gen2", x: 5500, y: 0, width: 30, height: 600, active: true },
-        { targetId: "gen3", x: 8500, y: 0, width: 30, height: 600, active: true },
-        { targetId: "gen4", x: 10500, y: 0, width: 30, height: 600, active: true },
-        { targetId: "gen5", x: 12500, y: 0, width: 30, height: 600, active: true }
-
+        { targetIds: ["gen1"],           x: 2500,  y: 0, width: 30, height: 600, active: true },
+        { targetIds: ["gen2a", "gen2b"], x: 5500,  y: 0, width: 30, height: 600, active: true }, // Dual Shield
+        { targetIds: ["gen3"],           x: 8500,  y: 0, width: 30, height: 600, active: true },
+        { targetIds: ["gen4"],           x: 10500, y: 0, width: 30, height: 600, active: true }  // Super Shield
     ];
 
     // 5. Space Asteroids & Asteroid Rain
