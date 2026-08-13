@@ -138,7 +138,7 @@ function triggerWin(message) {
     playSound('win'); 
 }
 
-const keys = { ArrowLeft: false, ArrowRight: false, Space: false, F: false, D: false }; 
+const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false, Space: false, F: false, D: false };
 
 window.addEventListener("keydown", (e) => {     
     if (e.code === "ArrowLeft") keys.ArrowLeft = true;     
