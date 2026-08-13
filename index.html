@@ -12,7 +12,7 @@
         <div id="start-screen" class="overlay">
             <h2>Lego Star Wars Explorer</h2>
             
-<p>1. Select Your Hero:</p>
+            <p>1. Select Your Hero:</p>
             <div class="character-select">
                 <div class="char-card selected" onclick="selectCharacter('luke', this)">
                     <img src="assets/luke.jpg" class="char-avatar" alt="Luke">
@@ -39,7 +39,7 @@
                 <button class="mission-btn" onclick="selectMission(3, this)">💚 3. Rescue Grogu</button>
             </div>
 
-<div class="menu-buttons" style="margin-top: 20px;">
+            <div class="menu-buttons" style="margin-top: 20px;">
                 <button onclick="startGame()" style="background-color: #2ecc71; font-size: 20px; padding: 15px 30px; border-radius: 12px;">▶ START MISSION</button>
             </div>
             <button id="fullscreen-btn" onclick="toggleFullscreen()" style="background-color: #fca311; margin-top: 8px;">📺 Fullscreen</button>
@@ -55,6 +55,15 @@
                 <p id="true-jedi-badge" style="color: #ffd700; display: none; font-size: 18px;">🌟 TRUE JEDI STATUS ACHIEVED! 🌟</p>
             </div>
             <button onclick="location.reload()">Play Next Mission</button>
+        </div>
+
+        <!-- Pause Screen Overlay -->
+        <div id="pause-screen" class="overlay" style="display: none;">
+            <h2 style="color: #fca311; text-shadow: 0 0 15px #fca311; margin-bottom: 20px;">⏸ GAME PAUSED</h2>
+            <div class="menu-buttons" style="flex-direction: column; gap: 15px;">
+                <button onclick="togglePause()" style="background-color: #2ecc71; font-size: 18px; padding: 12px 30px;">▶ Resume Game</button>
+                <button onclick="goToMainMenu()" style="background-color: #e74c3c; font-size: 18px; padding: 12px 30px;">🏠 Main Menu</button>
+            </div>
         </div>
 
         <!-- Dialogue Box -->
@@ -73,7 +82,7 @@
 
             <div id="score-display">Coins: <span id="score-text" style="color: #fca311;">0</span></div>
             <button id="shield-buy-btn" onclick="buyShield()" class="shop-btn">  Shield (10 Coins)</button>
-            <button id="pause-btn" onclick="togglePause()" class="mini-fs-btn">⏸ Pause</button> <!-- ADDED HERE -->
+            <button id="pause-btn" onclick="togglePause()" class="mini-fs-btn">⏸ Pause</button>
             <button id="mute-btn" onclick="toggleMute()" class="mini-fs-btn">🔊 Sound On</button>
             <button onclick="toggleFullscreen()" class="mini-fs-btn">📺</button>
             <div id="version-tag" style="font-size: 11px; opacity: 0.6; align-self: flex-end;">v1.0.0</div>
@@ -96,7 +105,7 @@
         </div>
     </div>
 
-<!-- Script Chain -->
+    <!-- Script Chain -->
     <script src="js/globals.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/entities.js"></script>
