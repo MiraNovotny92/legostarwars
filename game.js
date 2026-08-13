@@ -279,8 +279,8 @@ function update() {
 
         addParticles(GAME.player.x, GAME.player.y + 15, "#ff9f43", 2);
 
-        if (GAME.cutsceneTimer > 180) {
-            triggerWin("Landed Safely on the Secret Moon Base!");
+if (GAME.cutsceneTimer > 180) {
+            triggerWin("Landed Safely at the Secret Planet Base!");
         }
         return;
     }
