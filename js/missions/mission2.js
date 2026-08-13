@@ -124,8 +124,8 @@ function buildMission2() {
     });
     
     // Define the Spaceship at the end
-    GAME.spaceship = { x: cursorX + 500, y: 380, width: 280, height: 160 };
-    addGround(1200, 540);
+    GAME.spaceship = { x: cursorX + 500, y: 380, width: 380, height: 260 };
+    addGround(1000, 540);
 
     // Set final width so the camera stops
     GAME.worldWidth = cursorX;
