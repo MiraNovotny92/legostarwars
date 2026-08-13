@@ -59,7 +59,6 @@ window.togglePause = function() {
         }
     } else if (GAME.state === "PAUSED") {
         GAME.state = "PLAYING";
-        // Adjust startTime so the timer doesn't run while paused
         GAME.startTime += (Date.now() - pauseTimeStart);
         if (pauseScreen) pauseScreen.style.display = "none";
         
@@ -195,24 +194,20 @@ function resetPlayer() {
 }
 
 function update() {     
-// --- SPACESHIP TAKEOFF CUTSCENE ---
+    // --- SPACESHIP TAKEOFF CUTSCENE ---
     if (GAME.state === "CUTSCENE_SHIP") {
         if (GAME.spaceship.cutsceneTimer === undefined) GAME.spaceship.cutsceneTimer = 0;
         GAME.spaceship.cutsceneTimer++;
 
-        // Phase 1: Engine Warm-up (First 120 frames / ~2 seconds)
         if (GAME.spaceship.cutsceneTimer < 120) {
-            GAME.camera.shake = 4; // Gentle rumble while engines rev on the ground
-        } 
-        // Phase 2: Slow Liftoff (After 2 seconds)
-        else {
-            if (!GAME.spaceship.dy) GAME.spaceship.dy = -0.5; // Very gentle initial lift
-            GAME.spaceship.dy -= 0.06; // Much slower acceleration (was 0.25)
+            GAME.camera.shake = 4;
+        } else {
+            if (!GAME.spaceship.dy) GAME.spaceship.dy = -0.5;
+            GAME.spaceship.dy -= 0.06;
             GAME.spaceship.y += GAME.spaceship.dy;
-            GAME.camera.shake = 8; // Strong rumble during takeoff
+            GAME.camera.shake = 8;
         }
 
-        // Spawn Flame and Smoke Particles from the Engine
         let engineX = GAME.spaceship.x + 10;
         let engineY = GAME.spaceship.y + 105;
         for (let i = 0; i < 5; i++) {
@@ -227,16 +222,12 @@ function update() {
             });
         }
 
-        // Animate particles during cutscene
         for (let i = GAME.particles.length - 1; i >= 0; i--) {
             let p = GAME.particles[i];
-            p.x += p.dx;
-            p.y += p.dy;
-            p.life--;
+            p.x += p.dx; p.y += p.dy; p.life--;
             if (p.life <= 0) GAME.particles.splice(i, 1);
         }
 
-// Trigger Win screen once the ship flies completely off-screen
         if (GAME.spaceship.y < -400) {
             triggerWin("Escaped with 200 Coins!");
         }
@@ -248,30 +239,24 @@ function update() {
         if (GAME.cutsceneTimer === undefined) GAME.cutsceneTimer = 0;
         GAME.cutsceneTimer++;
 
-        // Bouncy jumping animation for both character & Obi-Wan
         let playerBounce = Math.abs(Math.sin(GAME.cutsceneTimer * 0.18)) * 35;
         let obiBounce = Math.abs(Math.sin(GAME.cutsceneTimer * 0.18 + 0.4)) * 35;
 
         GAME.player.y = GAME.player.baseY - playerBounce;
         GAME.obi.y = GAME.obi.baseY - obiBounce;
 
-        // Party sparkles popping at their feet
         if (GAME.cutsceneTimer % 5 === 0) {
             let colors = ["#ffd700", "#00bfff", "#ff007f", "#2ecc71", "#ffffff"];
             addParticles(GAME.player.x + 24, GAME.player.y + 30, colors[Math.floor(Math.random() * colors.length)], 3);
             addParticles(GAME.obi.x + 25, GAME.obi.y + 30, colors[Math.floor(Math.random() * colors.length)], 3);
         }
 
-        // Animate particles during cutscene
         for (let i = GAME.particles.length - 1; i >= 0; i--) {
             let p = GAME.particles[i];
-            p.x += p.dx;
-            p.y += p.dy;
-            p.life--;
+            p.x += p.dx; p.y += p.dy; p.life--;
             if (p.life <= 0) GAME.particles.splice(i, 1);
         }
 
-        // After ~10 seconds (600 frames), finish mission
         if (GAME.cutsceneTimer > 600) {
             GAME.player.y = GAME.player.baseY;
             GAME.obi.y = GAME.obi.baseY;
@@ -292,7 +277,7 @@ function update() {
     if (GAME.shieldTimer > 0) GAME.shieldTimer--; else GAME.hasShield = false;     
     if (GAME.player.saberSwingTimer > 0) GAME.player.saberSwingTimer--;     
     
-// --- MISSION 3: ZERO-GRAVITY FLIGHT & SHOOTING ---
+    // --- MISSION 3: ZERO-GRAVITY FLIGHT & SHOOTING ---
     if (GAME.currentMission === 3) {
         if (keys.ArrowLeft) GAME.player.dx -= 1.2;
         if (keys.ArrowRight) GAME.player.dx += 1.2;
@@ -305,14 +290,12 @@ function update() {
         GAME.player.x += GAME.player.dx;
         GAME.player.y += GAME.player.dy;
 
-        // Bound player inside flight screen
         if (GAME.player.y < 30) { GAME.player.y = 30; GAME.player.dy = 0; }
         if (GAME.player.y > 490) { GAME.player.y = 490; GAME.player.dy = 0; }
 
-        // Laser Cannon Shooting [D] Key
         if (!GAME.playerLasers) GAME.playerLasers = [];
         if (keys.D && (GAME.player.shootTimer || 0) <= 0) {
-            GAME.player.shootTimer = 10; // Rapid fire rate
+            GAME.player.shootTimer = 10;
             GAME.playerLasers.push({
                 x: GAME.player.x + GAME.player.width,
                 y: GAME.player.y + GAME.player.height / 2 - 3,
@@ -324,50 +307,6 @@ function update() {
         }
         if (GAME.player.shootTimer > 0) GAME.player.shootTimer--;
 
-        // Move Lasers forward
-        for (let i = GAME.playerLasers.length - 1; i >= 0; i--) {
-            let l = GAME.playerLasers[i];
-            l.x += l.dx;
-            if (l.x > GAME.camera.x + canvas.width + 100) {
-                GAME.playerLasers.splice(i, 1);
-            }
-        }
-    } 
-    // --- MISSIONS 1 & 2: STANDARD PLATFORMER MOVEMENT ---
-    else {
-// --- MISSION 3: ZERO-GRAVITY FLIGHT & SHOOTING ---
-    if (GAME.currentMission === 3) {
-        if (keys.ArrowLeft) GAME.player.dx -= 1.2;
-        if (keys.ArrowRight) GAME.player.dx += 1.2;
-        if (keys.ArrowUp) GAME.player.dy -= 1.2;
-        if (keys.ArrowDown) GAME.player.dy += 1.2;
-
-        GAME.player.dx *= GAME.friction;
-        GAME.player.dy *= GAME.friction;
-
-        GAME.player.x += GAME.player.dx;
-        GAME.player.y += GAME.player.dy;
-
-        // Keep ship inside screen bounds
-        if (GAME.player.y < 30) { GAME.player.y = 30; GAME.player.dy = 0; }
-        if (GAME.player.y > 490) { GAME.player.y = 490; GAME.player.dy = 0; }
-
-        // Laser Cannon Shooting [D] Key
-        if (!GAME.playerLasers) GAME.playerLasers = [];
-        if (keys.D && (GAME.player.shootTimer || 0) <= 0) {
-            GAME.player.shootTimer = 10; // Fire rate
-            GAME.playerLasers.push({
-                x: GAME.player.x + GAME.player.width,
-                y: GAME.player.y + GAME.player.height / 2 - 3,
-                width: 22,
-                height: 6,
-                dx: 16
-            });
-            playSound('laser');
-        }
-        if (GAME.player.shootTimer > 0) GAME.player.shootTimer--;
-
-        // Move Lasers forward
         for (let i = GAME.playerLasers.length - 1; i >= 0; i--) {
             let l = GAME.playerLasers[i];
             l.x += l.dx;
@@ -386,7 +325,6 @@ function update() {
         GAME.player.scaleX += (1 - GAME.player.scaleX) * 0.15;     
         GAME.player.scaleY += (1 - GAME.player.scaleY) * 0.15;
     }
-    } 
     
     // Moving Platforms
     GAME.movingPlatforms.forEach(mp => {         
@@ -495,7 +433,7 @@ function update() {
     GAME.studs.forEach(s => {                 
         if (!s.collected && Math.hypot((GAME.player.x + 24) - s.x, (GAME.player.y + 24) - s.y) < 32) {                         
             s.collected = true; 
-            GAME.score += 1; // 1 Coin = 1 Point!                         
+            GAME.score += 1;                         
             const scoreText = document.getElementById("score-text");                         
             const tjFill = document.getElementById("tj-fill");                         
             if (scoreText) scoreText.innerText = GAME.score;                         
@@ -504,7 +442,7 @@ function update() {
         }         
     }); 
 
-    // Jump Pads (Fires the player up!)
+    // Jump Pads
     GAME.jumpPads.forEach(pad => {         
         if (GAME.player.x < pad.x + pad.width && GAME.player.x + GAME.player.width > pad.x && 
             GAME.player.y + GAME.player.height >= pad.y && GAME.player.y < pad.y + pad.height) {             
@@ -515,21 +453,15 @@ function update() {
         }     
     });
 
-    // Particle Cleanup (Reverse Loop to prevent array skip / stuck particles)
+    // Particle Cleanup
     for (let i = GAME.particles.length - 1; i >= 0; i--) {
         let p = GAME.particles[i];
-        p.x += p.dx;
-        p.y += p.dy;
-        p.life--;
-        if (p.life <= 0) {
-            GAME.particles.splice(i, 1);
-        }
+        p.x += p.dx; p.y += p.dy; p.life--;
+        if (p.life <= 0) GAME.particles.splice(i, 1);
     }
 
     // MISSION 1: OBI-WAN & LIGHTSABER LOGIC
     if (GAME.currentMission === 1) {
-        
-        // 1. Did the player touch the lightsaber?
         if (!GAME.hasLightsaber && 
             GAME.player.x < GAME.lightsaber.x + GAME.lightsaber.width && 
             GAME.player.x + GAME.player.width > GAME.lightsaber.x && 
@@ -541,7 +473,6 @@ function update() {
             addParticles(GAME.lightsaber.x, GAME.lightsaber.y, "#00ff00", 25);     
         }     
 
-        // 2. Dialogue Box for Obi-Wan
         let distObi = Math.abs(GAME.player.x - GAME.obi.x);     
         const dialogueBox = document.getElementById("dialogue-box");     
         const dialogueText = document.getElementById("dialogue-text");     
@@ -565,38 +496,32 @@ function update() {
         }
     }                    
 
-// MISSION 2: SPACESHIP ESCAPE LOGIC     
+    // MISSION 2: SPACESHIP ESCAPE LOGIC     
     if (GAME.currentMission === 2 && GAME.spaceship) {         
         const dialogueBox = document.getElementById("dialogue-box");                      
         const dialogueText = document.getElementById("dialogue-text");                      
 
-        // 1. Is the player standing in front of the spaceship at the end?
         if (GAME.player.x + GAME.player.width > GAME.spaceship.x + 50) {             
             if (GAME.score >= 200) {                 
                 if (GAME.state === "PLAYING") {
                     GAME.state = "CUTSCENE_SHIP";
-                    GAME.spaceship.cutsceneTimer = 0; // Reset timer
-                    GAME.spaceship.dy = 0;            // Start stationary
+                    GAME.spaceship.cutsceneTimer = 0;
+                    GAME.spaceship.dy = 0;
                     if (dialogueBox) dialogueBox.style.display = "none";
                     playSound('rocket');
                 }
             } else {                 
-                // Not enough coins! Lock the door and show message
                 if (dialogueBox && dialogueText) {                     
                     dialogueBox.style.display = "block";                     
                     dialogueText.innerText = `Ship locked! You need 200 coins. You only have ${GAME.score}.`;                 
                 }             
             }         
-        } 
-        // 2. Is the player at the start of the level? (Show instructions)
-        else if (GAME.player.x < 400) {
+        } else if (GAME.player.x < 400) {
             if (dialogueBox && dialogueText) {
                 dialogueBox.style.display = "block";
                 dialogueText.innerText = "Mission Goal: Collect 200 coins to power the Escape Ship!";
             }
-        } 
-        // 3. Player is running through the middle of the level (Hide dialogue box)
-        else {             
+        } else {             
             if (dialogueBox) dialogueBox.style.display = "none";         
         }     
     }
@@ -694,7 +619,7 @@ function draw() {
         GAME.npcs.forEach(n => drawNPC(ctx, n));         
         GAME.jumpPads.forEach(pad => { ctx.fillStyle = pad.color; ctx.fillRect(pad.x, pad.y, pad.width, pad.height); });     
     } catch(e) {}     
-try {         
+    try {         
         GAME.particles.forEach(p => {             
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();         
         });     
@@ -739,26 +664,22 @@ try {
     try {
         if (GAME.currentMission === 2 && GAME.spaceship) {
             ctx.save();
-            // Main Grey Hull
             ctx.fillStyle = "#95a5a6";
             drawRoundedRect(ctx, GAME.spaceship.x, GAME.spaceship.y + 60, GAME.spaceship.width, 60, 20);
-            // Blue Cockpit window
             ctx.fillStyle = "#2980b9";
             drawRoundedRect(ctx, GAME.spaceship.x + 180, GAME.spaceship.y + 20, 70, 50, 15);
-            // Red Engine Glow
             ctx.shadowBlur = 20; ctx.shadowColor = "#e74c3c";
             ctx.fillStyle = "#e74c3c";
             ctx.fillRect(GAME.spaceship.x - 15, GAME.spaceship.y + 75, 20, 30);
             ctx.shadowBlur = 0;
             
-            // Text Label
             ctx.fillStyle = "#00bfff"; ctx.font = "bold 18px 'Comic Sans MS'"; ctx.textAlign = "center";
             ctx.fillText("Escape Ship!", GAME.spaceship.x + GAME.spaceship.width/2, GAME.spaceship.y);
             ctx.restore();
         }
     } catch(e) {}
     
-try {         
+    try {         
         if (GAME.state !== "CUTSCENE_SHIP") { 
             ctx.save();         
             
@@ -794,46 +715,47 @@ try {
             // --- MISSIONS 1 & 2: LEGO MINIFIGURE ---
             else {
                 ctx.translate(GAME.player.x + GAME.player.width/2, GAME.player.y + GAME.player.height);         
-                ctx.scale(GAME.player.scaleX, GAME.player.scaleY);       
-            
-            if (GAME.hasShield) {             
-                ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";             
-                ctx.beginPath(); ctx.arc(0, -GAME.player.height/2, GAME.player.width/1.2, 0, Math.PI*2); ctx.stroke();             
-                ctx.shadowBlur = 0;         
-            }         
-            
-            let currentChar = CHARACTERS[GAME.selectedCharKey];         
-            ctx.fillStyle = currentChar.color;         
-            ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
-            ctx.fillStyle = "#f1c40f";         
-            ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();         
-            ctx.fillStyle = "#2c3e50";         
-            ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);         
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
-            ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);          
+                ctx.scale(GAME.player.scaleX, GAME.player.scaleY);         
+                
+                if (GAME.hasShield) {             
+                    ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = "#00bfff";             
+                    ctx.beginPath(); ctx.arc(0, -GAME.player.height/2, GAME.player.width/1.2, 0, Math.PI*2); ctx.stroke();             
+                    ctx.shadowBlur = 0;         
+                }         
+                
+                let currentChar = CHARACTERS[GAME.selectedCharKey];         
+                ctx.fillStyle = currentChar.color;         
+                ctx.fillRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);         
+                ctx.fillStyle = "#f1c40f";         
+                ctx.beginPath(); ctx.arc(0, -GAME.player.height + 10, 10, 0, Math.PI*2); ctx.fill();         
+                ctx.fillStyle = "#2c3e50";         
+                ctx.fillRect(-GAME.player.width/2 + 10, -GAME.player.height + 35, GAME.player.width - 20, 13);         
+                ctx.strokeStyle = "#000"; ctx.lineWidth = 2.5;         
+                ctx.strokeRect(-GAME.player.width/2 + 8, -GAME.player.height + 15, GAME.player.width - 16, 20);          
 
-            if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
-                ctx.save();             
-                let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
-                let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                     
-                ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
-                ctx.rotate(swingAngle);             
-                
-                let saberLength = GAME.selectedCharKey === 'vader' ? 55 : 35;
-                
-                ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;             
-                ctx.fillStyle = currentChar.saberColor;             
-                ctx.fillRect(0, -saberLength, 6, saberLength);
-                
-if (GAME.selectedCharKey === 'ahsoka') {
-                    let dualOffset = GAME.player.facing === 'right' ? -25 : 25;
-                    ctx.fillRect(dualOffset, -25, 5, 25);
-                }
-                
-                ctx.shadowBlur = 0;             
-                ctx.restore();         
+                if (GAME.player.saberSwingTimer > 0 || GAME.hasLightsaber) {             
+                    ctx.save();             
+                    let swingProgress = (15 - GAME.player.saberSwingTimer) / 15;             
+                    let swingAngle = GAME.player.facing === 'right' ? (-Math.PI/2 + (swingProgress * Math.PI)) : (Math.PI/2 - (swingProgress * Math.PI));                                     
+                    ctx.translate(GAME.player.facing === 'right' ? 10 : -10, -GAME.player.height + 25);             
+                    ctx.rotate(swingAngle);             
+                    
+                    let saberLength = GAME.selectedCharKey === 'vader' ? 55 : 35;
+                    
+                    ctx.shadowBlur = 20; ctx.shadowColor = currentChar.saberColor;             
+                    ctx.fillStyle = currentChar.saberColor;             
+                    ctx.fillRect(0, -saberLength, 6, saberLength);
+                    
+                    if (GAME.selectedCharKey === 'ahsoka') {
+                        let dualOffset = GAME.player.facing === 'right' ? -25 : 25;
+                        ctx.fillRect(dualOffset, -25, 5, 25);
+                    }
+                    
+                    ctx.shadowBlur = 0;             
+                    ctx.restore();         
+                }       
+                ctx.restore();     
             } 
-            }      
             ctx.restore();     
         }
     } catch(e) {}
