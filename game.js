@@ -352,19 +352,26 @@ if (GAME.cutsceneTimer > 180) {
                 });
             }
 
-            if (GAME.shieldGenerators) {
+if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!hit && gen.active && l.x > gen.x && l.x < gen.x + gen.width && l.y > gen.y && l.y < gen.y + gen.height) {
                         hit = true;
                         gen.hp--;
-                        addParticles(l.x, l.y, "#00bfff", 12);
+                        addParticles(l.x, l.y, gen.isSuper ? "#ff4757" : "#00bfff", 12);
                         playSound('gateBreak');
+
                         if (gen.hp <= 0) {
                             gen.active = false;
-                            addParticles(gen.x + gen.width/2, gen.y + gen.height/2, "#00bfff", 30);
+                            addParticles(gen.x + gen.width/2, gen.y + gen.height/2, gen.isSuper ? "#ff4757" : "#00bfff", 45);
+                            
+                            // Deactivate barriers ONLY if ALL of their required generators are destroyed!
                             if (GAME.shieldBarriers) {
                                 GAME.shieldBarriers.forEach(sb => {
-                                    if (sb.targetId === gen.id) sb.active = false;
+                                    let allDestroyed = sb.targetIds.every(id => {
+                                        let g = GAME.shieldGenerators.find(item => item.id === id);
+                                        return !g || !g.active;
+                                    });
+                                    if (allDestroyed) sb.active = false;
                                 });
                             }
                         }
