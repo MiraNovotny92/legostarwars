@@ -1,70 +1,66 @@
 function buildMission3() {
-    // 1. Map Width & Player Ship Spawn
-    GAME.worldWidth = 6000; // Long space corridor
+    // 1. Map Width & Larger Player Ship Spawn
+    GAME.worldWidth = 6000;
     GAME.player = {
         x: 100,
-        y: 280,
-        width: 40,
-        height: 25,
+        y: 270,
+        width: 65,  // Larger 65px ship!
+        height: 36,
         dx: 0,
         dy: 0,
         shootTimer: 0
     };
 
-    // 2. Initialize / Reset Space Specific Arrays
+    // 2. Initialize Space Arrays
     GAME.playerLasers = [];
     GAME.asteroids = [];
     GAME.shieldGenerators = [];
     GAME.shieldBarriers = [];
 
-    // 3. Destination Moon / Planet at the end of space ($X = 5500$)
+    // 3. Destination Moon / Planet
     GAME.moon = { x: 5500, y: 50 };
 
-    // 4. Forcefield Barriers & 3-Hit Shield Generators
-    // (Generators take 3 laser hits to destroy and deactivate their barrier)
+    // 4. Shield Generators placed RIGHT IN THE CENTER FLIGHT PATH before the barrier!
     GAME.shieldGenerators = [
-        { id: "gen1", x: 1750, y: 120, width: 35, height: 35, hp: 3, active: true },
-        { id: "gen2", x: 3750, y: 480, width: 35, height: 35, hp: 3, active: true }
+        { id: "gen1", x: 1500, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+        { id: "gen2", x: 3500, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true }
     ];
 
     GAME.shieldBarriers = [
-        { targetId: "gen1", x: 1900, y: 0, width: 25, height: 700, active: true },
-        { targetId: "gen2", x: 3900, y: 0, width: 25, height: 700, active: true }
+        { targetId: "gen1", x: 1800, y: 0, width: 30, height: 600, active: true },
+        { targetId: "gen2", x: 3800, y: 0, width: 30, height: 600, active: true }
     ];
 
-    // 5. Asteroid Field
-    // (Purple/hp = Destroyable by shooting, Grey = Solid/Indestructible)
+    // 5. Clear Asteroid Layout (Purple = Destroyable, Grey = Solid Danger)
     GAME.asteroids = [
-        // --- ZONE 1: Warm-up Asteroids ---
-        { x: 500,  y: 200, radius: 35, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 700,  y: 400, radius: 45, destructible: false, active: true }, // Solid
-        { x: 900,  y: 150, radius: 30, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 1100, y: 320, radius: 40, destructible: true,  hp: 3, maxHp: 3, active: true, dy: 2, minY: 150, maxY: 480 }, // Moving Up/Down
-        { x: 1400, y: 250, radius: 50, destructible: false, active: true },
+        // --- ZONE 1: Warm-up Area ---
+        { x: 500,  y: 200, radius: 45, destructible: true,  hp: 3, maxHp: 3, active: true },
+        { x: 750,  y: 420, radius: 55, destructible: false, active: true }, // Solid Iron
+        { x: 1000, y: 180, radius: 40, destructible: true,  hp: 3, maxHp: 3, active: true, dy: 2, minY: 100, maxY: 480 },
+        { x: 1250, y: 360, radius: 50, destructible: true,  hp: 3, maxHp: 3, active: true },
 
-        // --- ZONE 2: First Shield Gate Area ---
-        { x: 2100, y: 100, radius: 40, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 2300, y: 450, radius: 35, destructible: true,  hp: 3, maxHp: 3, active: true, dy: -2.5, minY: 100, maxY: 480 },
-        { x: 2600, y: 280, radius: 55, destructible: false, active: true, dx: 1.5, minX: 2500, maxX: 2800 }, // Moving Left/Right
-        { x: 2900, y: 150, radius: 30, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 3100, y: 380, radius: 45, destructible: true,  hp: 3, maxHp: 3, active: true },
+        // --- ZONE 2: After First Shield Gate ---
+        { x: 2100, y: 150, radius: 45, destructible: true,  hp: 3, maxHp: 3, active: true },
+        { x: 2400, y: 400, radius: 50, destructible: false, active: true, dy: -2.5, minY: 100, maxY: 480 },
+        { x: 2700, y: 260, radius: 60, destructible: false, active: true, dx: 1.5, minX: 2500, maxX: 2900 },
+        { x: 3000, y: 180, radius: 40, destructible: true,  hp: 3, maxHp: 3, active: true },
+        { x: 3250, y: 380, radius: 50, destructible: true,  hp: 3, maxHp: 3, active: true },
 
-        // --- ZONE 3: Heavy Asteroid Field ---
-        { x: 4200, y: 200, radius: 40, destructible: false, active: true, dy: 3, minY: 80, maxY: 500 },
-        { x: 4400, y: 400, radius: 35, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 4700, y: 120, radius: 45, destructible: true,  hp: 3, maxHp: 3, active: true },
-        { x: 5000, y: 300, radius: 60, destructible: false, active: true },
-        { x: 5200, y: 250, radius: 30, destructible: true,  hp: 3, maxHp: 3, active: true }
+        // --- ZONE 3: Final Approach to Moon ---
+        { x: 4100, y: 220, radius: 50, destructible: false, active: true, dy: 3, minY: 80, maxY: 500 },
+        { x: 4400, y: 420, radius: 45, destructible: true,  hp: 3, maxHp: 3, active: true },
+        { x: 4700, y: 150, radius: 50, destructible: true,  hp: 3, maxHp: 3, active: true },
+        { x: 5000, y: 280, radius: 65, destructible: false, active: true }
     ];
 
-    // 6. Space Studs / Coins to Collect
-    for (let x = 300; x < 5300; x += 150) {
-        let y = 100 + Math.sin(x / 200) * 180 + 150; // Dynamic sine wave path through space
+    // 6. Space Studs / Coins Path
+    for (let x = 300; x < 5200; x += 140) {
+        let y = 120 + Math.sin(x / 220) * 180 + 150;
         GAME.studs.push({
             x: x,
             y: y,
-            radius: 8,
-            color: x % 300 === 0 ? "#ffd700" : "#00bfff", // Alternating Gold & Cyan coins
+            radius: 9,
+            color: x % 280 === 0 ? "#ffd700" : "#00bfff",
             collected: false
         });
     }
