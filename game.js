@@ -307,14 +307,104 @@ function update() {
         }
         if (GAME.player.shootTimer > 0) GAME.player.shootTimer--;
 
+// 1. Move Lasers forward & check hits
         for (let i = GAME.playerLasers.length - 1; i >= 0; i--) {
             let l = GAME.playerLasers[i];
             l.x += l.dx;
-            if (l.x > GAME.camera.x + canvas.width + 100) {
+            let hit = false;
+
+            // Laser vs Asteroids
+            if (GAME.asteroids) {
+                GAME.asteroids.forEach(ast => {
+                    if (!hit && ast.active && Math.hypot(l.x - ast.x, l.y - ast.y) < ast.radius) {
+                        hit = true;
+                        if (ast.destructible) {
+                            ast.hp--;
+                            addParticles(l.x, l.y, "#ff9f43", 8);
+                            if (ast.hp <= 0) {
+                                ast.active = false;
+                                addParticles(ast.x, ast.y, "#a4b0be", 20);
+                                playSound('gateBreak');
+                            }
+                        } else {
+                            addParticles(l.x, l.y, "#ffffff", 5);
+                        }
+                    }
+                });
+            }
+
+            // Laser vs Shield Generators (Takes 3 Hits to disable forcefield!)
+            if (GAME.shieldGenerators) {
+                GAME.shieldGenerators.forEach(gen => {
+                    if (!hit && gen.active && l.x > gen.x && l.x < gen.x + gen.width && l.y > gen.y && l.y < gen.y + gen.height) {
+                        hit = true;
+                        gen.hp--;
+                        addParticles(l.x, l.y, "#00bfff", 12);
+                        playSound('gateBreak');
+
+                        if (gen.hp <= 0) {
+                            gen.active = false;
+                            addParticles(gen.x + gen.width/2, gen.y + gen.height/2, "#00bfff", 30);
+                            // Deactivate connected Forcefield
+                            if (GAME.shieldBarriers) {
+                                GAME.shieldBarriers.forEach(sb => {
+                                    if (sb.targetId === gen.id) sb.active = false;
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (hit || l.x > GAME.camera.x + canvas.width + 100) {
                 GAME.playerLasers.splice(i, 1);
             }
         }
-    } 
+
+        // 2. Animate Moving Asteroids & Push Ship Physics
+        if (GAME.asteroids) {
+            GAME.asteroids.forEach(ast => {
+                if (!ast.active) return;
+                
+                // Move Asteroid
+                if (ast.dy) {
+                    ast.y += ast.dy;
+                    if (ast.y > ast.maxY || ast.y < ast.minY) ast.dy *= -1;
+                }
+                if (ast.dx) {
+                    ast.x += ast.dx;
+                    if (ast.x > ast.maxX || ast.x < ast.minX) ast.dx *= -1;
+                }
+
+                // Push Ship if Rock collides with Player Ship
+                let dist = Math.hypot((GAME.player.x + 20) - ast.x, (GAME.player.y + 15) - ast.y);
+                if (dist < ast.radius + 18) {
+                    let angle = Math.atan2((GAME.player.y + 15) - ast.y, (GAME.player.x + 20) - ast.x);
+                    GAME.player.x = ast.x + Math.cos(angle) * (ast.radius + 19);
+                    GAME.player.y = ast.y + Math.sin(angle) * (ast.radius + 19);
+                    GAME.camera.shake = 3;
+                }
+            });
+        }
+
+        // 3. Forcefield Barriers Blocking Ship
+        if (GAME.shieldBarriers) {
+            GAME.shieldBarriers.forEach(sb => {
+                if (sb.active && GAME.player.x < sb.x + sb.width && GAME.player.x + GAME.player.width > sb.x &&
+                    GAME.player.y < sb.y + sb.height && GAME.player.y + GAME.player.height > sb.y) {
+                    GAME.player.x = sb.x - GAME.player.width; // Block ship from passing
+                }
+            });
+        }
+
+        // 4. Trigger Moon Landing Cutscene when reaching the Moon
+        if (GAME.moon && GAME.player.x + GAME.player.width >= GAME.moon.x - 50) {
+            if (GAME.state === "PLAYING") {
+                GAME.state = "CUTSCENE_LANDING";
+                GAME.cutsceneTimer = 0;
+            }
+        }
+    }
     // --- MISSIONS 1 & 2: STANDARD PLATFORMER MOVEMENT ---
     else {
         if (keys.ArrowLeft) { GAME.player.dx -= 1.2; GAME.player.facing = 'left'; }     
