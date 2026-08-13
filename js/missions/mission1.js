@@ -229,7 +229,7 @@ function buildMission1() {
         minY: 440, maxY: 440, isMoving: true 
     });
     // Add the water pit under the moving platform
-    addWaterPit(400);
+    addWaterPit(250);
     addGround(200, 540);
 
     
@@ -250,15 +250,14 @@ function buildMission1() {
     GAME.movingPlatforms.push({
         x: cursorX + 330, y: 290, width: 120, height: 24,
         dx: 0, dy: -2.0, minX: cursorX + 330, maxX: cursorX + 330,
-        minY: 200, maxY: 290, isMoving: true
+        minY: 200, maxY: 490, isMoving: true
     });
 
     // THIS IS THE SECRET:
     // Instead of addGround, we add a water pit that spans the entire 600px width of this obstacle!
-    addWaterPit(600);
+    addWaterPit(300);
 
     // A simple 200px gap to jump over
-    addWaterPit(150);
     addGround(200, 540);
 
     // A simple 200px gap to jump over
