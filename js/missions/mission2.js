@@ -160,13 +160,52 @@ function buildMission2() {
     addCoinGrid(cursorX + 50, 250, 5, 12); 
     addGround(600, 540);
     GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 200, y: 440, width: 60, height: 20, color: "#00ffcc" });
     GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
-    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
-    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
-    GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 300, y: 540, width: 60, height: 20, color: "#00ffcc" });
+    GAME.jumpPads.push({ x: cursorX - 400, y: 540, width: 60, height: 20, color: "#00ffcc" });
     GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
     GAME.jumpPads.push({ x: cursorX - 100, y: 340, width: 60, height: 20, color: "#00ffcc" });
 
+        // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(200, 540);
+        // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(200, 540);
+        // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(200, 540);
+
+            // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(200, 540);
+
+            // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(200, 540);
+
+            // Place a destructible laser gate. The player can slash it now, and it stays destroyed on the way back!
+    GAME.laserGates.push({
+        x: cursorX + 200, y: 240, width: 20, height: 300, destroyed: false
+    });
+    // Draw 500px of ground under the laser gate
+    addGround(200, 540);
 
     // --- SECTION 12: FINAL SPRINT TO THE SPACESHIP ---
     // FIXED: Y position calculated so it sits exactly on the floor (540 floor - 260 height = 280)
