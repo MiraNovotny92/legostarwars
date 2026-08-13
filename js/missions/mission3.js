@@ -18,21 +18,25 @@ function buildMission3() {
     GAME.shieldBarriers = [];
 
     // 3. Destination Moon / Planet
-    GAME.moon = { x: 11400, y: 50 };
+    GAME.moon = { x: 15400, y: 50 };
 
     // 4. 4 Shield Gates along the 12,000px journey
     GAME.shieldGenerators = [
         { id: "gen1", x: 2200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
         { id: "gen2", x: 5200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
         { id: "gen3", x: 8200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
-        { id: "gen4", x: 10200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true }
+        { id: "gen4", x: 10200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true },
+        { id: "gen5", x: 12200, y: 260, width: 45, height: 45, hp: 3, maxHp: 3, active: true }
+
     ];
 
     GAME.shieldBarriers = [
         { targetId: "gen1", x: 2500, y: 0, width: 30, height: 600, active: true },
         { targetId: "gen2", x: 5500, y: 0, width: 30, height: 600, active: true },
         { targetId: "gen3", x: 8500, y: 0, width: 30, height: 600, active: true },
-        { targetId: "gen4", x: 10500, y: 0, width: 30, height: 600, active: true }
+        { targetId: "gen4", x: 10500, y: 0, width: 30, height: 600, active: true },
+        { targetId: "gen5", x: 12500, y: 0, width: 30, height: 600, active: true }
+
     ];
 
     // 5. Space Asteroids & Asteroid Rain
