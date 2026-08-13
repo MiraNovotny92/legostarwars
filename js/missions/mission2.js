@@ -51,10 +51,10 @@ function buildMission2() {
 
     // --- SECTION 4: LANDING ZONE WITH BB-8 ---
     GAME.droids.push({
-        x: cursorX + 100, y: 515, baseY: 515, width: 40, height: 45, type: 'bb8',
+        x: cursorX + 100, y: 545, baseY: 545, width: 40, height: 45, type: 'bb8',
         dx: 2.0, minX: cursorX + 50, maxX: cursorX + 350, bounceY: 0, textTimer: 0, label: 'Beep-Bloop!', isFloating: false
     });
-    addGround(500, 540);
+    addGround(400, 540);
     addCoins(cursorX - 400, 500, 8); // 8 coins on the ground
 
     // --- SECTION 5: HIGH-SPEED MOVING PLATFORMS ---
@@ -66,7 +66,7 @@ function buildMission2() {
     addWaterPit(450);
 
     GAME.movingPlatforms.push({ 
-        x: cursorX, y: 340, width: 140, height: 24, 
+        x: cursorX, y: 340, width: 240, height: 24, 
         dx: 2.5, dy: 0, minX: cursorX, maxX: cursorX + 300, minY: 340, maxY: 340, isMoving: true 
     });
     addCoins(cursorX + 50, 300, 6); // 6 coins hovering above the second platform
