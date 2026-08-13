@@ -141,8 +141,10 @@ function triggerWin(message) {
 const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false, Space: false, F: false, D: false };
 
 window.addEventListener("keydown", (e) => {     
-    if (e.code === "ArrowLeft") keys.ArrowLeft = true;     
-    if (e.code === "ArrowRight") keys.ArrowRight = true;     
+    if (e.code === "ArrowLeft" || e.code === "KeyA") keys.ArrowLeft = true;     
+    if (e.code === "ArrowRight" || e.code === "KeyD") keys.ArrowRight = true; 
+    if (e.code === "ArrowUp" || e.code === "KeyW") keys.ArrowUp = true;     
+    if (e.code === "ArrowDown" || e.code === "KeyS") keys.ArrowDown = true;     
     if (e.code === "Space") {         
         if (!keys.Space && GAME.player.grounded) { playSound('jump'); GAME.player.scaleX = 0.7; GAME.player.scaleY = 1.3; }         
         keys.Space = true;     
@@ -155,7 +157,6 @@ window.addEventListener("keydown", (e) => {
         }         
         keys.D = true;     
     } 
-    // Pause Shortcut (P or Escape)
     if (e.code === "Escape" || e.code === "KeyP") {
         if (GAME.state === "PLAYING" || GAME.state === "PAUSED") {
             togglePause();
@@ -164,8 +165,10 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {     
-    if (e.code === "ArrowLeft") keys.ArrowLeft = false;     
+    if (e.code === "ArrowLeft" || e.code === "KeyA") keys.ArrowLeft = false;     
     if (e.code === "ArrowRight") keys.ArrowRight = false;     
+    if (e.code === "ArrowUp" || e.code === "KeyW") keys.ArrowUp = false;     
+    if (e.code === "ArrowDown" || e.code === "KeyS") keys.ArrowDown = false;     
     if (e.code === "Space") keys.Space = false;     
     if (e.code === "KeyF") keys.F = false;     
     if (e.code === "KeyD") keys.D = false; 
