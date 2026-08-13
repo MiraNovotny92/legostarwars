@@ -929,27 +929,39 @@ function draw() {
                 });
             }
 
-            if (GAME.shieldGenerators) {
+if (GAME.shieldGenerators) {
                 GAME.shieldGenerators.forEach(gen => {
                     if (!gen.active) return;
                     ctx.save();
-                    // Satellite Pod Base
-                    ctx.fillStyle = "#34495e";
+                    
+                    // Pod Body
+                    ctx.fillStyle = gen.isSuper ? "#1e272e" : "#34495e";
                     drawRoundedRect(ctx, gen.x, gen.y, gen.width, gen.height, 8);
-                    ctx.strokeStyle = "#00bfff"; ctx.lineWidth = 3; ctx.stroke();
+                    ctx.strokeStyle = gen.isSuper ? "#ff4757" : "#00bfff"; 
+                    ctx.lineWidth = gen.isSuper ? 4 : 3; 
+                    ctx.stroke();
 
-                    // Glowing Stage HP Core (3 = Green, 2 = Yellow, 1 = Red)
-                    let coreColors = ["#e74c3c", "#f1c40f", "#2ecc71"];
-                    ctx.shadowBlur = 15; ctx.shadowColor = coreColors[gen.hp - 1];
-                    ctx.fillStyle = coreColors[gen.hp - 1];
+                    // Dynamic Health Color (Green -> Yellow -> Orange -> Red)
+                    let hpRatio = gen.hp / gen.maxHp;
+                    let coreColor = "#2ecc71"; // Green
+                    if (hpRatio <= 0.25) coreColor = "#ff4757"; // Red
+                    else if (hpRatio <= 0.5) coreColor = "#ff793f"; // Orange
+                    else if (hpRatio <= 0.75) coreColor = "#f1c40f"; // Yellow
+
+                    ctx.shadowBlur = gen.isSuper ? 25 : 15; 
+                    ctx.shadowColor = coreColor;
+                    ctx.fillStyle = coreColor;
                     ctx.beginPath();
-                    ctx.arc(gen.x + gen.width/2, gen.y + gen.height/2, 12, 0, Math.PI*2);
+                    ctx.arc(gen.x + gen.width/2, gen.y + gen.height/2, gen.isSuper ? 18 : 12, 0, Math.PI*2);
                     ctx.fill();
                     ctx.shadowBlur = 0;
 
-                    // Label
-                    ctx.fillStyle = "#00bfff"; ctx.font = "bold 12px 'Comic Sans MS'"; ctx.textAlign = "center";
-                    ctx.fillText(`SHOOT 3X (${gen.hp})`, gen.x + gen.width/2, gen.y - 8);
+                    // Label Text & Health Counter
+                    ctx.fillStyle = gen.isSuper ? "#ff4757" : "#00bfff"; 
+                    ctx.font = "bold 12px 'Comic Sans MS'"; 
+                    ctx.textAlign = "center";
+                    let labelText = gen.isSuper ? `SUPER SHIELD (${gen.hp}/${gen.maxHp})` : `SHIELD (${gen.hp}/${gen.maxHp})`;
+                    ctx.fillText(labelText, gen.x + gen.width/2, gen.y - 8);
                     ctx.restore();
                 });
             }
